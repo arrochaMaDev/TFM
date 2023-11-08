@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { type Ref, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import Popup from './Popup.vue'
 
 const router = useRouter() // router para ir al alumno cuando se clique en él
 
@@ -100,10 +101,13 @@ onMounted(() => {
 })
 
 // LÓGICA BORRAR ALUMNO
-const borrarAlumno = async (id: number) => {
+let popupVisible: Ref<boolean> = ref(false) // ref para ocultar o mostrar el popup
+let idAlumnoSeleccionado: Ref<number | null> = ref(null) // ref del id del alumno a borrar
+
+const borrarAlumno = async () => {
   // funcion con async/await y try/catch en vez de fetch con .then y .catch
   try {
-    const response = await fetch(`http://localhost:3000/student/${id}`, {
+    const response = await fetch(`http://localhost:3000/student/${idAlumnoSeleccionado.value}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json'
@@ -112,6 +116,7 @@ const borrarAlumno = async (id: number) => {
     })
     if (response.status === 204) {
       alert('Alumno borrado con éxito')
+      popupVisible.value = false
       getStudentsData()
     } else {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
@@ -119,7 +124,20 @@ const borrarAlumno = async (id: number) => {
   } catch (error) {
     console.error('Error en la solicitud:', error)
     alert('Ha ocurrido un error')
+    popupVisible.value = false
   }
+}
+
+const cancelarBorrar = () => {
+  // si se da click en no se cancela el borrado
+  popupVisible.value = false
+  idAlumnoSeleccionado.value = null
+}
+
+const mostrarPopup = (id: number) => {
+  // si se da click en si, se muestra el popup y recibe el id del alumnoi a borrar
+  idAlumnoSeleccionado.value = id
+  popupVisible.value = true
 }
 </script>
 <template>
@@ -180,10 +198,13 @@ const borrarAlumno = async (id: number) => {
           <td>
             <button type="button" @click="goToStudent(student.id)">Editar</button>
           </td>
-          <td><button type="button" @click="borrarAlumno(student.id)">Borrar</button></td>
+          <td><button type="button" @click="mostrarPopup(student.id)">Borrar</button></td>
+          <!-- le paso el id del alumno que quiero borrar -->
         </tr>
       </table>
     </div>
+    <Popup v-if="popupVisible" @confirmar="borrarAlumno" @cancelar="cancelarBorrar"></Popup>
+    <!-- recibo un emit de confirmar que ejecuta la funcion borrarAlumno y otro emit de cancelar que ejecuta cancelarBorrar -->
   </div>
 </template>
 <style scoped>
@@ -205,8 +226,6 @@ table {
     border: none;
     border-spacing: 0;
   }
-}
-#alumno {
 }
 
 table tr:hover td {

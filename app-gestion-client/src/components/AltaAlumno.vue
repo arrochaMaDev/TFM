@@ -24,6 +24,7 @@ function crearAlumno() {
       } else {
         alert('Alumno Creado')
       }
+      getStudentsData()
     })
     .catch((error) => {
       console.error('Error en la solicitud:', error)

@@ -4,8 +4,6 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-const emit = defineEmits(['goToStudent'])
-
 const props = defineProps<{
   studentData: {
     id: number
@@ -65,11 +63,6 @@ const añoActual = fechaActual.getFullYear()
 /**
  * % LÓGICA BORRAR ALUMNO
  * */
-let confirmacionEliminar: Ref<boolean> = ref(false)
-const confirmacionBorrar = () => {
-  // funcion para confirmar el borrado mostrando un div para seleccionar si o no
-  confirmacionEliminar.value = !confirmacionEliminar.value
-}
 const borrarAlumno = async () => {
   // funcion con async/await y try/catch en vez de fetch con .then y .catch
   try {
@@ -90,6 +83,12 @@ const borrarAlumno = async () => {
     console.error('Error en la solicitud:', error)
     alert('Ha ocurrido un error')
   }
+}
+
+let confirmacionEliminar: Ref<boolean> = ref(false)
+const confirmacionBorrar = () => {
+  // funcion para confirmar el borrado mostrando un div para seleccionar si o no
+  confirmacionEliminar.value = !confirmacionEliminar.value
 }
 </script>
 
