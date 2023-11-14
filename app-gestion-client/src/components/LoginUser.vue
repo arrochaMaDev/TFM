@@ -1,34 +1,51 @@
 <script setup lang="ts">
+import router from '@/router'
 import { ref, type Ref } from 'vue'
+import Spinner from './Spinner.vue'
+import { useLoadingStore } from '@/stores/loading'
 
-//FETCH POST LOGIN A LA BASE DE DATOS
-const loginUser = () => {
-  fetch('http://localhost:3000/login', {
-    method: 'POST',
-    body: JSON.stringify({
-      email: userEmailRef.value,
-      pass: userPassRef.value
-    }),
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include'
-  })
-    .then((response) => {
-      if (!response.ok) {
-        if (response.status === 403) {
-          alert('Usuario o contraseña incorrectos')
-        }
-        throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
-      } else {
-        alert(`Bienvenido ${userEmailRef.value}`)
+// let loading: Ref<boolean> = ref(false) // declaro variable spinner en false para que no se muestre
+const loadingStore = useLoadingStore()
+const isLoading = ref(false)
+
+const loginUser = async () => {
+  try {
+    loadingStore.showLoading()
+
+    const response = await fetch('http://localhost:3000/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: userEmailRef.value,
+        pass: userPassRef.value
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+
+    if (!response.ok) {
+      if (response.status === 403) {
+        alert('Usuario o contraseña incorrectos')
       }
-    })
-    .catch((error) => {
-      // console.error('Error en la solicitud:', error)
-      console.log('Error en la solicitud:', error)
-      // alert('Ha ocurrido un error')
-    })
+      throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      localStorage.setItem('email', userEmailRef.value)
+      router.push({
+        path: '/home'
+      })
+      setTimeout(() => {
+        location.reload()
+      }, 100)
+      await new Promise((resolve) => setTimeout(resolve, 4000))
+    }
+  } catch (error) {
+    // Maneja cualquier error que pueda ocurrir durante la operación
+    console.log('Error en la solicitud:', error)
+    // alert('Ha ocurrido un error');
+  } finally {
+    loadingStore.hideLoading()
+  }
 }
 
 //Referencias del formulario
@@ -49,6 +66,7 @@ const ToggleVerPass = () => {
 </script>
 
 <template>
+  <!-- <Spinner v-if="loading"></Spinner> -->
   <div class="centradoVertical">
     <div class="formLoginUser">
       <h1 class="green">Login</h1>
@@ -107,12 +125,5 @@ const ToggleVerPass = () => {
 
 #buttonVerPass {
   cursor: pointer;
-}
-
-.class1 {
-  background-color: red;
-}
-.class2 {
-  background-color: blue;
 }
 </style>

@@ -1,5 +1,55 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+import { onMounted, ref, watch, type Ref } from 'vue'
+import { getUserData } from './utils/getUserData'
+import router from './router'
+import Spinner from './components/Spinner.vue'
+import { useLoadingStore } from './stores/loading'
+
+// FUNCION LOADING SPINNER
+const loadingStore = useLoadingStore() // store de Pinia para el Spinner
+let isLoading: Ref<boolean> = ref(loadingStore.isLoading) // uso la variable de estado en la store de LoadingStore de Pinia
+
+onMounted(() => {
+  // Establece la referencia reactiva para seguir el estado de carga
+  watch(
+    () => loadingStore.isLoading,
+    (value) => {
+      isLoading.value = value
+    }
+  )
+})
+
+// LEER LA COOKIE
+let userData: any = undefined
+let userEmail: Ref<string | null> = ref(null)
+onMounted(() => {
+  userEmail.value = localStorage.getItem('email')
+})
+userData = getUserData
+
+//BORRAR LA COOKIE
+const cerrarSesion = async () => {
+  try {
+    loadingStore.showLoading()
+    await new Promise((resolve) => setTimeout(resolve, 4000))
+    deleteCookie('user')
+    localStorage.removeItem('email')
+    router.push({
+      path: '/login' // redireccionamos a /login
+    })
+    setTimeout(() => {
+      location.reload()
+    }, 100)
+  } catch (error) {
+    console.log('Error en la solicitud:', error)
+  } finally {
+    loadingStore.hideLoading()
+  }
+}
+const deleteCookie = (user: string) => {
+  document.cookie = `${user}=; max-age=0` //expires=Thu, 01 Jan 1970 00:00:00 UTC`
+}
 </script>
 
 <template>
@@ -18,11 +68,18 @@ import { RouterLink, RouterView } from 'vue-router'
     <RouterLink to="/alta_profesor">Alta Profesor</RouterLink>
     <RouterLink to="/buscador_alumno">Buscar Alumnos</RouterLink>
     <RouterLink to="/listado_alumnos">Listado Alumnos</RouterLink>
+    <div v-if="userEmail">
+      <hr />
+      <a>Bienvenido {{ userEmail }}</a>
+      <a @click="cerrarSesion">LogOut</a>
+    </div>
   </nav>
+
   <!-- </div>
   </header> -->
 
   <RouterView />
+  <Spinner v-if="isLoading"></Spinner>
 </template>
 
 <style scoped>
@@ -54,8 +111,9 @@ nav a.router-link-exact-active:hover {
 nav a {
   display: flex;
   flex-direction: column;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+  /* padding: 0 1rem;
+  border-left: 1px solid var(--color-border); */
+  cursor: pointer;
 }
 
 nav a:first-of-type {
@@ -83,9 +141,13 @@ nav a:first-of-type {
     text-align: left;
     margin-left: -1rem;
     font-size: 1rem;
-
     padding: 1rem 0;
     margin-top: 1rem;
   }
+}
+hr {
+  border: 1px solid #ccc;
+  margin: 10px 0;
+  width: 50%;
 }
 </style>

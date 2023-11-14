@@ -2,8 +2,12 @@
 import { type Ref, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Popup from './Popup.vue'
+import AltaAlumno from './AltaAlumno.vue'
+import { useLoadingStore } from '@/stores/loading'
 
 const router = useRouter() // router para ir al alumno cuando se clique en él
+const loadingStore = useLoadingStore()
+const isLoading = ref(false)
 
 let studentsRefFromServer: Ref<
   {
@@ -19,6 +23,8 @@ let studentsRefFromServer: Ref<
 > = ref([])
 
 function getStudentsData() {
+  loadingStore.showLoading()
+
   fetch('http://localhost:3000/students', {
     method: 'GET',
     headers: {
@@ -30,6 +36,8 @@ function getStudentsData() {
       if (!response.ok) {
         throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
       } else {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+
         const data = (await response.json()) as {
           id: number
           usuario_id: string
@@ -48,6 +56,9 @@ function getStudentsData() {
     .catch((error) => {
       console.error('Error en la solicitud:', error)
       alert('Ha ocurrido un error')
+    })
+    .finally(() => {
+      loadingStore.hideLoading()
     })
 }
 getStudentsData()
@@ -139,6 +150,32 @@ const mostrarPopup = (id: number) => {
   idAlumnoSeleccionado.value = id
   popupVisible.value = true
 }
+
+// LÓGICA EDITAR ALUMNO
+let alumnoEditar: Ref<
+  | {
+      id: number
+      usuario_id: string
+      nombre: string
+      apellidos: string
+      dni: string
+      direccion: string
+      telefono: string
+      email: string
+    }
+  | undefined
+> = ref(undefined)
+
+const editarAlumno = async () => {
+  try {
+    router.push({
+      path: `/alta_alumno`
+    })
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    alert('Ha ocurrido un error')
+  }
+}
 </script>
 <template>
   <div class="container">
@@ -205,6 +242,7 @@ const mostrarPopup = (id: number) => {
     </div>
     <Popup v-if="popupVisible" @confirmar="borrarAlumno" @cancelar="cancelarBorrar"></Popup>
     <!-- recibo un emit de confirmar que ejecuta la funcion borrarAlumno y otro emit de cancelar que ejecuta cancelarBorrar -->
+    <AltaAlumno></AltaAlumno>
   </div>
 </template>
 <style scoped>

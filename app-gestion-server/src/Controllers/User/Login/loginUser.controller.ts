@@ -22,12 +22,12 @@ export class LoginUserController {
         isValid: true,
       };
       console.log('logged');
-      response.cookie('user', JSON.stringify(userObject), {
-        domain: 'localhost',
-        maxAge: Date.now() / 1000 + 3600,
-      });
-      response.sendStatus(HttpStatus.NO_CONTENT);
-
+      response
+        .cookie('user', JSON.stringify(userObject), {
+          domain: 'localhost',
+          maxAge: Date.now() / 1000 + 3600,
+        })
+        .sendStatus(HttpStatus.NO_CONTENT);
       console.log(userObject);
     }
   }

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { defineEmits } from 'vue'
-
 const emit = defineEmits(['confirmar', 'cancelar']) // creo los emits para que se ejecuten en el padre el borrado o no
 </script>
 
