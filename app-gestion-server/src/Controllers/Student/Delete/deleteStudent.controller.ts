@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Res } from '@nestjs/common';
+import { Controller, Delete, Param, Res } from '@nestjs/common';
 import { DeleteStudentService } from './deleteStudent.service';
 import { Response } from 'express';
 

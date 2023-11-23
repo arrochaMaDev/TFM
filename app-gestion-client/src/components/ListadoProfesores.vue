@@ -2,28 +2,24 @@
 import { type Ref, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Popup from './Popup.vue'
-import AltaAlumno from './AltaAlumno.vue'
+import AltaProfesor from './AltaProfesor.vue'
 import { useLoadingStore } from '@/stores/loading'
-import { useEditingStore } from '@/stores/editar'
 
 const router = useRouter() // router para ir al alumno cuando se clique en él
 const loadingStore = useLoadingStore() // store del Spinner
 
-let studentsRefFromServer: Ref<
+let teachersRefFromServer: Ref<
   {
     id: number
     usuario_id: string
     nombre: string
     apellidos: string
-    dni: string
-    direccion: string
-    telefono: string
     email: string
   }[]
 > = ref([])
 
-function getStudentsData() {
-  fetch('http://localhost:3000/students', {
+function getTeachersData() {
+  fetch('http://localhost:3000/teachers', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -42,14 +38,11 @@ function getStudentsData() {
           usuario_id: string
           nombre: string
           apellidos: string
-          dni: string
-          direccion: string
-          telefono: string
           email: string
         }[]
-        studentsRefFromServer.value = data
+        teachersRefFromServer.value = data
         console.log(data)
-        console.log(studentsRefFromServer.value)
+        console.log(teachersRefFromServer.value)
       }
     })
     .catch((error) => {
@@ -60,12 +53,12 @@ function getStudentsData() {
       loadingStore.LoadingFalse()
     })
 }
-getStudentsData()
+getTeachersData()
 
 // Ir a la página idividual del alumno
-const goToStudent = (id: number) => {
+const goToTeacher = (id: number) => {
   router.push({
-    path: `/alumno/${id}`
+    path: `/teacher/${id}`
   })
 }
 
@@ -76,21 +69,17 @@ let arrayOrdenado: Ref<
     usuario_id: string
     nombre: string
     apellidos: string
-    dni: string
-    direccion: string
-    telefono: string
     email: string
   }[]
 > = ref([]) // Nuevo array Ref para ordenar la lsta según se indique
 
-let ordenarPor: Ref<'id' | 'nombre' | 'apellidos' | 'dni' | 'email'> = ref('id')
-// let ordenarPor: Ref<'id' | 'nombre' | 'nombre' | 'apellidos' | 'dni' | 'email'> = ref('id')
+let ordenarPor: Ref<'id' | 'nombre' | 'apellidos' | 'email'> = ref('id')
 
 const ordenarArray = () => {
-  arrayOrdenado.value = [...studentsRefFromServer.value]
+  arrayOrdenado.value = [...teachersRefFromServer.value]
   const valor = ordenarPor.value
 
-  studentsRefFromServer.value.sort((a, b) => {
+  teachersRefFromServer.value.sort((a, b) => {
     if (valor === 'id') {
       return a[valor] - b[valor]
     } else {
@@ -113,12 +102,12 @@ onMounted(() => {
 
 // LÓGICA BORRAR ALUMNO
 let popupVisible: Ref<boolean> = ref(false) // ref para ocultar o mostrar el popup
-let idAlumnoSeleccionado: Ref<number | null> = ref(null) // ref del id del alumno seleccionado para borrar
+let idProfesorSeleccionado: Ref<number | null> = ref(null) // ref del id del alumno a borrar
 
-const borrarAlumno = async () => {
+const borrarProfesor = async () => {
   // funcion con async/await y try/catch en vez de fetch con .then y .catch
   try {
-    const response = await fetch(`http://localhost:3000/student/${idAlumnoSeleccionado.value}`, {
+    const response = await fetch(`http://localhost:3000/teacher/${idProfesorSeleccionado.value}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json'
@@ -130,7 +119,7 @@ const borrarAlumno = async () => {
       await new Promise((resolve) => setTimeout(resolve, 2000))
       alert('Alumno borrado con éxito')
       popupVisible.value = false
-      getStudentsData()
+      getTeachersData()
     } else {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
     }
@@ -146,76 +135,50 @@ const borrarAlumno = async () => {
 const cancelarBorrar = () => {
   // si se da click en no se cancela el borrado
   popupVisible.value = false
-  idAlumnoSeleccionado.value = null
+  idProfesorSeleccionado.value = null
 }
 
 const mostrarPopup = (id: number) => {
-  // si se da click en si, se muestra el popup y recibe el id del alumno a borrar
-  idAlumnoSeleccionado.value = id
+  // si se da click en si, se muestra el popup y recibe el id del alumnoi a borrar
+  idProfesorSeleccionado.value = id
   popupVisible.value = true
 }
 
 // LÓGICA EDITAR ALUMNO
-const editingStore = useEditingStore() // store del componente editar Alumno
-
-let popUpState: Ref<boolean> = ref(editingStore.editarFalse()) // variable del estado del popUp
-console.log(popUpState.value)
-
-let alumnoEditar: Ref<
+let profesorEditar: Ref<
   | {
       id: number
       usuario_id: string
       nombre: string
       apellidos: string
-      dni: string
-      direccion: string
-      telefono: number
       email: string
     }
   | undefined
 > = ref(undefined)
 
-const editarAlumno = (student: any) => {
-  // popUpState.value = true
-  editingStore.editarTrue()
-  alumnoEditar.value = student
-  // fetch para obtener los datos del alumno
-  fetch(`http://localhost:3000/student/${alumnoEditar.value?.id}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include'
-  }).then(async (response) => {
-    const data = (await response.json()) as {
-      id: number
-      usuario_id: string
-      nombre: string
-      apellidos: string
-      dni: string
-      direccion: string
-      telefono: number
-      email: string
-    }
-    alumnoEditar.value = data
-    console.table(data)
-  })
-}
-
-const mostrarAltaAlumno = () => {
-  // popUpState.value = true
-  popUpState.value = editingStore.editarTrue()
-  console.log(popUpState.value)
-}
-
-const resetearPopUpState = () => {
-  // popUpState.value = false
-  popUpState.value = editingStore.editarFalse()
-  console.log(popUpState.value)
+const editarProfesor = async () => {
+  try {
+    router.push({
+      path: `/alta_profesor`
+    })
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    alert('Ha ocurrido un error')
+  }
 }
 </script>
 <template>
   <div class="container">
+    <!-- <div id="listadoDeAlumnos">
+      <ul>
+        <h3>LISTADO DE ALUMNOS MODO LISTA</h3>
+        <li :studentData="student" v-for="student in studentsRefFromServer" :key="student.id">
+          {{ console.log(student.id) }}
+          {{ student.nombre }}, {{ student.apellidos }}, {{ student.dni }},
+          <button type="button" @click="goToStudent(student.id)">Ver alumno</button>
+        </li>
+      </ul>
+    </div> -->
     <div id="ordenarPor">
       <label for="ordenarPor">Ordenar por:</label>
       <select v-model="ordenarPor" @change="ordenarArray">
@@ -227,7 +190,7 @@ const resetearPopUpState = () => {
     </div>
     <div>
       <table id="tabla">
-        <th colspan="7"><h3>LISTADO DE ALUMNOS</h3></th>
+        <th colspan="4"><h3>LISTADO DE PROFESORES</h3></th>
         <tr>
           <th>
             <h3>ID</h3>
@@ -239,51 +202,25 @@ const resetearPopUpState = () => {
             <h3>Apellidos</h3>
           </th>
           <th>
-            <h3>DNI</h3>
-          </th>
-          <th>
-            <h3>Teléfono</h3>
-          </th>
-          <th>
-            <h3>Dirección</h3>
-          </th>
-          <th>
             <h3>Email</h3>
           </th>
         </tr>
-        <tr id="alumno" v-for="student in studentsRefFromServer" :key="student.id">
-          <td>{{ student.id }}</td>
-          <td>{{ student.nombre }}</td>
-          <td>{{ student.apellidos }}</td>
-          <td>{{ student.dni }}</td>
-          <td>{{ student.telefono }}</td>
-          <td>{{ student.direccion }}</td>
-          <td>{{ student.email }}</td>
+        <tr id="alumno" v-for="teacher in teachersRefFromServer" :key="teacher.id">
+          <td>{{ teacher.id }}</td>
+          <td>{{ teacher.nombre }}</td>
+          <td>{{ teacher.apellidos }}</td>
+          <td>{{ teacher.email }}</td>
           <td>
-            <button type="button" @click="goToStudent(student.id)">Ver</button>
+            <button type="button" @click="goToTeacher(teacher.id)">Editar</button>
           </td>
-          <td>
-            <button type="button" @click="editarAlumno(student), mostrarAltaAlumno()">
-              Editar
-            </button>
-          </td>
-          <td><button type="button" @click="mostrarPopup(student.id)">Borrar</button></td>
-          <!-- le paso el id del alumno que quiero borrar -->
+          <td><button type="button" @click="mostrarPopup(teacher.id)">Borrar</button></td>
+          <!-- le paso el id que quiero borrar -->
         </tr>
       </table>
     </div>
-    <Popup v-if="popupVisible" @confirmar="borrarAlumno" @cancelar="cancelarBorrar"></Popup>
+    <Popup v-if="popupVisible" @confirmar="borrarProfesor" @cancelar="cancelarBorrar"></Popup>
     <!-- recibo un emit de confirmar que ejecuta la funcion borrarAlumno y otro emit de cancelar que ejecuta cancelarBorrar -->
-    <AltaAlumno
-      v-if="popUpState"
-      :isEditing="popUpState"
-      @cerrarPopUp="resetearPopUpState"
-      @obtenerAlumnos="getStudentsData()"
-      @resetearAlumno="editarAlumno(alumnoEditar)"
-      :alumnoParaEditar="alumnoEditar"
-    >
-      <!-- para resetear valores, recibo un emit y vuelvo a ejecutar la funcion editarAlumnos con los parámetros recibidos del componente hijo-->
-    </AltaAlumno>
+    <AltaProfesor></AltaProfesor>
   </div>
 </template>
 <style scoped>
@@ -292,7 +229,7 @@ const resetearPopUpState = () => {
 }
 table {
   margin-top: 0px;
-  width: max-content;
+  width: 1000px;
   border: none;
 
   & th {
@@ -312,7 +249,7 @@ table tr:hover td {
   background-color: rgb(106, 98, 53);
 }
 
-table tr:hover td:nth-last-child(-n + 3) {
+table tr:hover td:nth-last-child(-n + 2) {
   background-color: initial;
 }
 

@@ -24,14 +24,15 @@ onMounted(() => {
 let userData: any = undefined
 let userEmail: Ref<string | null> = ref(null)
 onMounted(() => {
-  userEmail.value = localStorage.getItem('email')
+  userEmail.value = localStorage.getItem('email') // accedo al valor email del localStorage
 })
+
 userData = getUserData
 
 //BORRAR LA COOKIE
 const cerrarSesion = async () => {
   try {
-    loadingStore.showLoading()
+    loadingStore.Loadingtrue()
     await new Promise((resolve) => setTimeout(resolve, 4000))
     deleteCookie('user')
     localStorage.removeItem('email')
@@ -44,7 +45,7 @@ const cerrarSesion = async () => {
   } catch (error) {
     console.log('Error en la solicitud:', error)
   } finally {
-    loadingStore.hideLoading()
+    loadingStore.LoadingFalse()
   }
 }
 const deleteCookie = (user: string) => {
@@ -60,7 +61,7 @@ const deleteCookie = (user: string) => {
       <HelloWorld msg="You did it!" /> -->
 
   <nav>
-    <RouterLink to="/">Home</RouterLink>
+    <!-- <RouterLink to="/home">Home</RouterLink> -->
     <RouterLink to="/about">About</RouterLink>
     <RouterLink to="/login">Login</RouterLink>
     <RouterLink to="/alta_usuario">Alta Usuario</RouterLink>
@@ -68,7 +69,9 @@ const deleteCookie = (user: string) => {
     <RouterLink to="/alta_profesor">Alta Profesor</RouterLink>
     <RouterLink to="/buscador_alumno">Buscar Alumnos</RouterLink>
     <RouterLink to="/listado_alumnos">Listado Alumnos</RouterLink>
+    <RouterLink to="/listado_profesores">Listado Profesores</RouterLink>
     <div v-if="userEmail">
+      <!-- Si existe userEmail en localStorage, muestro un mensaje de bienvenida y un botón de logout-->
       <hr />
       <a>Bienvenido {{ userEmail }}</a>
       <a @click="cerrarSesion">LogOut</a>

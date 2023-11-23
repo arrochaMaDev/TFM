@@ -1,199 +1,300 @@
 <script setup lang="ts">
-import { computed, ref, type Ref } from 'vue'
+import { ref, type Ref } from 'vue'
+
+// Referencias del formulario
+let studentNombreRef: Ref<string | undefined> = ref(undefined)
+let studentApellidosRef: Ref<string | undefined> = ref(undefined)
+let studentDniRef: Ref<string | undefined> = ref(undefined)
+let studentDireccionRef: Ref<string | undefined> = ref(undefined)
+let studentTelefonoRef: Ref<number | undefined> = ref(undefined)
+let studentEmailRef: Ref<string | undefined> = ref(undefined)
+
+// Resetear los datos del formulario y poner cada ref a vacío
+const borrarDatosForm = () => {
+  studentNombreRef.value = undefined
+  studentApellidosRef.value = undefined
+  studentDniRef.value = undefined
+  studentDireccionRef.value = undefined
+  studentTelefonoRef.value = undefined
+  studentEmailRef.value = undefined
+  console.log('Borrar Datos')
+}
+
+// VALIDAR DATOS DEL FORMULARIO
+const patronTel = /^\d{9}$/
+const patronEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const validarDatos = () => {
+  console.log('validar Datos')
+  if (
+    !studentNombreRef.value ||
+    !studentApellidosRef.value ||
+    !studentDniRef.value ||
+    !studentDireccionRef.value ||
+    !studentTelefonoRef.value ||
+    !studentEmailRef.value
+  ) {
+    alert('Por favor, complete todos los campos obligatorios.')
+    return false
+  }
+  if (!studentTelefonoRef.value || !patronTel.test(studentTelefonoRef.value.toString())) {
+    alert('El número de teléfono debe tener 9 dígitos numéricos.')
+    return false
+  }
+  if (!studentEmailRef.value || !patronEmail.test(studentEmailRef.value)) {
+    alert('Por favor, introduce un email válido.')
+    return false
+  }
+  return true
+}
 
 // FETCH PARA ENVIAR DATOS DEL ALUMNO A LA BD:
 function crearAlumno() {
-  fetch('http://localhost:3000/student', {
-    method: 'POST',
-    body: JSON.stringify({
-      nombre: studentNombreRef.value,
-      apellidos: studentApellidosRef.value,
-      dni: studentDniRef.value,
-      direccion: studentDireccionRef.value,
-      telefono: studentTelefonoRef.value,
-      email: studentEmailRef.value
-    }),
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include'
-  })
-    .then((response) => {
-      if (!response.ok) {
+  const datosValidos = validarDatos()
+  if (datosValidos) {
+    fetch('http://localhost:3000/student', {
+      method: 'POST',
+      body: JSON.stringify({
+        nombre: studentNombreRef.value,
+        apellidos: studentApellidosRef.value,
+        dni: studentDniRef.value,
+        direccion: studentDireccionRef.value,
+        telefono: studentTelefonoRef.value,
+        email: studentEmailRef.value
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+        } else {
+          alert('Alumno Creado')
+          // Imprimo los datos que he introducido
+          const datosAlumno = [
+            studentNombreRef.value,
+            studentApellidosRef.value,
+            studentDniRef.value,
+            studentDireccionRef.value,
+            studentTelefonoRef.value,
+            studentEmailRef.value
+          ]
+          console.table(datosAlumno)
+          borrarDatosForm()
+        }
+      })
+      .catch((error) => {
+        console.error('Error en la solicitud:', error)
+        alert('Ha ocurrido un error')
+      })
+  }
+}
+
+// COMPONENTE COMO POPUP PARA EDITAR
+const emit = defineEmits(['cerrarPopUp', 'obtenerAlumnos', 'resetearAlumno'])
+const props = defineProps<{
+  alumnoParaEditar:
+    | {
+        id: number
+        usuario_id: string
+        nombre: string
+        apellidos: string
+        dni: string
+        telefono: number
+        direccion: string
+        email: string
+      }
+    | undefined
+  isEditing: boolean
+}>()
+
+let alumnoEditado = ref({ ...props.alumnoParaEditar })
+
+let popUpStyle: Ref<boolean> = ref(props.isEditing) // variable para activar el estilo popUp
+
+// FETCH PARA ACTUALIZAR DATOS DEL ALUMNO:
+const actualizarAlumno = async () => {
+  if (alumnoEditado.value.telefono && !patronTel.test(alumnoEditado.value.telefono.toString())) {
+    alert('El número de teléfono debe tener 9 dígitos numéricos.')
+    return
+  }
+  if (alumnoEditado.value.email && !patronEmail.test(alumnoEditado.value.email)) {
+    alert('Por favor, introduce un email válido.')
+  } else {
+    try {
+      const response = await fetch(`http://localhost:3000/student/${alumnoEditado.value?.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          nombre: alumnoEditado.value?.nombre,
+          apellidos: alumnoEditado.value?.apellidos,
+          dni: alumnoEditado.value?.dni,
+          direccion: alumnoEditado.value?.direccion,
+          telefono: alumnoEditado.value?.telefono,
+          email: alumnoEditado.value?.email
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      if (response.ok) {
+        alert('Alumno Editado')
+        // Imprimo los datos que he introducido
+        const AlumnoActualizado = [
+          alumnoEditado.value?.nombre,
+          alumnoEditado.value?.apellidos,
+          alumnoEditado.value?.dni,
+          alumnoEditado.value?.direccion,
+          alumnoEditado.value?.telefono,
+          alumnoEditado.value?.email
+        ]
+        console.table(AlumnoActualizado)
+        popUpStyle.value = false
+      } else {
         throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
-      } else {
-        alert('Alumno Creado')
       }
-      getStudentsData()
-    })
-    .catch((error) => {
+    } catch (error) {
       console.error('Error en la solicitud:', error)
       alert('Ha ocurrido un error')
-    })
-
-  // Imprimo los datos que he introducido
-  const datosAlumno = [
-    studentNombreRef.value,
-    studentApellidosRef.value,
-    studentDniRef.value,
-    studentDireccionRef.value,
-    studentTelefonoRef.value,
-    studentEmailRef.value
-  ]
-  console.log(datosAlumno)
+    } finally {
+      emit('cerrarPopUp')
+      emit('obtenerAlumnos')
+    }
+  }
 }
-
-//Referencias del formulario
-let studentNombreRef: Ref<string> = ref('')
-let studentApellidosRef: Ref<string> = ref('')
-let studentDniRef: Ref<string> = ref('')
-let studentDireccionRef: Ref<string> = ref('')
-let studentTelefonoRef: Ref<number | undefined> = ref() // lo pongo undefined para que no me aparezca ningún dato en el formulario
-let studentEmailRef: Ref<string> = ref('')
-
-// para resetear los datos del formulario y poner cada ref a vacío
-function resetearDatosForm() {
-  studentNombreRef.value = ''
-  studentApellidosRef.value = ''
-  studentDniRef.value = ''
-  studentDireccionRef.value = ''
-  studentTelefonoRef.value = undefined // lo pongo undefined para que no me aparezca ningún dato en el formulario
-  studentEmailRef.value = ''
+// para resetear los valores como están actualmente en la BD
+const resetearValoresIniciales = () => {
+  console.log('resetear valores iniciales')
+  alumnoEditado.value.nombre = props.alumnoParaEditar?.nombre
+  alumnoEditado.value.apellidos = props.alumnoParaEditar?.apellidos
+  alumnoEditado.value.dni = props.alumnoParaEditar?.dni
+  alumnoEditado.value.telefono = props.alumnoParaEditar?.telefono
+  alumnoEditado.value.direccion = props.alumnoParaEditar?.direccion
+  alumnoEditado.value.email = props.alumnoParaEditar?.email
+  emit('resetearAlumno', alumnoEditado) // hago el emit y paso además el alumnoEdidado según el valor de solo lectura de las props recibidas
 }
-
-// OBTENER LISTADO DE ESTUDIANTES
-let studentsRefFromServer: Ref<
-  {
-    id: number
-    usuario_id: string
-    nombre: string
-    apellidos: string
-    dni: string
-    direccion: string
-    telefono: number
-    email: string
-  }[]
-> = ref([])
-
-let invertedStudentsRefFromServer = ref(
-  computed(() => {
-    // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-    return studentsRefFromServer.value.slice().reverse()
-  })
-)
-console.log(invertedStudentsRefFromServer.value)
-
-function getStudentsData() {
-  fetch('http://localhost:3000/students', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include'
-  })
-    .then(async (response) => {
-      if (!response.ok) {
-        throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
-      } else {
-        const data = (await response.json()) as {
-          id: number
-          usuario_id: string
-          nombre: string
-          apellidos: string
-          dni: string
-          direccion: string
-          telefono: number
-          email: string
-        }[]
-        studentsRefFromServer.value = data
-        console.log(data)
-        console.log(studentsRefFromServer.value)
-      }
-    })
-    .catch((error) => {
-      console.error('Error en la solicitud:', error)
-      alert('Ha ocurrido un error')
-    })
-}
-getStudentsData()
 </script>
 
 <template>
-  <div class="centradoVertical">
-    <div class="form">
-      <h1 class="green">Alta alumnos</h1>
-      <form @submit.prevent="crearAlumno(), getStudentsData()">
+  <div class="container" :class="{ altaAlumnosPopup: popUpStyle }">
+    <div class="form" :class="{ 'altaAlumnosPopup-content': popUpStyle }">
+      <h1 v-if="popUpStyle" class="green">Editar alumno</h1>
+      <h1 v-else class="green">Alta alumno</h1>
+      <form @submit.prevent="crearAlumno()">
         <label class="green">Nombre</label>
-        <input type="text" name="" id="nombreInput" required v-model="studentNombreRef" />
+        <input
+          v-if="!popUpStyle"
+          type="text"
+          name=""
+          id="nombreInput"
+          required
+          v-model="studentNombreRef"
+        />
+        <!-- :value="popUpStyle ? alumnoEditado?.nombre : studentNombreRef" -->
+        <input
+          v-if="popUpStyle"
+          type="text"
+          name=""
+          id="nombreInput"
+          required
+          v-model="alumnoEditado.nombre"
+        />
+        <!-- si popUpStyle es true, v-model son las props que le paso desde el componente padre -->
         <label class="green">Apellidos</label>
-        <input type="text" name="" id="apellidosInput" required v-model="studentApellidosRef" />
+        <input
+          v-if="!popUpStyle"
+          type="text"
+          name=""
+          id="apellidosInput"
+          required
+          v-model="studentApellidosRef"
+        />
+        <input
+          v-if="popUpStyle"
+          type="text"
+          name=""
+          id="apellidosInput"
+          required
+          v-model="alumnoEditado.apellidos"
+        />
         <label class="green">Dni</label>
-        <input type="text" name="" id="dniInput" required v-model="studentDniRef" />
-        <label class="green">Dirección</label>
-        <input type="text" name="" id="direcciónInput" required v-model="studentDireccionRef" />
+        <input
+          v-if="!popUpStyle"
+          type="text"
+          name=""
+          id="dniInput"
+          required
+          v-model="studentDniRef"
+        />
+        <input
+          v-if="popUpStyle"
+          type="text"
+          name=""
+          id="dniInput"
+          required
+          v-model="alumnoEditado.dni"
+        />
         <label class="green">Teléfono</label>
         <input
+          v-if="!popUpStyle"
           type="tel"
-          pattern="[0-9]{9}"
+          pattern="^\d{9}$"
           name=""
           id="telefonoInput"
           required
-          v-model.number="studentTelefonoRef"
+          v-model="studentTelefonoRef"
+        />
+        <input
+          v-if="popUpStyle"
+          type="tel"
+          pattern="^\d{9}$"
+          name=""
+          id="telefonoInput"
+          required
+          v-model="alumnoEditado.telefono"
+        />
+        <label class="green">Dirección</label>
+        <input
+          v-if="!popUpStyle"
+          type="text"
+          name=""
+          id="direcciónInput"
+          required
+          v-model="studentDireccionRef"
+        />
+        <input
+          v-if="popUpStyle"
+          type="text"
+          name=""
+          id="direcciónInput"
+          required
+          v-model="alumnoEditado.direccion"
         />
         <label class="green">Email</label>
-        <input type="email" name="" id="emailInput" v-model="studentEmailRef" />
-        <button type="reset" @click="resetearDatosForm()">Resetear</button>
-        <button type="submit">Enviar</button>
+        <input
+          v-if="!popUpStyle"
+          type="email"
+          name=""
+          id="emailInput"
+          required
+          v-model="studentEmailRef"
+        />
+        <input
+          v-if="popUpStyle"
+          required
+          type="email"
+          name=""
+          id="emailInput"
+          v-model="alumnoEditado.email"
+        />
+        <button type="reset" @click="borrarDatosForm()">Borrar</button>
+        <button type="reset" v-if="popUpStyle" @click="resetearValoresIniciales">Resetear</button>
+        <button type="submit" v-if="!popUpStyle" @click="crearAlumno()">Enviar</button>
+        <button type="button" v-if="popUpStyle" @click="actualizarAlumno()">Enviar</button>
+        <button type="button" v-if="popUpStyle" @click="emit('cerrarPopUp')">Cancelar</button>
       </form>
     </div>
-    <div class="vistaPrevia">
-      <h2>Vista previa del alumno:</h2>
-      <p>Nombre: {{ studentNombreRef }}</p>
-      <p>Apellidos: {{ studentApellidosRef }}</p>
-      <p>DNI: {{ studentDniRef }}</p>
-      <p>Direccion: {{ studentDireccionRef }}</p>
-      <p>Teléfono: {{ studentTelefonoRef }}</p>
-      <p>Email: {{ studentEmailRef }}</p>
-      <div>
-        <img class="" src="../utils/img/miguelarrocha.png" alt="" width="100" height="100" />
-      </div>
-    </div>
-    <section>
-      <table id="tabla">
-        <tr>
-          <th>
-            <h3>ID</h3>
-          </th>
-          <th>
-            <h3>Nombre</h3>
-          </th>
-          <th>
-            <h3>Apellidos</h3>
-          </th>
-          <th>
-            <h3>DNI</h3>
-          </th>
-          <th>
-            <h3>Dirección</h3>
-          </th>
-          <th>
-            <h3>Teléfono</h3>
-          </th>
-          <th>
-            <h3>Email</h3>
-          </th>
-        </tr>
-        <tr v-for="student in invertedStudentsRefFromServer" :key="student.id">
-          <td>{{ student.id }}</td>
-          <td>{{ student.nombre }}</td>
-          <td>{{ student.apellidos }}</td>
-          <td>{{ student.dni }}</td>
-          <td>{{ student.direccion }}</td>
-          <td>{{ student.telefono }}</td>
-          <td>{{ student.email }}</td>
-        </tr>
-      </table>
-    </section>
   </div>
 </template>
 
@@ -224,29 +325,30 @@ getStudentsData()
     color: white;
     border: 1px solid hsla(160, 100%, 37%, 1);
     border-radius: 5px;
+    cursor: pointer;
   }
 }
-
-.vistaPrevia {
+.altaAlumnosPopup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
-  flex-direction: column;
-  width: 1000px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
-table {
-  width: 1000px;
-  border: 1px solid #ffffff;
+.altaAlumnosPopup-content {
+  background: #000000;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid white;
 
-  & th {
-    background-color: rgb(79, 90, 86);
-  }
-
-  & td {
-    width: fit-content;
-    text-align: left;
-    vertical-align: top;
-    border: 1px solid #ffffff;
-    border-spacing: 0;
+  & button {
+    cursor: pointer;
   }
 }
 </style>

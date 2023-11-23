@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import router from '@/router'
 import { ref, type Ref } from 'vue'
-import Spinner from './Spinner.vue'
 import { useLoadingStore } from '@/stores/loading'
 
-// let loading: Ref<boolean> = ref(false) // declaro variable spinner en false para que no se muestre
-const loadingStore = useLoadingStore()
-const isLoading = ref(false)
+const loadingStore = useLoadingStore() // store del Spinner
 
 const loginUser = async () => {
   try {
-    loadingStore.showLoading()
+    loadingStore.Loadingtrue()
 
     const response = await fetch('http://localhost:3000/login', {
       method: 'POST',
@@ -44,7 +41,7 @@ const loginUser = async () => {
     console.log('Error en la solicitud:', error)
     // alert('Ha ocurrido un error');
   } finally {
-    loadingStore.hideLoading()
+    loadingStore.LoadingFalse()
   }
 }
 
@@ -66,7 +63,6 @@ const ToggleVerPass = () => {
 </script>
 
 <template>
-  <!-- <Spinner v-if="loading"></Spinner> -->
   <div class="centradoVertical">
     <div class="formLoginUser">
       <h1 class="green">Login</h1>
@@ -81,7 +77,6 @@ const ToggleVerPass = () => {
           required
           v-model="userPassRef"
         />
-        <!-- si verPass es true, entonces type=text. Si es false, entonces type=password-->
         <button type="button" id="buttonVerPass" @click="ToggleVerPass()">
           <span v-if="verPass">Ocultar Pass</span>
           <span v-else>Mostrar Pass</span>

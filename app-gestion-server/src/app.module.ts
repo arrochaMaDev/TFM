@@ -20,6 +20,10 @@ import { LoginUserController } from './Controllers/User/Login/loginUser.controll
 import { LoginUserService } from './Controllers/User/Login/loginUser.service';
 import { DeleteStudentController } from './Controllers/Student/Delete/deleteStudent.controller';
 import { DeleteStudentService } from './Controllers/Student/Delete/deleteStudent.service';
+import { GetTeacherController } from './Controllers/Teacher/Get/getTeacher.controller';
+import { GetTeacherService } from './Controllers/Teacher/Get/getTeacher.service';
+import { UpdateStudentService } from './Controllers/Student/Update/UpdateStudent.service';
+import { UpdateStudentController } from './Controllers/Student/Update/updateStudent.controller';
 
 @Module({
   imports: [
@@ -39,7 +43,9 @@ import { DeleteStudentService } from './Controllers/Student/Delete/deleteStudent
     RegisterTeacherController,
     RegisterUserController,
     GetStudentController,
+    GetTeacherController,
     DeleteStudentController,
+    UpdateStudentController,
     ListerStudentsController,
     ListerTeachersController,
     LoginUserController,
@@ -49,7 +55,9 @@ import { DeleteStudentService } from './Controllers/Student/Delete/deleteStudent
     RegisterTeacherService,
     RegisterUserService,
     GetStudentService,
+    GetTeacherService,
     DeleteStudentService,
+    UpdateStudentService,
     ListerStudentsService,
     ListerTeachersService,
     LoginUserService,

@@ -179,7 +179,8 @@ function guardarFoto() {}
         <img class="" src="../utils/img/miguelarrocha.png" alt="" width="100" height="100" />
       </div>
     </div>
-    <section>
+    <!--· TABLA CON EL LISTADO DE PROFESORES -->
+    <!-- <section> 
       <table id="tablaServer">
         <tr>
           <th><h3>Nombre</h3></th>
@@ -193,11 +194,10 @@ function guardarFoto() {}
           <td>{{ teacher.email }}</td>
           <td id="tdAsignaturas">
             {{ teacherAsignaturas.toString() }}
-            <!-- También se puede añadir con un v-for-->
           </td>
         </tr>
       </table>
-    </section>
+    </section> -->
   </div>
 </template>
 

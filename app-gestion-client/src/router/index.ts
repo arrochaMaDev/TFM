@@ -7,6 +7,7 @@ import BuscadorAlumno from '@/components/BuscadorAlumno.vue'
 import ListadoAlumnos from '@/components/ListadoAlumnos.vue'
 import Alumno from '@/components/Alumno.vue'
 import LoginUser from '@/components/LoginUser.vue'
+import ListadoProfesores from '@/components/ListadoProfesores.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,13 +35,15 @@ const router = createRouter({
       path: '/alta_alumno',
       name: 'alta_alumno',
 
-      component: AltaAlumno
+      component: AltaAlumno,
+      props: true // para pasar información mediante los props (ejemplo: id)
     },
     {
       path: '/alta_profesor',
       name: 'alta_profesor',
 
-      component: AltaProfesor
+      component: AltaProfesor,
+      props: true // para pasar información mediante los props (ejemplo: id)
     },
     {
       path: '/buscador_alumno',
@@ -62,6 +65,20 @@ const router = createRouter({
       // props: { shouldGetData: true } // para pasar información mediante los props (ejemplo: id)
       props: true // para pasar información mediante los props (ejemplo: id)
     },
+    {
+      path: '/listado_profesores',
+      name: 'listado_profesores',
+
+      component: ListadoProfesores
+    },
+    // {
+    //   path: '/profesor/:id',
+    //   name: 'profesor',
+
+    //   component: Profesor,
+    //   // props: { shouldGetData: true } // para pasar información mediante los props (ejemplo: id)
+    //   props: true // para pasar información mediante los props (ejemplo: id)
+    // },
     {
       path: '/login',
       name: 'login',

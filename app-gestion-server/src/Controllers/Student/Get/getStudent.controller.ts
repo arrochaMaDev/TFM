@@ -17,6 +17,7 @@ export class GetStudentController {
       apellidos: student.apellidos,
       dni: student.dni,
       direccion: student.direccion,
+      telefono: student.telefono,
       email: student.email,
     };
     response.send(studentDto).status(200);
