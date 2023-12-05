@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import AltaUsuario from '../components/AltaUsuario.vue'
 import AltaAlumno from '../components/AltaAlumno.vue'
 import AltaProfesor from '@/components/AltaProfesor.vue'
+import AltaAsignatura from '@/components/AltaAsignatura.vue'
 import BuscadorAlumno from '@/components/BuscadorAlumno.vue'
 import ListadoAlumnos from '@/components/ListadoAlumnos.vue'
 import Alumno from '@/components/Alumno.vue'
@@ -26,34 +27,40 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue')
     },
     {
-      path: '/alta_usuario',
-      name: 'alta_usuario',
+      path: '/alta-usuario',
+      name: 'alta-usuario',
 
       component: AltaUsuario
     },
     {
-      path: '/alta_alumno',
-      name: 'alta_alumno',
+      path: '/alta-alumno',
+      name: 'alta-alumno',
 
       component: AltaAlumno,
       props: true // para pasar información mediante los props (ejemplo: id)
     },
     {
-      path: '/alta_profesor',
-      name: 'alta_profesor',
+      path: '/alta-profesor',
+      name: 'alta-profesor',
 
       component: AltaProfesor,
       props: true // para pasar información mediante los props (ejemplo: id)
     },
     {
-      path: '/buscador_alumno',
-      name: 'buscador_alumno',
+      path: '/alta-asignatura',
+      name: 'alta-asignatura',
+
+      component: AltaAsignatura
+    },
+    {
+      path: '/buscador-alumno',
+      name: 'buscador-alumno',
 
       component: BuscadorAlumno
     },
     {
-      path: '/listado_alumnos',
-      name: 'listado_alumnos',
+      path: '/listado-alumnos',
+      name: 'listado-alumnos',
 
       component: ListadoAlumnos
     },
@@ -66,8 +73,8 @@ const router = createRouter({
       props: true // para pasar información mediante los props (ejemplo: id)
     },
     {
-      path: '/listado_profesores',
-      name: 'listado_profesores',
+      path: '/listado-profesores',
+      name: 'listado-profesores',
 
       component: ListadoProfesores
     },

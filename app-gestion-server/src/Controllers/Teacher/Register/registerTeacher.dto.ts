@@ -13,6 +13,4 @@ export class RegisterTeacherDto {
   @IsNotEmpty()
   @IsEmail()
   email: string;
-
-  // asignaturas: string[]; ???
 }

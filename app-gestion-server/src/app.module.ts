@@ -24,6 +24,17 @@ import { GetTeacherController } from './Controllers/Teacher/Get/getTeacher.contr
 import { GetTeacherService } from './Controllers/Teacher/Get/getTeacher.service';
 import { UpdateStudentService } from './Controllers/Student/Update/UpdateStudent.service';
 import { UpdateStudentController } from './Controllers/Student/Update/updateStudent.controller';
+import { RegisterSubjectController } from './Controllers/Subject/Register/registerSubjectController';
+import { RegisterSubjectService } from './Controllers/Subject/Register/registerSubjectService';
+import { SubjectDb } from './Modelos/Subject/subjectDb';
+import { ListerSubjectsController } from './Controllers/Subject/Get/listerSubjects.controller';
+import { ListerSubjectsService } from './Controllers/Subject/Get/listerSubjects.service';
+import { GetSubjectController } from './Controllers/Subject/Get/getSubject.controller';
+import { GetSubjectService } from './Controllers/Subject/Get/getSubject.service';
+import { DeleteSubjectController } from './Controllers/Subject/Delete/deleteSubject.controller';
+import { DeleteSubjectService } from './Controllers/Subject/Delete/deleteSubject.service';
+import { UpdateSubjectController } from './Controllers/Subject/Update/updateSubject.controller';
+import { UpdateSubjectService } from './Controllers/Subject/Update/updateSubject.service';
 
 @Module({
   imports: [
@@ -34,32 +45,42 @@ import { UpdateStudentController } from './Controllers/Student/Update/updateStud
       username: 'root',
       password: 'root',
       database: 'app_gestion',
-      entities: [StudentDb, TeacherDb, UserDb],
+      entities: [StudentDb, TeacherDb, UserDb, SubjectDb],
     }),
-    TypeOrmModule.forFeature([StudentDb, TeacherDb, UserDb]),
+    TypeOrmModule.forFeature([StudentDb, TeacherDb, UserDb, SubjectDb]),
   ],
   controllers: [
     RegisterStudentController,
     RegisterTeacherController,
     RegisterUserController,
+    RegisterSubjectController,
     GetStudentController,
     GetTeacherController,
+    GetSubjectController,
     DeleteStudentController,
+    DeleteSubjectController,
     UpdateStudentController,
+    UpdateSubjectController,
     ListerStudentsController,
     ListerTeachersController,
+    ListerSubjectsController,
     LoginUserController,
   ], //AppController
   providers: [
     RegisterStudentService,
     RegisterTeacherService,
     RegisterUserService,
+    RegisterSubjectService,
     GetStudentService,
     GetTeacherService,
+    GetSubjectService,
     DeleteStudentService,
+    DeleteSubjectService,
     UpdateStudentService,
+    UpdateSubjectService,
     ListerStudentsService,
     ListerTeachersService,
+    ListerSubjectsService,
     LoginUserService,
   ],
 })
