@@ -10,7 +10,12 @@ export class RegisterTeacherController {
 
   @Post()
   async registerStudent(@Body() data: RegisterTeacherDto) {
-    const { nombre, apellidos, email } = data;
-    await this.registerTeacherService.createTeacher(nombre, apellidos, email);
+    const { nombre, apellidos, email, asignaturas } = data;
+    await this.registerTeacherService.createTeacher(
+      nombre,
+      apellidos,
+      email,
+      asignaturas,
+    );
   }
 }

@@ -1,6 +1,7 @@
 <!-- eslint-disable vue/no-side-effects-in-computed-properties -->
 <script setup lang="ts">
-import { computed, ref, type Ref } from 'vue'
+import { computed, inject, onMounted, ref, type Ref } from 'vue'
+import type { VueCookies } from 'vue-cookies'
 
 // FETCH PARA ENVIAR DATOS DEL USUARIO A LA BD:
 function crearUsuario() {

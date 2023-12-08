@@ -29,7 +29,7 @@ export class RegisterUserService {
       username: user.getUsername(),
       email: user.getEmail(),
       pass: user.getPass(),
-      permisos: user.getPermisos(),
+      permiso: user.getPermiso(),
     };
     console.log(userDb);
 

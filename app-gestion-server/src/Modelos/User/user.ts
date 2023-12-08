@@ -4,7 +4,7 @@ export class User {
     private readonly username: string, // https://www.uuidgenerator.net/dev-corner/typescript
     private readonly email: string,
     private readonly pass: string,
-    private readonly permisos: number,
+    private readonly permiso: number,
   ) {}
 
   getId(): number {
@@ -19,7 +19,7 @@ export class User {
   getPass(): string {
     return this.pass;
   }
-  getPermisos(): number {
-    return this.permisos;
+  getPermiso(): number {
+    return this.permiso;
   }
 }

@@ -78,7 +78,7 @@ function getAsignaturasData() {
       if (!response.ok) {
         throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
       } else {
-        //   loadingStore.Loadingtrue()
+        //   loadingStore.loadingTrue()
         //   await new Promise((resolve) => setTimeout(resolve, 2000))
 
         const data = (await response.json()) as {

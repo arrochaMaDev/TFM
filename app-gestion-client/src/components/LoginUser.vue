@@ -7,7 +7,7 @@ const loadingStore = useLoadingStore() // store del Spinner
 
 const loginUser = async () => {
   try {
-    loadingStore.Loadingtrue()
+    loadingStore.loadingTrue()
 
     const response = await fetch('http://localhost:3000/login', {
       method: 'POST',
@@ -29,7 +29,7 @@ const loginUser = async () => {
     } else {
       localStorage.setItem('email', userEmailRef.value)
       router.push({
-        path: '/home'
+        path: '/about'
       })
       setTimeout(() => {
         location.reload()
@@ -41,7 +41,7 @@ const loginUser = async () => {
     console.log('Error en la solicitud:', error)
     // alert('Ha ocurrido un error');
   } finally {
-    loadingStore.LoadingFalse()
+    loadingStore.loadingFalse()
   }
 }
 

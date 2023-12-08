@@ -8,7 +8,8 @@ function crearProfesor() {
     body: JSON.stringify({
       nombre: teacherNombreRef.value,
       apellidos: teacherApellidosRef.value,
-      email: teacherEmailRef.value
+      email: teacherEmailRef.value,
+      asignaturas: teacherAsignaturasToString.value
     }),
     headers: {
       'Content-Type': 'application/json'
@@ -24,7 +25,8 @@ function crearProfesor() {
         const datosProfesor = [
           teacherNombreRef.value,
           teacherApellidosRef.value,
-          teacherEmailRef.value
+          teacherEmailRef.value,
+          teacherAsignaturasToString.value
         ]
         console.log(datosProfesor)
 
@@ -32,6 +34,7 @@ function crearProfesor() {
         teacherNombreRef.value = ''
         teacherApellidosRef.value = ''
         teacherEmailRef.value = ''
+        teacherAsignaturas.value = [''] // teacherAsignaturasToString depende de teacherAsignaturas
       }
     })
     .catch((error) => {
@@ -58,7 +61,9 @@ function agregarAsignatura() {
     teacherAsignaturasToString.value = teacherAsignaturas.value
       .map((elemento) => ' ' + elemento) // recorro el array añadiendo un espacio a cada elemento
       .toString() // lo convierto en string
+      .trimStart() // elimino el espacio al principio
     asignaturaSelected.value = ''
+    console.log(teacherAsignaturasToString.value)
   }
 }
 
@@ -96,27 +101,57 @@ function getTeachersData() {
       'Content-Type': 'application/json'
     },
     credentials: 'include'
-  }).then(async (response) => {
-    const data = (await response.json()) as {
-      id: number
-      usuario_id: string
-      nombre: string
-      apellidos: string
-      email: string
-    }[]
-    teachersRefFromServer.value = data
-    console.log(data)
-    console.log(teachersRefFromServer.value)
   })
-  // .catch((error) => {
-  //   alert('Hay un error' + error)
-  //   console.log('hay un error', error)
-  // })
-  // NO SE IMPLEMENTA EL MANEJO DE ERRORES
+    .then(async (response) => {
+      const data = (await response.json()) as {
+        id: number
+        usuario_id: string
+        nombre: string
+        apellidos: string
+        email: string
+      }[]
+      teachersRefFromServer.value = data
+      console.log(data)
+      console.log(teachersRefFromServer.value)
+    })
+    .catch((error) => {
+      alert('Hay un error' + error)
+      console.log('hay un error', error)
+    })
 }
 getTeachersData()
 
-function guardarFoto() {}
+// OBTENER ASIGNATURAS DADAS DE ALTA
+
+let asignaturas: Ref<
+  {
+    id: number
+    nombre: string
+  }[]
+> = ref([])
+
+function getSubjectsData() {
+  fetch('http://localhost:3000/asignaturas', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
+  })
+    .then(async (response) => {
+      const data = (await response.json()) as {
+        id: number
+        nombre: string
+      }[]
+      asignaturas.value = data
+      console.log(data)
+    })
+    .catch((error) => {
+      alert('Hay un error' + error)
+      console.log('hay un error', error)
+    })
+}
+getSubjectsData()
 </script>
 
 <template>
@@ -132,20 +167,10 @@ function guardarFoto() {}
         <input type="email" name="" id="emailInput" v-model="teacherEmailRef" />
         <label class="green">Asignaturas</label>
         <select name="" id="asignaturasInput" v-model="asignaturaSelected">
-          <!--! OJO PORQUE LAS ASIGNATURAS DE ESTA LISTA DEBEN SER LAS QUE SE HAYAN INSERTADO EN LA BASE DE DATOS. SE DEBE HACER UNA PETICIÓN GET A LA BD Y LISTAR ESTAS ASIGNATURAS COMO CADA UNA DE LAS OPCIONES-->
           <option selected disabled>Seleccione la asignatura</option>
-          <option value="Despertar Musical">Despertar Musical</option>
-          <option value="Lenguaje Musical">Lenguaje Musical</option>
-          <option value="Oboe">Oboe</option>
-          <option value="Flauta">Flauta</option>
-          <option value="Clarinete">Clarinete</option>
-          <option value="Saxofón">Saxofón</option>
-          <option value="Trompa">Trompa</option>
-          <option value="Trompeta">Trompeta</option>
-          <option value="Trombón">Trombón</option>
-          <option value="Bombardino">Bombardino</option>
-          <option value="Tuba">Tuba</option>
-          <option value="Percusión">Percusión</option>
+          <option v-for="asignatura in asignaturas" :key="asignatura.id">
+            {{ asignatura.nombre }}
+          </option>
         </select>
         <button type="button" @click="agregarAsignatura()">Agregar</button>
         <label for="myfile">Selecciona una foto de perfil:</label>
@@ -161,11 +186,8 @@ function guardarFoto() {}
       <p>Nombre: {{ teacherNombreRef }}</p>
       <p>Apellidos: {{ teacherApellidosRef }}</p>
       <p>Email: {{ teacherEmailRef }}</p>
-      <p>Asignaturas modo lista horizontal: {{ teacherAsignaturasToString }}</p>
-      <!-- OPCIÓN 1: trompeta, flauta, saxo, etc -->
       <div>
-        Asignaturas modo lista vertical:
-        <p>OPCIÓN 2: lo mismo pero como una lista vertical</p>
+        Asignaturas:
         <table id="asignaturasSeleccionadas">
           <tr v-for="(asignatura, index) in teacherAsignaturas" :key="index">
             {{
@@ -179,25 +201,6 @@ function guardarFoto() {}
         <img class="" src="../utils/img/miguelarrocha.png" alt="" width="100" height="100" />
       </div>
     </div>
-    <!--· TABLA CON EL LISTADO DE PROFESORES -->
-    <!-- <section> 
-      <table id="tablaServer">
-        <tr>
-          <th><h3>Nombre</h3></th>
-          <th><h3>Apellidos</h3></th>
-          <th><h3>Email</h3></th>
-          <th><h3>Asignaturas</h3></th>
-        </tr>
-        <tr v-for="teacher in teachersRefFromServer" :key="teacher.id">
-          <td>{{ teacher.nombre }}</td>
-          <td>{{ teacher.apellidos }}</td>
-          <td>{{ teacher.email }}</td>
-          <td id="tdAsignaturas">
-            {{ teacherAsignaturas.toString() }}
-          </td>
-        </tr>
-      </table>
-    </section> -->
   </div>
 </template>
 

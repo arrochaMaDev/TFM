@@ -6,7 +6,8 @@ export class Teacher {
     private readonly usuario_id: string, // https://www.uuidgenerator.net/dev-corner/typescript
     private readonly nombre: string,
     private readonly apellidos: string,
-    private readonly email: string, // private readonly asignaturas: Asignaturas[],  pendiente de añadir la tabla de asignaturas
+    private readonly email: string,
+    private readonly asignaturas: string,
   ) {}
 
   getId(): number {
@@ -24,7 +25,7 @@ export class Teacher {
   getEmail(): string {
     return this.email;
   }
-  // getAsignaturas(): Asignaturas[] {
-  //   return this.asignaturas;
-  // }
+  getAsignaturas(): string {
+    return this.asignaturas;
+  }
 }

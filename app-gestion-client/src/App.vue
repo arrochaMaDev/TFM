@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import { onMounted, ref, watch, type Ref } from 'vue'
+import { onMounted, ref, watch, type Ref, inject } from 'vue'
 import { getUserData } from './utils/getUserData'
 import router from './router'
 import Spinner from './components/Spinner.vue'
 import { useLoadingStore } from './stores/loading'
+import { useAdminStore } from './stores/isAdmin'
+import type { VueCookies } from 'vue-cookies'
 
 // FUNCION LOADING SPINNER
 const loadingStore = useLoadingStore() // store de Pinia para el Spinner
@@ -20,11 +22,21 @@ onMounted(() => {
   )
 })
 
-// LEER LA COOKIE
+// LEER LA COOKIE Y VER EMAIL Y PERMISOS
 let userData: any = undefined
 let userEmail: Ref<string | null> = ref(null)
+const $cookies = inject<VueCookies>('$cookies')
+const isAdminStore = useAdminStore()
+let adminMode: Ref<boolean> = ref(isAdminStore.isAdmin)
+
 onMounted(() => {
   userEmail.value = localStorage.getItem('email') // accedo al valor email del localStorage
+  const userCookie = $cookies?.get('user')
+  if (userCookie.permiso === 9) {
+    adminMode.value = isAdminStore.isAdminTrue()
+  } else {
+    adminMode.value = isAdminStore.isAdminFalse()
+  }
 })
 
 userData = getUserData
@@ -32,7 +44,7 @@ userData = getUserData
 //BORRAR LA COOKIE
 const cerrarSesion = async () => {
   try {
-    loadingStore.Loadingtrue()
+    loadingStore.loadingTrue()
     await new Promise((resolve) => setTimeout(resolve, 4000))
     deleteCookie('user')
     localStorage.removeItem('email')
@@ -45,7 +57,7 @@ const cerrarSesion = async () => {
   } catch (error) {
     console.log('Error en la solicitud:', error)
   } finally {
-    loadingStore.LoadingFalse()
+    loadingStore.loadingFalse()
   }
 }
 const deleteCookie = (user: string) => {
@@ -64,13 +76,13 @@ const deleteCookie = (user: string) => {
     <!-- <RouterLink to="/home">Home</RouterLink> -->
     <RouterLink to="/about">About</RouterLink>
     <RouterLink to="/login">Login</RouterLink>
-    <RouterLink to="/alta-usuario">Alta Usuario</RouterLink>
-    <RouterLink to="/alta-alumno">Alta Alumno</RouterLink>
-    <RouterLink to="/alta-profesor">Alta Profesor</RouterLink>
-    <RouterLink to="/alta-asignatura">Alta Asignatura</RouterLink>
-    <RouterLink to="/buscador-alumno">Buscar Alumnos</RouterLink>
-    <RouterLink to="/listado-alumnos">Listado Alumnos</RouterLink>
-    <RouterLink to="/listado-profesores">Listado Profesores</RouterLink>
+    <RouterLink to="/alta-usuario" v-if="adminMode">Alta Usuario</RouterLink>
+    <RouterLink to="/alta-alumno" v-if="adminMode">Alta Alumno</RouterLink>
+    <RouterLink to="/alta-profesor" v-if="adminMode">Alta Profesor</RouterLink>
+    <RouterLink to="/alta-asignatura" v-if="adminMode">Alta Asignatura</RouterLink>
+    <RouterLink to="/buscador-alumno" v-if="adminMode">Buscar Alumnos</RouterLink>
+    <RouterLink to="/listado-alumnos" v-if="adminMode">Listado Alumnos</RouterLink>
+    <RouterLink to="/listado-profesores" v-if="adminMode">Listado Profesores</RouterLink>
     <div v-if="userEmail">
       <!-- Si existe userEmail en localStorage, muestro un mensaje de bienvenida y un botón de logout-->
       <hr />

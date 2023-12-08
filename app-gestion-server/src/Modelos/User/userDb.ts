@@ -15,7 +15,7 @@ export class UserDb {
   pass: string;
 
   @Column()
-  permisos: number;
+  permiso: number;
 
   // Relaciones @OnetoMany para relacionar username y el login con usuario_id de un profesor o de uno o varios alumnos
 }

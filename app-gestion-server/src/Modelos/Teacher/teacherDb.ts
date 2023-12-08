@@ -17,5 +17,8 @@ export class TeacherDb {
   @Column()
   email: string;
 
+  @Column()
+  asignaturas: string;
+
   // Relaciones @OnetoMany o lo que sea para sacar la lista de asignaturas de ese profesor
 }

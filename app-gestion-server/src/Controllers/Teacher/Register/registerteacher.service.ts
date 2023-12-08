@@ -16,7 +16,7 @@ export class RegisterTeacherService {
     nombre: string,
     apellidos: string,
     email: string,
-    // asignaturas: []
+    asignaturas: string,
   ) {
     const usuario_uuid = await uuidv4();
     console.log(usuario_uuid);
@@ -27,7 +27,7 @@ export class RegisterTeacherService {
       nombre,
       apellidos,
       email,
-      // asignaturas
+      asignaturas,
     );
     console.log(teacher);
 
@@ -37,6 +37,7 @@ export class RegisterTeacherService {
       nombre: teacher.getNombre(),
       apellidos: teacher.getApellidos(),
       email: teacher.getEmail(),
+      asignaturas: teacher.getAsignaturas(),
     };
     console.log(teacherDb);
 

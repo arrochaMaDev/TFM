@@ -34,7 +34,7 @@ function getStudentsData() {
       if (!response.ok) {
         throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
       } else {
-        loadingStore.Loadingtrue()
+        loadingStore.loadingTrue()
         await new Promise((resolve) => setTimeout(resolve, 2000))
 
         const data = (await response.json()) as {
@@ -57,7 +57,7 @@ function getStudentsData() {
       alert('Ha ocurrido un error')
     })
     .finally(() => {
-      loadingStore.LoadingFalse()
+      loadingStore.loadingFalse()
     })
 }
 getStudentsData()
@@ -126,7 +126,7 @@ const borrarAlumno = async () => {
       credentials: 'include'
     })
     if (response.status === 204) {
-      loadingStore.Loadingtrue()
+      loadingStore.loadingTrue()
       await new Promise((resolve) => setTimeout(resolve, 2000))
       alert('Alumno borrado con éxito')
       popupVisible.value = false
@@ -139,7 +139,7 @@ const borrarAlumno = async () => {
     alert('Ha ocurrido un error')
     popupVisible.value = false
   } finally {
-    loadingStore.LoadingFalse()
+    loadingStore.loadingFalse()
   }
 }
 

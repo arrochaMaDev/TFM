@@ -13,4 +13,8 @@ export class RegisterTeacherDto {
   @IsNotEmpty()
   @IsEmail()
   email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  asignaturas: string;
 }
