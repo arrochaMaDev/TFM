@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { StudentDb } from '../Student/studentDb';
 
 @Entity({ name: 'profesor' })
 export class TeacherDb {
@@ -20,5 +21,6 @@ export class TeacherDb {
   @Column()
   asignaturas: string;
 
-  // Relaciones @OnetoMany o lo que sea para sacar la lista de asignaturas de ese profesor
+  @ManyToOne(() => StudentDb, (student: StudentDb) => student.teacher)
+  student: TeacherDb;
 }

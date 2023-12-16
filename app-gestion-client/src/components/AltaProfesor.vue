@@ -52,25 +52,6 @@ let teacherAsignaturas: Ref<string[]> = ref([])
 let teacherAsignaturasToString: Ref<string> = ref('')
 let fotoURL: Ref<string> = ref('')
 
-function agregarAsignatura() {
-  if (asignaturaSelected.value === '') {
-    // si quieren insertar un valor vacío salta una alerta
-    alert('Tienes que selecionar alguna asignatura')
-  } else {
-    teacherAsignaturas.value.push(asignaturaSelected.value)
-    teacherAsignaturasToString.value = teacherAsignaturas.value
-      .map((elemento) => ' ' + elemento) // recorro el array añadiendo un espacio a cada elemento
-      .toString() // lo convierto en string
-      .trimStart() // elimino el espacio al principio
-    asignaturaSelected.value = ''
-    console.log(teacherAsignaturasToString.value)
-  }
-}
-
-const eliminarAsignatura = (index: any) => {
-  teacherAsignaturas.value.splice(index, 1)
-}
-
 // para resetear los datos del formulario y poner cada ref a vacío
 function resetearDatosForm() {
   teacherNombreRef.value = ''
@@ -121,7 +102,7 @@ function getTeachersData() {
 }
 getTeachersData()
 
-// OBTENER ASIGNATURAS DADAS DE ALTA
+// OBTENER Y AÑADIR ASIGNATURAS DADAS DE ALTA
 
 let asignaturas: Ref<
   {
@@ -152,6 +133,28 @@ function getSubjectsData() {
     })
 }
 getSubjectsData()
+
+function agregarAsignatura() {
+  if (asignaturaSelected.value === '') {
+    // si quieren insertar un valor vacío salta una alerta
+    alert('Tienes que selecionar alguna asignatura')
+  } else {
+    teacherAsignaturas.value.push(asignaturaSelected.value)
+    teacherAsignaturasToString.value = teacherAsignaturas.value
+      .map((elemento) => ' ' + elemento) // recorro el array añadiendo un espacio a cada elemento
+      .toString() // lo convierto en string
+      .trimStart() // elimino el espacio al principio
+    asignaturaSelected.value = ''
+    console.log(teacherAsignaturasToString.value)
+  }
+}
+
+const eliminarAsignatura = (index: any) => {
+  teacherAsignaturas.value.splice(index, 1)
+  if (teacherAsignaturas.value.length === 0) {
+    teacherAsignaturasToString.value = ''
+  }
+}
 </script>
 
 <template>
@@ -187,8 +190,8 @@ getSubjectsData()
       <p>Apellidos: {{ teacherApellidosRef }}</p>
       <p>Email: {{ teacherEmailRef }}</p>
       <div>
-        Asignaturas:
         <table id="asignaturasSeleccionadas">
+          <th colspan="2">Asignaturas seleccionadas:</th>
           <tr v-for="(asignatura, index) in teacherAsignaturas" :key="index">
             {{
               asignatura
@@ -240,12 +243,12 @@ getSubjectsData()
 }
 
 table {
-  width: 1000px;
+  /* width: 1000px; */
   border: 1px solid #ffffff;
 
-  & th {
+  /* & th {
     background-color: rgb(79, 90, 86);
-  }
+  } */
 
   & td {
     width: fit-content;
@@ -265,10 +268,10 @@ table {
   flex-wrap: wrap; */
   width: fit-content;
   border: none;
-  text-align: center;
-  vertical-align: middle;
 
   & td {
+    text-align: center;
+    vertical-align: text-bottom;
     border: none;
   }
 

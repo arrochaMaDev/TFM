@@ -35,6 +35,9 @@ import { DeleteSubjectController } from './Controllers/Subject/Delete/deleteSubj
 import { DeleteSubjectService } from './Controllers/Subject/Delete/deleteSubject.service';
 import { UpdateSubjectController } from './Controllers/Subject/Update/updateSubject.controller';
 import { UpdateSubjectService } from './Controllers/Subject/Update/updateSubject.service';
+import { RegisterMatriculaController } from './Controllers/Matricula/registerMatricula.controller';
+import { RegisterMatriculaService } from './Controllers/Matricula/RegisterMatricula.service';
+import { MatriculaDb } from './Modelos/Matricula/matriculaDb';
 
 @Module({
   imports: [
@@ -45,15 +48,22 @@ import { UpdateSubjectService } from './Controllers/Subject/Update/updateSubject
       username: 'root',
       password: 'root',
       database: 'app_gestion',
-      entities: [StudentDb, TeacherDb, UserDb, SubjectDb],
+      entities: [StudentDb, TeacherDb, UserDb, SubjectDb, MatriculaDb],
     }),
-    TypeOrmModule.forFeature([StudentDb, TeacherDb, UserDb, SubjectDb]),
+    TypeOrmModule.forFeature([
+      StudentDb,
+      TeacherDb,
+      UserDb,
+      SubjectDb,
+      MatriculaDb,
+    ]),
   ],
   controllers: [
     RegisterStudentController,
     RegisterTeacherController,
     RegisterUserController,
     RegisterSubjectController,
+    RegisterMatriculaController,
     GetStudentController,
     GetTeacherController,
     GetSubjectController,
@@ -71,6 +81,7 @@ import { UpdateSubjectService } from './Controllers/Subject/Update/updateSubject
     RegisterTeacherService,
     RegisterUserService,
     RegisterSubjectService,
+    RegisterMatriculaService,
     GetStudentService,
     GetTeacherService,
     GetSubjectService,

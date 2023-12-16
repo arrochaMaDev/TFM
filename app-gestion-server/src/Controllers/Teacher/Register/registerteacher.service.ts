@@ -31,7 +31,7 @@ export class RegisterTeacherService {
     );
     console.log(teacher);
 
-    const teacherDb: TeacherDb = {
+    const teacherDb: Partial<TeacherDb> = {
       id: teacher.getId(),
       usuario_id: teacher.getUsuario_id(),
       nombre: teacher.getNombre(),

@@ -35,18 +35,7 @@ export class RegisterStudentService {
     );
     console.log(student);
 
-    // const alumnoDb: AlumnoDb = {
-    //   id: 0,
-    //   usuario_uuid: usuario_uuid,
-    //   nombre: nombre,
-    //   apellidos: apellidos,
-    //   dni: dni,
-    //   direccion: direccion,
-    //   telefono: telefono,
-    //   email: email,
-    // } as unknown as AlumnoDb;
-
-    const studentDb: StudentDb = {
+    const studentDb: Partial<StudentDb> = {
       id: student.getId(),
       usuario_id: student.getUsuario_id(),
       nombre: student.getNombre(),

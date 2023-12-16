@@ -15,7 +15,7 @@ export class RegisterSubjectService {
     const subject = new Subject(0, nombre);
     console.log(subject);
 
-    const subjectDb: SubjectDb = {
+    const subjectDb: Partial<SubjectDb> = {
       id: subject.getId(),
       nombre: subject.getNombre(),
     };

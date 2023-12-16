@@ -17,6 +17,9 @@ const borrarDatosForm = () => {
   studentDireccionRef.value = undefined
   studentTelefonoRef.value = undefined
   studentEmailRef.value = undefined
+  asignaturaSelected.value = ''
+  teacherAsignaturas.value = []
+  teacherAsignaturasToString.value = ''
   console.log('Borrar Datos')
 }
 
@@ -174,6 +177,64 @@ const resetearValoresIniciales = () => {
   alumnoEditado.value.email = props.alumnoParaEditar?.email
   emit('resetearAlumno', alumnoEditado) // hago el emit y paso además el alumnoEdidado según el valor de solo lectura de las props recibidas
 }
+
+// OBTENER Y AÑADIR ASIGNATURAS DADAS DE ALTA
+
+let asignaturas: Ref<
+  {
+    id: number
+    nombre: string
+  }[]
+> = ref([])
+
+let asignaturaSelected: Ref<string> = ref('')
+let teacherAsignaturas: Ref<string[]> = ref([])
+let teacherAsignaturasToString: Ref<string> = ref('')
+
+function getSubjectsData() {
+  fetch('http://localhost:3000/asignaturas', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
+  })
+    .then(async (response) => {
+      const data = (await response.json()) as {
+        id: number
+        nombre: string
+      }[]
+      asignaturas.value = data
+      console.log(data)
+    })
+    .catch((error) => {
+      alert('Hay un error' + error)
+      console.log('hay un error', error)
+    })
+}
+getSubjectsData()
+
+function agregarAsignatura() {
+  if (asignaturaSelected.value === '') {
+    // si quieren insertar un valor vacío salta una alerta
+    alert('Tienes que selecionar alguna asignatura')
+  } else {
+    teacherAsignaturas.value.push(asignaturaSelected.value)
+    teacherAsignaturasToString.value = teacherAsignaturas.value
+      .map((elemento) => ' ' + elemento) // recorro el array añadiendo un espacio a cada elemento
+      .toString() // lo convierto en string
+      .trimStart() // elimino el espacio al principio
+    asignaturaSelected.value = ''
+    console.log(teacherAsignaturasToString.value)
+  }
+}
+
+const eliminarAsignatura = (index: any) => {
+  teacherAsignaturas.value.splice(index, 1)
+  if (teacherAsignaturas.value.length === 0) {
+    teacherAsignaturasToString.value = ''
+  }
+}
 </script>
 
 <template>
@@ -288,6 +349,25 @@ const resetearValoresIniciales = () => {
           id="emailInput"
           v-model="alumnoEditado.email"
         />
+        <label class="green">Asignaturas</label>
+        <select name="" id="asignaturasInput" v-model="asignaturaSelected">
+          <option selected disabled>Seleccione la asignatura</option>
+          <option v-for="asignatura in asignaturas" :key="asignatura.id">
+            {{ asignatura.nombre }}
+          </option>
+        </select>
+        <button type="button" @click="agregarAsignatura()">Agregar</button>
+        <div>
+          <table id="asignaturasSeleccionadas">
+            <th colspan="2" v-if="teacherAsignaturasToString">Asignaturas seleccionadas:</th>
+            <tr v-for="(asignatura, index) in teacherAsignaturas" :key="index">
+              {{
+                asignatura
+              }}
+              <td><button type="submit" @click="eliminarAsignatura">Eliminar</button></td>
+            </tr>
+          </table>
+        </div>
         <button type="reset" @click="borrarDatosForm()">Borrar</button>
         <button type="reset" v-if="popUpStyle" @click="resetearValoresIniciales">Resetear</button>
         <button type="submit" v-if="!popUpStyle" @click="crearAlumno()">Enviar</button>
@@ -349,6 +429,28 @@ const resetearValoresIniciales = () => {
 
   & button {
     cursor: pointer;
+  }
+}
+
+#asignaturasSeleccionadas {
+  /* display: flex;
+  flex-wrap: column; */
+  width: fit-content;
+  border: none;
+
+  & td {
+    text-align: center;
+    vertical-align: text-bottom;
+    border: none;
+  }
+
+  & button {
+    width: 100px;
+    height: 25px;
+    background-color: hsla(160, 100%, 37%, 1);
+    color: white;
+    border: 1px solid hsla(160, 100%, 37%, 1);
+    border-radius: 5px;
   }
 }
 </style>
