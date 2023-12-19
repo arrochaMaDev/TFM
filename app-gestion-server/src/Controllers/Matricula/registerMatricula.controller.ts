@@ -11,16 +11,28 @@ export class RegisterMatriculaController {
   @Post()
   async registerMatriculaController(@Body() data: RegisterMatriculaDto) {
     try {
-      const { alumno, asignatura, profesor, nota } = data;
-      const savedMatricula =
-        await this.registerMatriculaService.createMatricula(
-          data,
-          // alumno,
-          // asignatura,
-          // profesor,
-          // nota,
-        );
-      return savedMatricula;
+      // const { alumno, asignatura, profesor, nota } = data;
+      const matriculaData = await this.registerMatriculaService.createMatricula(
+        data,
+        // alumno,
+        // asignatura,
+        // profesor,
+        // nota,
+      );
+
+      const matricula = {
+        alumno: {
+          nombre: matriculaData.student.nombre,
+          apellidos: matriculaData.student.apellidos,
+        },
+        asignatura: matriculaData.subject.nombre,
+        profesor: {
+          nombre: matriculaData.teacher.nombre,
+          apellidos: matriculaData.teacher.apellidos,
+        },
+        nota: matriculaData.nota,
+      };
+      return matricula;
     } catch (error) {
       console.error('Error al crear la matrícula:', error);
       throw new Error('No se pudo crear la matrícula');

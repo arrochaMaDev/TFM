@@ -32,8 +32,8 @@ export class StudentDb {
   email: string;
 
   @OneToMany(() => SubjectDb, (subject: SubjectDb) => subject.student)
-  subject: SubjectDb[];
+  subjects: SubjectDb[];
 
   @OneToMany(() => TeacherDb, (teacher: TeacherDb) => teacher.student)
-  teacher: TeacherDb[];
+  teachers: TeacherDb[];
 }
