@@ -4,12 +4,9 @@ import { MatriculaDb } from 'src/Modelos/Matricula/matriculaDb';
 import { Repository } from 'typeorm';
 import { RegisterMatriculaDto } from './RegisterMatricula.dto';
 import { Matricula } from 'src/Modelos/Matricula/matricula';
-import { GetStudentService } from '../Student/Get/getStudent.service';
-import { GetSubjectService } from '../Subject/Get/getSubject.service';
-import { GetTeacherService } from '../Teacher/Get/getTeacher.service';
-import { StudentDb } from 'src/Modelos/Student/studentDb';
-import { SubjectDb } from 'src/Modelos/Subject/subjectDb';
-import { TeacherDb } from 'src/Modelos/Teacher/teacherDb';
+import { GetStudentService } from '../../Student/Get/getStudent.service';
+import { GetSubjectService } from '../../Subject/Get/getSubject.service';
+import { GetTeacherService } from '../../Teacher/Get/getTeacher.service';
 
 @Injectable()
 export class RegisterMatriculaService {
@@ -29,7 +26,13 @@ export class RegisterMatriculaService {
     // nota: number,
   ) {
     try {
-      const { alumno, asignatura, profesor, nota } = data;
+      const {
+        alumno,
+        asignatura,
+        profesor,
+        // nota
+        // EL CAMPO NOTA SE RESERVA PARA LA EVALUACION
+      } = data;
 
       const student = await this.getStudentService.getStudent(alumno);
       console.log(student);
@@ -45,7 +48,7 @@ export class RegisterMatriculaService {
         student,
         subject,
         teacher,
-        nota,
+        // nota,
       );
       console.log(matricula);
 
@@ -64,7 +67,7 @@ export class RegisterMatriculaService {
         student: matricula.getAlumno(),
         subject: matricula.getAsignatura(),
         teacher: matricula.getProfesor(),
-        nota: matricula.getNota(),
+        // nota: matricula.getNota(),
       };
       console.table(matriculaDb);
 

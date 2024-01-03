@@ -35,9 +35,11 @@ import { DeleteSubjectController } from './Controllers/Subject/Delete/deleteSubj
 import { DeleteSubjectService } from './Controllers/Subject/Delete/deleteSubject.service';
 import { UpdateSubjectController } from './Controllers/Subject/Update/updateSubject.controller';
 import { UpdateSubjectService } from './Controllers/Subject/Update/updateSubject.service';
-import { RegisterMatriculaController } from './Controllers/Matricula/registerMatricula.controller';
-import { RegisterMatriculaService } from './Controllers/Matricula/RegisterMatricula.service';
+import { RegisterMatriculaService } from './Controllers/Matricula/Register/registerMatricula.service';
 import { MatriculaDb } from './Modelos/Matricula/matriculaDb';
+import { ListerMatriculasController } from './Controllers/Matricula/Get/listerMatriculas.controller';
+import { ListerMatriculasService } from './Controllers/Matricula/Get/listerMatriculas.service';
+import { RegisterMatriculaController } from './Controllers/Matricula/Register/registerMatricula.controller';
 
 @Module({
   imports: [
@@ -74,6 +76,7 @@ import { MatriculaDb } from './Modelos/Matricula/matriculaDb';
     ListerStudentsController,
     ListerTeachersController,
     ListerSubjectsController,
+    ListerMatriculasController,
     LoginUserController,
   ], //AppController
   providers: [
@@ -92,6 +95,7 @@ import { MatriculaDb } from './Modelos/Matricula/matriculaDb';
     ListerStudentsService,
     ListerTeachersService,
     ListerSubjectsService,
+    ListerMatriculasService,
     LoginUserService,
   ],
 })

@@ -9,6 +9,7 @@ import ListadoAlumnos from '@/components/ListadoAlumnos.vue'
 import Alumno from '@/components/Alumno.vue'
 import LoginUser from '@/components/LoginUser.vue'
 import ListadoProfesores from '@/components/ListadoProfesores.vue'
+import Matricula from '@/components/Matricula.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -91,6 +92,12 @@ const router = createRouter({
       name: 'login',
 
       component: LoginUser
+    },
+    {
+      path: '/matricula',
+      name: 'matricula',
+
+      component: Matricula
     }
   ]
 })

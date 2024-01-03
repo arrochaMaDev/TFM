@@ -3,10 +3,10 @@ import { ListerStudentsService } from './listerStudents.service';
 
 @Controller('students')
 export class ListerStudentsController {
-  constructor(private readonly ListerStudentsService: ListerStudentsService) {}
+  constructor(private readonly listerStudentsService: ListerStudentsService) {}
 
   @Get()
   async listerStudents() {
-    return this.ListerStudentsService.listerStudents();
+    return this.listerStudentsService.listerStudents();
   }
 }

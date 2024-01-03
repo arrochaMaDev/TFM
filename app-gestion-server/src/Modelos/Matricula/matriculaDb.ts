@@ -15,26 +15,27 @@ export class MatriculaDb {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // @ManyToOne(() => StudentDb, { eager: true }) // Use eager loading if needed
-  // @ManyToOne(() => StudentDb) // No eager loading by default
+  // @ManyToOne(() => StudentDb, { eager: true })
+  // @ManyToOne(() => StudentDb)
   @ManyToOne(() => StudentDb, (student: StudentDb) => student.id)
   @JoinColumn({ name: 'alumno' })
   student: StudentDb;
 
-  // @ManyToOne(() => SubjectDb, { eager: true }) // Use eager loading if needed
-  // @ManyToOne(() => SubjectDb) // No eager loading by default
+  // @ManyToOne(() => SubjectDb, { eager: true })
+  // @ManyToOne(() => SubjectDb)
   @ManyToOne(() => SubjectDb, (subject: SubjectDb) => subject.id)
   @JoinColumn({ name: 'asignatura' })
   subject: SubjectDb;
 
-  // @ManyToOne(() => TeacherDb, { eager: true }) // Use eager loading if needed
-  // @ManyToOne(() => TeacherDb) // No eager loading by default
+  // @ManyToOne(() => TeacherDb, { eager: true })
+  // @ManyToOne(() => TeacherDb)
   @ManyToOne(() => TeacherDb, (teacher: TeacherDb) => teacher.id)
   @JoinColumn({ name: 'profesor' })
   teacher: TeacherDb;
 
-  @Column({ type: 'decimal', precision: 3, scale: 1 })
-  @IsNumber()
-  nota: number;
-  // matricula: { id: number; nombre: string };
+  // @Column({ type: 'decimal', precision: 3, scale: 1 })
+  // @IsNumber()
+  // nota: number;
+
+  // EL CAMPO NOTA SE RESERVA PARA LA EVALUACION
 }

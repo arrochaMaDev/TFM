@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { RegisterMatriculaService } from './RegisterMatricula.service';
 import { RegisterMatriculaDto } from './RegisterMatricula.dto';
+import { RegisterMatriculaService } from './registerMatricula.service';
 
 @Controller('matricula')
 export class RegisterMatriculaController {
@@ -30,7 +30,8 @@ export class RegisterMatriculaController {
           nombre: matriculaData.teacher.nombre,
           apellidos: matriculaData.teacher.apellidos,
         },
-        nota: matriculaData.nota,
+        // nota: matriculaData.nota,
+        // EL CAMPO NOTA SE RESERVA PARA LA EVALUACION
       };
       return matricula;
     } catch (error) {

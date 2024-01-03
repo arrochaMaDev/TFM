@@ -5,10 +5,12 @@ import Popup from './Popup.vue'
 import AltaAlumno from './AltaAlumno.vue'
 import { useLoadingStore } from '@/stores/loading'
 import { useEditingStore } from '@/stores/editar'
+// import { getStudentsData } from '@/utils/peticionesFetch'
 
 const router = useRouter() // router para ir al alumno cuando se clique en él
 const loadingStore = useLoadingStore() // store del Spinner
 
+// OBTENER DATOS DE TODOS LOS ESTUDIANTES
 let studentsRefFromServer: Ref<
   {
     id: number
@@ -22,51 +24,41 @@ let studentsRefFromServer: Ref<
   }[]
 > = ref([])
 
-function getStudentsData() {
-  fetch('http://localhost:3000/students', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include'
-  })
-    .then(async (response) => {
-      if (!response.ok) {
-        throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
-      } else {
-        loadingStore.loadingTrue()
-        await new Promise((resolve) => setTimeout(resolve, 2000))
+const getStudentsData = async () => {
+  try {
+    const response = await fetch('http://localhost:3000/students', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      loadingStore.loadingTrue()
+      await new Promise((resolve) => setTimeout(resolve, 2000))
 
-        const data = (await response.json()) as {
-          id: number
-          usuario_id: string
-          nombre: string
-          apellidos: string
-          dni: string
-          direccion: string
-          telefono: string
-          email: string
-        }[]
-        studentsRefFromServer.value = data
-        console.log(data)
-        console.log(studentsRefFromServer.value)
-      }
-    })
-    .catch((error) => {
-      console.error('Error en la solicitud:', error)
-      alert('Ha ocurrido un error')
-    })
-    .finally(() => {
-      loadingStore.loadingFalse()
-    })
-}
-getStudentsData()
-
-// Ir a la página idividual del alumno
-const goToStudent = (id: number) => {
-  router.push({
-    path: `/alumno/${id}`
-  })
+      const data = (await response.json()) as {
+        id: number
+        usuario_id: string
+        nombre: string
+        apellidos: string
+        dni: string
+        direccion: string
+        telefono: string
+        email: string
+      }[]
+      studentsRefFromServer.value = data
+      console.log(data)
+      console.log(studentsRefFromServer.value)
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    alert('Ha ocurrido un error')
+  } finally {
+    loadingStore.loadingFalse()
+  }
 }
 
 // ORDENAR RESULTADOS POR VALOR QUE SE INDIQUE
@@ -84,7 +76,6 @@ let arrayOrdenado: Ref<
 > = ref([]) // Nuevo array Ref para ordenar la lsta según se indique
 
 let ordenarPor: Ref<'id' | 'nombre' | 'apellidos' | 'dni' | 'email'> = ref('id')
-// let ordenarPor: Ref<'id' | 'nombre' | 'nombre' | 'apellidos' | 'dni' | 'email'> = ref('id')
 
 const ordenarArray = () => {
   arrayOrdenado.value = [...studentsRefFromServer.value]
@@ -109,6 +100,7 @@ const ordenarArray = () => {
 
 onMounted(() => {
   ordenarArray()
+  getStudentsData()
 })
 
 // LÓGICA BORRAR ALUMNO
@@ -144,13 +136,13 @@ const borrarAlumno = async () => {
 }
 
 const cancelarBorrar = () => {
-  // si se da click en no se cancela el borrado
+  // si se da click en NO se cancela el borrado
   popupVisible.value = false
   idAlumnoSeleccionado.value = null
 }
 
 const mostrarPopup = (id: number) => {
-  // si se da click en si, se muestra el popup y recibe el id del alumno a borrar
+  // si se da click en SI, se muestra el popup y recibe el id del alumno a borrar
   idAlumnoSeleccionado.value = id
   popupVisible.value = true
 }
@@ -212,6 +204,13 @@ const resetearPopUpState = () => {
   // popUpState.value = false
   popUpState.value = editingStore.editarFalse()
   console.log(popUpState.value)
+}
+
+// Ir a la página idividual del alumno
+const goToStudent = (id: number) => {
+  router.push({
+    path: `/alumno/${id}`
+  })
 }
 </script>
 <template>

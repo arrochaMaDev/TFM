@@ -23,7 +23,7 @@ onMounted(() => {
 })
 
 // LEER LA COOKIE Y VER EMAIL Y PERMISOS
-let userData: any = undefined
+// let userData: any = undefined
 let userEmail: Ref<string | null> = ref(null)
 const $cookies = inject<VueCookies>('$cookies')
 const isAdminStore = useAdminStore()
@@ -39,7 +39,7 @@ onMounted(() => {
   }
 })
 
-userData = getUserData
+// userData = getUserData
 
 //BORRAR LA COOKIE
 const cerrarSesion = async () => {
@@ -80,6 +80,7 @@ const deleteCookie = (user: string) => {
     <RouterLink to="/alta-alumno" v-if="adminMode">Alta Alumno</RouterLink>
     <RouterLink to="/alta-profesor" v-if="adminMode">Alta Profesor</RouterLink>
     <RouterLink to="/alta-asignatura" v-if="adminMode">Alta Asignatura</RouterLink>
+    <RouterLink to="/matricula" v-if="adminMode">Matricula</RouterLink>
     <RouterLink to="/buscador-alumno" v-if="adminMode">Buscar Alumnos</RouterLink>
     <RouterLink to="/listado-alumnos" v-if="adminMode">Listado Alumnos</RouterLink>
     <RouterLink to="/listado-profesores" v-if="adminMode">Listado Profesores</RouterLink>
