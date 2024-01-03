@@ -40,6 +40,8 @@ import { MatriculaDb } from './Modelos/Matricula/matriculaDb';
 import { ListerMatriculasController } from './Controllers/Matricula/Get/listerMatriculas.controller';
 import { ListerMatriculasService } from './Controllers/Matricula/Get/listerMatriculas.service';
 import { RegisterMatriculaController } from './Controllers/Matricula/Register/registerMatricula.controller';
+import { GetMatriculaController } from './Controllers/Matricula/Get/getMatricula.controller';
+import { GetMatriculaService } from './Controllers/Matricula/Get/getMatricula.service';
 
 @Module({
   imports: [
@@ -69,6 +71,7 @@ import { RegisterMatriculaController } from './Controllers/Matricula/Register/re
     GetStudentController,
     GetTeacherController,
     GetSubjectController,
+    GetMatriculaController,
     DeleteStudentController,
     DeleteSubjectController,
     UpdateStudentController,
@@ -88,6 +91,7 @@ import { RegisterMatriculaController } from './Controllers/Matricula/Register/re
     GetStudentService,
     GetTeacherService,
     GetSubjectService,
+    GetMatriculaService,
     DeleteStudentService,
     DeleteSubjectService,
     UpdateStudentService,

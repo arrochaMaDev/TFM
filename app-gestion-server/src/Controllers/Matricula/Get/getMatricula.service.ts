@@ -4,21 +4,20 @@ import { MatriculaDb } from 'src/Modelos/Matricula/matriculaDb';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class ListerMatriculasService {
+export class GetMatriculaService {
   constructor(
     @InjectRepository(MatriculaDb)
-    private readonly matriculasRepository: Repository<MatriculaDb>,
+    private readonly matriculaRepository: Repository<MatriculaDb>,
   ) {}
-
-  async listerMatriculas(): Promise<MatriculaDb[]> {
-    // const listado = await this.matriculasRepository.find();
-    const listado = await this.matriculasRepository
+  async getMatricula(id: number): Promise<MatriculaDb | null> {
+    const matricula = await this.matriculaRepository
       .createQueryBuilder('matricula')
       .leftJoinAndSelect('matricula.student', 'student')
       .leftJoinAndSelect('matricula.subject', 'subject')
       .leftJoinAndSelect('matricula.teacher', 'teacher')
-      .getMany();
-    console.table(listado);
-    return listado;
+      .where('matricula.id = :id', { id })
+      .getOne();
+
+    return matricula || null;
   }
 }

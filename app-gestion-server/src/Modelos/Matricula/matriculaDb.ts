@@ -16,20 +16,20 @@ export class MatriculaDb {
   id: number;
 
   // @ManyToOne(() => StudentDb, { eager: true })
-  // @ManyToOne(() => StudentDb)
-  @ManyToOne(() => StudentDb, (student: StudentDb) => student.id)
+  // @ManyToOne(() => StudentDb, (student: StudentDb) => student.id)
+  @ManyToOne(() => StudentDb)
   @JoinColumn({ name: 'alumno' })
   student: StudentDb;
 
   // @ManyToOne(() => SubjectDb, { eager: true })
-  // @ManyToOne(() => SubjectDb)
-  @ManyToOne(() => SubjectDb, (subject: SubjectDb) => subject.id)
+  // @ManyToOne(() => SubjectDb, (subject: SubjectDb) => subject.id)
+  @ManyToOne(() => SubjectDb)
   @JoinColumn({ name: 'asignatura' })
   subject: SubjectDb;
 
   // @ManyToOne(() => TeacherDb, { eager: true })
-  // @ManyToOne(() => TeacherDb)
-  @ManyToOne(() => TeacherDb, (teacher: TeacherDb) => teacher.id)
+  // @ManyToOne(() => TeacherDb, (teacher: TeacherDb) => teacher.id)
+  @ManyToOne(() => TeacherDb)
   @JoinColumn({ name: 'profesor' })
   teacher: TeacherDb;
 
