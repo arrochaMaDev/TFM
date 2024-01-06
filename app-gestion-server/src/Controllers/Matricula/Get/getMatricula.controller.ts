@@ -53,7 +53,6 @@ export class GetMatriculaController {
   }
 
   // OBTENER MATRICULA POR ID DEL STUDENT
-
   @Get('student/:id')
   async getMatriculasByStudentId(
     @Param('id') id: number,

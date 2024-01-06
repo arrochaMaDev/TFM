@@ -33,6 +33,6 @@ export class GetMatriculaService {
       relations: ['student', 'subject', 'teacher'],
     });
 
-    return matriculas || [];
+    return matriculas;
   }
 }

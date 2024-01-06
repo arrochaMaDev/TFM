@@ -84,6 +84,7 @@ const deleteCookie = (user: string) => {
     <RouterLink to="/buscador-alumno" v-if="adminMode">Buscar Alumnos</RouterLink>
     <RouterLink to="/listado-alumnos" v-if="adminMode">Listado Alumnos</RouterLink>
     <RouterLink to="/listado-profesores" v-if="adminMode">Listado Profesores</RouterLink>
+    <RouterLink to="/listado-matriculas" v-if="adminMode">Listado Matriculas</RouterLink>
     <div v-if="userEmail">
       <!-- Si existe userEmail en localStorage, muestro un mensaje de bienvenida y un botón de logout-->
       <hr />
