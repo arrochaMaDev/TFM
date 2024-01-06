@@ -62,23 +62,23 @@ const getStudentsData = async () => {
 }
 
 // ORDENAR RESULTADOS POR VALOR QUE SE INDIQUE
-let arrayOrdenado: Ref<
-  {
-    id: number
-    usuario_id: string
-    nombre: string
-    apellidos: string
-    dni: string
-    direccion: string
-    telefono: string
-    email: string
-  }[]
-> = ref([]) // Nuevo array Ref para ordenar la lsta según se indique
+// let arrayOrdenado: Ref<
+//   {
+//     id: number
+//     usuario_id: string
+//     nombre: string
+//     apellidos: string
+//     dni: string
+//     direccion: string
+//     telefono: string
+//     email: string
+//   }[]
+// > = ref([]) // Nuevo array Ref para ordenar la lsta según se indique
 
 let ordenarPor: Ref<'id' | 'nombre' | 'apellidos' | 'dni' | 'email'> = ref('id')
 
 const ordenarArray = () => {
-  arrayOrdenado.value = [...studentsRefFromServer.value]
+  // arrayOrdenado.value = [...studentsRefFromServer.value]
   const valor = ordenarPor.value
 
   studentsRefFromServer.value.sort((a, b) => {

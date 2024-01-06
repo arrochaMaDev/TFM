@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/no-side-effects-in-computed-properties -->
 <script setup lang="ts">
-import { ref, type Ref } from 'vue'
+import { computed, ref, type Ref } from 'vue'
 import Popup from './Popup.vue'
 
 // FETCH PARA ENVIAR DATOS DE LA ASIGNATURA A LA BD:
@@ -46,6 +46,7 @@ function crearAsignatura() {
   // Imprimo los datos que he enviado a la base de datos
   const asignatura = asignaturaRef.value
   console.log(asignatura)
+  resetearDatosForm()
 }
 
 //Referencias del formulario
@@ -176,9 +177,29 @@ const editarAsignatura = async () => {
   if (repetido) {
     alert('Ya existe una asignatura con ese nombre')
   }
+  modoEditar.value = false
   resetearDatosForm()
   getAsignaturasData()
 }
+
+// ORDENAR EL ARRAY DE ASIGNATURAS PARA MOSTRARLAS POR NOMBRE
+// FUNCION ELIMINAR TILDES
+function eliminarTildes(str: string): string {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+const asignaturasRefFromServerOrdenadas = computed(() =>
+  asignaturasRefFromServer.value.slice().sort((a, b) => {
+    const nombreA = eliminarTildes(a.nombre.toLowerCase())
+    const nombreB = eliminarTildes(b.nombre.toLowerCase())
+    if (nombreA < nombreB) {
+      return -1
+    }
+    if (nombreA > nombreB) {
+      return 1
+    }
+    return 0
+  })
+)
 </script>
 
 <template>
@@ -198,7 +219,11 @@ const editarAsignatura = async () => {
         <tr>
           <th colspan="3">LISTADO DE ASIGNATURAS</th>
         </tr>
-        <tr id="asignatura" v-for="asignatura in asignaturasRefFromServer" :key="asignatura.id">
+        <tr
+          id="asignatura"
+          v-for="asignatura in asignaturasRefFromServerOrdenadas"
+          :key="asignatura.id"
+        >
           {{
             asignatura.nombre
           }}

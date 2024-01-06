@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, ref, onMounted } from 'vue'
+import { type Ref, ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import Popup from './Popup.vue'
 import AltaAlumno from './AltaAlumno.vue'
@@ -68,44 +68,49 @@ const getStudentsData = async () => {
 }
 
 // ORDENAR RESULTADOS POR VALOR QUE SE INDIQUE
-// let arrayOrdenado: Ref<
-//   {
-//     id: number
-//     usuario_id: string
-//     nombre: string
-//     apellidos: string
-//     dni: string
-//     direccion: string
-//     telefono: string
-//     email: string
-//   }[]
-// > = ref([]) // Nuevo array Ref para ordenar la lsta según se indique
+let ordenarPor: Ref<
+  'student.nombre' | 'student.apellidos' | 'student.dni' | 'subject.nombre' | 'teacher.nombre'
+> = ref('student.nombre')
 
-// let ordenarPor: Ref<'id' | 'nombre' | 'apellidos' | 'dni' | 'email'> = ref('id')
+const ordenarMatriculas = () => {
+  function eliminarTildes(elemento: string): string {
+    return elemento.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  }
 
-// const ordenarArray = () => {
-//   arrayOrdenado.value = [...studentsRefFromServer.value]
-//   const valor = ordenarPor.value
+  const matriculasOrdenadas = matriculasRefFromServer.value.slice().sort((a, b) => {
+    let valorA = ''
+    let valorB = ''
 
-//   studentsRefFromServer.value.sort((a, b) => {
-//     if (valor === 'id') {
-//       return a[valor] - b[valor]
-//     } else {
-//       const valorA = a[valor].toLowerCase()
-//       const valorB = b[valor].toLowerCase()
-//       if (valorA < valorB) {
-//         return -1
-//       }
-//       if (valorA > valorB) {
-//         return 1
-//       }
-//       return 0
-//     }
-//   })
-// }
+    if (ordenarPor.value === 'student.nombre') {
+      valorA = eliminarTildes(a.student.nombre.toLowerCase())
+      valorB = eliminarTildes(b.student.nombre.toLowerCase())
+    } else if (ordenarPor.value === 'student.apellidos') {
+      valorA = eliminarTildes(a.student.apellidos.toLowerCase())
+      valorB = eliminarTildes(b.student.apellidos.toLowerCase())
+      console.log('ordenado')
+    } else if (ordenarPor.value === 'student.dni') {
+      valorA = eliminarTildes(a.student.dni.toLowerCase())
+      valorB = eliminarTildes(b.student.dni.toLowerCase())
+    } else if (ordenarPor.value === 'subject.nombre') {
+      valorA = eliminarTildes(a.subject.nombre.toLowerCase())
+      valorB = eliminarTildes(b.subject.nombre.toLowerCase())
+    } else if (ordenarPor.value === 'teacher.nombre') {
+      valorA = eliminarTildes(a.teacher.nombre.toLowerCase())
+      valorB = eliminarTildes(b.teacher.nombre.toLowerCase())
+    }
 
+    if (valorA < valorB) {
+      return -1
+    }
+    if (valorA > valorB) {
+      return 1
+    }
+    return 0
+  })
+  matriculasRefFromServer.value = matriculasOrdenadas
+}
 onMounted(() => {
-  // ordenarArray()
+  ordenarMatriculas()
   getStudentsData()
 })
 
@@ -227,16 +232,17 @@ const goToStudent = (id: number) => {
   <div class="container">
     <div id="ordenarPor">
       <label for="ordenarPor">Ordenar por:</label>
-      <!-- <select v-model="ordenarPor" @change="ordenarArray">
-        <option value="nombre">Nombre</option>
-        <option value="apellidos">Apellidos</option>
-        <option value="dni">DNI</option>
-        <option value="email">Email</option>
-      </select> -->
+      <select v-model="ordenarPor" @change="ordenarMatriculas()">
+        <option value="student.nombre">Nombre Alumno</option>
+        <option value="student.apellidos">Apellidos Alumno</option>
+        <option value="student.dni">DNI</option>
+        <option value="subject.nombre">Asignatura</option>
+        <option value="teacher.nombre">Nombre Profesor</option>
+      </select>
     </div>
     <div>
       <table id="tabla">
-        <th colspan="5"><h3>LISTADO DE ALUMNOS</h3></th>
+        <th colspan="5"><h3>LISTADO DE MATRICULAS</h3></th>
         <tr>
           <th>
             <h3>Nombre</h3>
@@ -259,7 +265,7 @@ const goToStudent = (id: number) => {
           <td>{{ matricula.student.apellidos }}</td>
           <td>{{ matricula.student.dni }}</td>
           <td>{{ matricula.subject.nombre }}</td>
-          <td>{{ matricula.teacher.nombre + '' + matricula.teacher.apellidos }}</td>
+          <td>{{ matricula.teacher.nombre + ' ' + matricula.teacher.apellidos }}</td>
           <td>
             <button type="button" @click="goToStudent(matricula.student.id)">Ver</button>
           </td>
