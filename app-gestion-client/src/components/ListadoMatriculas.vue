@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, ref, onMounted, computed } from 'vue'
+import { type Ref, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Popup from './Popup.vue'
 import AltaAlumno from './AltaAlumno.vue'
@@ -21,7 +21,7 @@ let matriculasRefFromServer: Ref<
       apellidos: string
       dni: string
       direccion: string
-      telefono: 111222333
+      telefono: number
       email: string
     }
     subject: {

@@ -21,11 +21,6 @@ let studentIdRef: Ref<number | undefined> = ref(undefined) // Puede ser number o
 
 let studentDataFromServer = ref(props.studentData) // datos del estudiante de la base de datos que se pasan como props
 
-// let shouldGetData = ref(props.shouldGetData) // variable flag que se usará para si es true, mostrar al alumno en la vista
-
-// if (shouldGetData.value) {
-// obtener id para ver mostrar el alumno individual
-
 studentIdRef.value = Number(router.currentRoute.value.params.id)
 const studentId = Number(router.currentRoute.value.params.id)
 console.log(studentId)
@@ -51,7 +46,6 @@ fetch(`http://localhost:3000/student/${studentIdRef.value}`, {
   studentDataFromServer.value = data
   console.log(data)
 })
-// } // fin del if shouldGetData.value
 
 // Obtener la fecha actual
 const fechaActual = new Date()
@@ -60,9 +54,7 @@ const añoActual = fechaActual.getFullYear()
 /**
  * !! OJO QUE SI SE HACE ASÍ, CUANDO ESTEMOS EN ENERO APARECERÁ EL AÑO 2024/2025 */
 
-/**
- * % LÓGICA BORRAR ALUMNO
- * */
+// LÓGICA BORRAR ALUMNO
 const borrarAlumno = async () => {
   // funcion con async/await y try/catch en vez de fetch con .then y .catch
   try {
@@ -90,31 +82,62 @@ const confirmacionBorrar = () => {
   // funcion para confirmar el borrado mostrando un div para seleccionar si o no
   confirmacionEliminar.value = !confirmacionEliminar.value
 }
+
+// OBTENER MATRICULAS DEL ALUMNO
+let matriculaFromServer: Ref<{
+  student: {
+    id: number
+    usuario_id: string
+    nombre: string
+    apellidos: string
+    dni: string
+    direccion: string
+    telefono: string
+    email: string
+  }
+  matriculas: {
+    id: number
+    subject: {
+      id: number
+      nombre: string
+    }
+    teacher: {
+      id: number
+      nombre: string
+      apellidos: string
+      asignaturas: string
+    }
+  }[]
+} | null> = ref(null)
+
+const getStudentData = async () => {
+  try {
+    const response = await fetch(`http://localhost:3000/matricula/student/${studentIdRef.value}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      // await new Promise((resolve) => setTimeout(resolve, 2000))
+      const data = await response.json()
+      matriculaFromServer.value = data
+      console.log(data)
+      console.dir(matriculaFromServer.value)
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    alert('Ha ocurrido un error')
+  }
+}
+getStudentData()
 </script>
 
 <template>
-  <!-- <article class="alumno">
-    <h3 @click="emit('goToStudent', studentDataFromServer.id)" class="green title"> {{ postDataFromServer.title }} </h3>
-    <h3 class="subtitle">Por {{ postDataFromServer.owner }}</h3>
-    <h5 class="subtitle">
-      Publicado el {{ new Date(postDataFromServer.created_at).toISOString().split('T')[0] }}
-    </h5>
-    <h5 class="subtitle">
-      Editado el {{ new Date(postDataFromServer.updated_at).toISOString().split('T')[0] }}
-    </h5>
-    <p>{{ postDataFromServer.content }}</p>
-  </article> -->
-
-  <!-- <div>
-    <h1>Busca a un Alumnos</h1>
-    <form @goToStudent="goToStudent">
-      <label>Ingresa el Id del alumno que quieres buscar:</label>
-      <input type="text" v-model="studentIdRef" />
-      <button type="submit">Enviar</button>
-    </form> -->
-
-  <!-- <div @click="emit('goToStudent', studentDataFromServer.id)"> -->
-  <div>
+  <div v-if="studentDataFromServer">
     <h2>Detalle del Alumno</h2>
     <p>Usuario_id: {{ studentDataFromServer.usuario_id }}</p>
     <p>Nombre: {{ studentDataFromServer.nombre }}</p>
@@ -124,12 +147,21 @@ const confirmacionBorrar = () => {
     <p>telefono: {{ studentDataFromServer.telefono }}</p>
     <p>Email: {{ studentDataFromServer.email }}</p>
     <div>
-      Matriculado en:
-      <ul>
-        <li>trompeta</li>
-        <li>saxofon</li>
-        <li>flauta</li>
-      </ul>
+      <table id="tabla" v-if="matriculaFromServer">
+        <th colspan="5"><h3>MATRICULAS</h3></th>
+        <tr>
+          <th>
+            <h3>Asignatura</h3>
+          </th>
+          <th>
+            <h3>Profesor</h3>
+          </th>
+        </tr>
+        <tr id="alumno" v-for="matricula in matriculaFromServer?.matriculas" :key="matricula.id">
+          <td>{{ matricula.subject.nombre }}</td>
+          <td>{{ matricula.teacher.nombre + ' ' + matricula.teacher.apellidos }}</td>
+        </tr>
+      </table>
     </div>
     <div>
       <table id="tabla">
