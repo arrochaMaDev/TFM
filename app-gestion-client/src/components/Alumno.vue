@@ -119,10 +119,14 @@ const getStudentData = async () => {
       },
       credentials: 'include'
     })
+    if (response.status === 404) {
+      // Si da 404 es que no hay matricula en la BD
+      console.log('No se encontró matricula en el servidor')
+      return // sale de la función sin entrar en el bloque catch
+    }
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
-      // await new Promise((resolve) => setTimeout(resolve, 2000))
       const data = await response.json()
       matriculaFromServer.value = data
       console.log(data)

@@ -10,7 +10,7 @@ export class DeleteStudentService {
     private readonly studentRepository: Repository<StudentDb>,
   ) {}
 
-  async deleteStudent(id: number): Promise<void> {
+  async deleteStudent(id: number): Promise<StudentDb> {
     const student = await this.studentRepository.findOne({
       where: {
         id,
@@ -20,6 +20,6 @@ export class DeleteStudentService {
       throw new Error('Usuario no encontrado');
     }
     console.log(student);
-    await this.studentRepository.remove(student);
+    return await this.studentRepository.remove(student);
   }
 }

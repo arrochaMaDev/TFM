@@ -68,7 +68,7 @@ export class GetMatriculaController {
           .status(404)
           .json({ message: 'Matrículas no encontradas para este estudiante' });
       }
-      // OPCION DE CONTROLAR LOS DATOS MEDIANTE UN DTO
+      // Controlo los datos mediante un DTO
       const student = await this.getStudentService.getStudent(studentId);
       if (!student || matriculas.length === 0) {
         return response

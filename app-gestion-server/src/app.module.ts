@@ -42,6 +42,8 @@ import { ListerMatriculasService } from './Controllers/Matricula/Get/listerMatri
 import { RegisterMatriculaController } from './Controllers/Matricula/Register/registerMatricula.controller';
 import { GetMatriculaController } from './Controllers/Matricula/Get/getMatricula.controller';
 import { GetMatriculaService } from './Controllers/Matricula/Get/getMatricula.service';
+import { DeleteMatriculaController } from './Controllers/Matricula/Delete/deleteMatricula.controller';
+import { DeleteMatriculaService } from './Controllers/Matricula/Delete/deleteMatricula.service';
 
 @Module({
   imports: [
@@ -74,6 +76,7 @@ import { GetMatriculaService } from './Controllers/Matricula/Get/getMatricula.se
     GetMatriculaController,
     DeleteStudentController,
     DeleteSubjectController,
+    DeleteMatriculaController,
     UpdateStudentController,
     UpdateSubjectController,
     ListerStudentsController,
@@ -94,6 +97,7 @@ import { GetMatriculaService } from './Controllers/Matricula/Get/getMatricula.se
     GetMatriculaService,
     DeleteStudentService,
     DeleteSubjectService,
+    DeleteMatriculaService,
     UpdateStudentService,
     UpdateSubjectService,
     ListerStudentsService,
