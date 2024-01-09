@@ -20,14 +20,15 @@ export class UpdateMatriculaService {
   // Solo existen 2 opciones: se actualiza la el ID de la asignatura o el ID profesor
   async updateMatricula(
     matriculaId: number,
-    newSubjectId?: Partial<SubjectDb>, // number
-    newTeacherId?: Partial<TeacherDb>, // number
+    newSubjectId?: Partial<SubjectDb>, // solo se pasa el id, pero se maneja como un objeto en vez de con un number
+    newTeacherId?: Partial<TeacherDb>,
   ): Promise<MatriculaDb> {
     try {
       // OBTENGO LA MATRICULA A ACTUALIZAR
       const matriculaToUpdate =
         await this.getMatriculaService.getMatricula(matriculaId);
 
+      // MODIFICO EL PROFESOR A PARTIR DEL ID
       if (newTeacherId) {
         const newTeacher = await this.teacherRepository.findOne({
           where: {
@@ -40,7 +41,7 @@ export class UpdateMatriculaService {
           throw new Error('Profesor no encontrado');
         }
       }
-
+      // MODIFICO LA ASIGNATURA A PARTIR DEL ID
       if (newSubjectId) {
         const newSubject = await this.subjectRepository.findOne({
           where: {

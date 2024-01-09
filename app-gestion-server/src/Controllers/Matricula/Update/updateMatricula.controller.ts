@@ -15,8 +15,9 @@ export class UpdateMatriculaController {
     @Param('id') matriculaId: number,
     @Body()
     updatedData: {
-      newSubjectId?: Partial<SubjectDb>; // number
-      newTeacherId?: Partial<TeacherDb>; // number
+      newSubjectId?: Partial<SubjectDb>; // en este caso se maneja en la petición mediante las propiedades del objeto
+      newTeacherId?: Partial<TeacherDb>;
+      // newTeacherId?: number // Otra opción es manejarlo como number. En este caso, solo le estaremos pasando el id. No el objeto y sus propiedades
     },
     @Res() response: Response,
   ) {
@@ -34,7 +35,8 @@ export class UpdateMatriculaController {
         });
       }
       console.log('Actualizado con éxito');
-      // OPCION DE CONTROLAR LOS DATOS MEDIANTE UN DTO
+
+      // CONTROLO LOS DATOS DE RESPUESTA MEDIANTE UN DTO
       const updatedMatriculaDto = {
         id: updatedMatricula.id,
         student: {
