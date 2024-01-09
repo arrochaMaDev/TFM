@@ -2,12 +2,12 @@ import { Controller, Get, Param, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { GetMatriculaService } from './getMatricula.service';
 import { GetStudentService } from 'src/Controllers/Student/Get/getStudent.service';
-import { GetMatriculaByStudentIdService } from './getMatriculaByStudentId.service';
+import { GetMatriculasByStudentIdService } from './listerMatriculasByStudentId.service';
 
-@Controller('matricula')
-export class GetMatriculaByStudentIdController {
+@Controller('matriculas')
+export class GetMatriculasByStudentIdController {
   constructor(
-    private readonly getMatriculaByStudentIdService: GetMatriculaByStudentIdService,
+    private readonly getMatriculasByStudentIdService: GetMatriculasByStudentIdService,
     private readonly getStudentService: GetStudentService,
   ) {}
 
@@ -20,7 +20,7 @@ export class GetMatriculaByStudentIdController {
     try {
       const studentId = Number(id);
       const matriculas =
-        await this.getMatriculaByStudentIdService.getMatriculasByStudentId(
+        await this.getMatriculasByStudentIdService.getMatriculasByStudentId(
           studentId,
         );
 

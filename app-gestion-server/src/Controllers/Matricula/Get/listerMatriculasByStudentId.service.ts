@@ -4,7 +4,7 @@ import { MatriculaDb } from 'src/Modelos/Matricula/matriculaDb';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class GetMatriculaByStudentIdService {
+export class GetMatriculasByStudentIdService {
   constructor(
     @InjectRepository(MatriculaDb)
     private readonly matriculaRepository: Repository<MatriculaDb>,

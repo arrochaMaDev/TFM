@@ -20,6 +20,11 @@ export class GetMatriculaService {
       .leftJoinAndSelect('matricula.teacher', 'teacher')
       .where('matricula.id = :id', { id })
       .getOne();
+    // const matricula = await this.matriculaRepository.findOne({
+    //   where: {
+    //     id: id,
+    //   },
+    // });
 
     return matricula || null;
   }

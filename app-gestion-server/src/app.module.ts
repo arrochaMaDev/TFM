@@ -54,8 +54,10 @@ import { DeleteTeacherService } from './Controllers/Teacher/Delete/deleteTeacher
 import { DeleteTeacherController } from './Controllers/Teacher/Delete/DeleteTeacher.controller';
 import { DeleteUserController } from './Controllers/User/Delete/deleteUser.controller';
 import { DeleteUserService } from './Controllers/User/Delete/deleteUser.service';
-import { GetMatriculaByStudentIdService } from './Controllers/Matricula/Get/getMatriculaByStudentId.service';
-import { GetMatriculaByStudentIdController } from './Controllers/Matricula/Get/getMatriculaByStudentId.controller';
+import { GetMatriculasByStudentIdService } from './Controllers/Matricula/Get/listerMatriculasByStudentId.service';
+import { GetMatriculasByStudentIdController } from './Controllers/Matricula/Get/listerMatriculasByStudentId.controller';
+import { UpdateMatriculaController } from './Controllers/Matricula/Update/updateMatricula.controller';
+import { UpdateMatriculaService } from './Controllers/Matricula/Update/updateMatricula.service';
 
 @Module({
   imports: [
@@ -87,7 +89,7 @@ import { GetMatriculaByStudentIdController } from './Controllers/Matricula/Get/g
     GetSubjectController,
     GetUserController,
     GetMatriculaController,
-    GetMatriculaByStudentIdController,
+    GetMatriculasByStudentIdController,
     DeleteStudentController,
     DeleteSubjectController,
     DeleteTeacherController,
@@ -96,6 +98,7 @@ import { GetMatriculaByStudentIdController } from './Controllers/Matricula/Get/g
     UpdateStudentController,
     UpdateSubjectController,
     UpdateTeacherController,
+    UpdateMatriculaController,
     ListerStudentsController,
     ListerTeachersController,
     ListerSubjectsController,
@@ -114,7 +117,7 @@ import { GetMatriculaByStudentIdController } from './Controllers/Matricula/Get/g
     GetSubjectService,
     GetUserService,
     GetMatriculaService,
-    GetMatriculaByStudentIdService,
+    GetMatriculasByStudentIdService,
     DeleteStudentService,
     DeleteSubjectService,
     DeleteTeacherService,
@@ -123,6 +126,7 @@ import { GetMatriculaByStudentIdController } from './Controllers/Matricula/Get/g
     UpdateStudentService,
     UpdateSubjectService,
     UpdateTeacherService,
+    UpdateMatriculaService,
     ListerStudentsService,
     ListerTeachersService,
     ListerSubjectsService,

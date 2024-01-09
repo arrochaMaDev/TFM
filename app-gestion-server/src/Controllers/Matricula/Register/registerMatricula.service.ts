@@ -52,8 +52,10 @@ export class RegisterMatriculaService {
       );
       console.log(matricula);
 
+      // Opción con el método create. Crea un objeto con los parámetros de la entidad de matriculaRepository, similar a new Matricula:
+
       // const matricula = this.matriculaRepository.create({
-      //   // El método create crea un objeto con los parámetros de la entidad de matriculaRepository, similar a new Matricula
+      //   // El método create
       //   student: { id: alumno },
       //   subject: { id: asignatura },
       //   teacher: { id: profesor },

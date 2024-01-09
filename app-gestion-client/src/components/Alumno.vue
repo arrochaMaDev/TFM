@@ -112,7 +112,7 @@ let matriculaFromServer: Ref<{
 
 const getStudentData = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/matricula/student/${studentIdRef.value}`, {
+    const response = await fetch(`http://localhost:3000/matriculas/student/${studentIdRef.value}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
