@@ -149,7 +149,7 @@ const resetearDatos = () => {
         @input="buscarAlumnoPorApellidos"
       />
     </div>
-    <button @click="resetearDatos">Borrar datos</button>
+    <button @click="resetearDatos">Resetear</button>
 
     <!--todo Añadir otro parámetro de búsqueda??-->
     <br />

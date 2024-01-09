@@ -154,6 +154,7 @@ const ToggleVerPass = () => {
     color: white;
     border: 1px solid hsla(160, 100%, 37%, 1);
     border-radius: 5px;
+    cursor: pointer;
   }
 }
 

@@ -18,7 +18,7 @@ export class UpdateSubjectController {
         Number(id),
         updatedData,
       );
-      response.status(200).json(updatedSubject); // Devuelve el estudiante actualizado
+      response.status(200).json(updatedSubject); // Devuelve la asignatura actualizada
       console.log('Actualizado con éxito');
     } catch (error) {
       response.status(400).json({ error: error.message });

@@ -32,5 +32,9 @@ const emit = defineEmits(['confirmar', 'cancelar']) // creo los emits para que s
   padding: 10px;
   border-radius: 10px;
   border: 1px solid white;
+
+  & button {
+    cursor: pointer;
+  }
 }
 </style>

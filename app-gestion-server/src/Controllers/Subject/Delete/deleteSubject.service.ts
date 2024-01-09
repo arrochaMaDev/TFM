@@ -17,7 +17,7 @@ export class DeleteSubjectService {
       },
     });
     if (!student) {
-      throw new Error('Usuario no encontrado');
+      throw new Error('Asignatura no encontrada');
     }
     console.log(student);
     await this.subjectRepository.remove(student);

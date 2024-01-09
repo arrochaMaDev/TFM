@@ -22,7 +22,7 @@ export class UpdateSubjectService {
       throw new Error('Asignatura no encontrada');
     }
 
-    // Actualiza los campos del estudiante con newData
+    // Actualiza los campos de la asignatura con newData
     Object.assign(subjectToUpdate, newData);
 
     // Guarda los cambios en la base de datos

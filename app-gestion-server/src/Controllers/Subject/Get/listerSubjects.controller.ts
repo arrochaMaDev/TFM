@@ -4,11 +4,11 @@ import { ListerSubjectsService } from './listerSubjects.service';
 @Controller('asignaturas')
 export class ListerSubjectsController {
   constructor(
-    private readonly ListerSubjectsController: ListerSubjectsService,
+    private readonly listerSubjectsController: ListerSubjectsService,
   ) {}
 
   @Get()
   async listerSubjects() {
-    return this.ListerSubjectsController.listerSubjects();
+    return this.listerSubjectsController.listerSubjects();
   }
 }

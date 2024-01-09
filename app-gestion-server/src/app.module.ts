@@ -44,6 +44,16 @@ import { GetMatriculaController } from './Controllers/Matricula/Get/getMatricula
 import { GetMatriculaService } from './Controllers/Matricula/Get/getMatricula.service';
 import { DeleteMatriculaController } from './Controllers/Matricula/Delete/deleteMatricula.controller';
 import { DeleteMatriculaService } from './Controllers/Matricula/Delete/deleteMatricula.service';
+import { ListerUsersController } from './Controllers/User/Get/listerUsers.controller';
+import { ListerUsersService } from './Controllers/User/Get/listerUsers.service';
+import { GetUserService } from './Controllers/User/Get/getUser.service';
+import { GetUserController } from './Controllers/User/Get/getUser.controller';
+import { UpdateTeacherController } from './Controllers/Teacher/Update/updateTeacher.controller';
+import { UpdateTeacherService } from './Controllers/Teacher/Update/updateTeacher.service';
+import { DeleteTeacherService } from './Controllers/Teacher/Delete/deleteTeacher.service';
+import { DeleteTeacherController } from './Controllers/Teacher/Delete/DeleteTeacher.controller';
+import { DeleteUserController } from './Controllers/User/Delete/deleteUser.controller';
+import { DeleteUserService } from './Controllers/User/Delete/deleteUser.service';
 
 @Module({
   imports: [
@@ -73,15 +83,20 @@ import { DeleteMatriculaService } from './Controllers/Matricula/Delete/deleteMat
     GetStudentController,
     GetTeacherController,
     GetSubjectController,
+    GetUserController,
     GetMatriculaController,
     DeleteStudentController,
     DeleteSubjectController,
+    DeleteTeacherController,
+    DeleteUserController,
     DeleteMatriculaController,
     UpdateStudentController,
     UpdateSubjectController,
+    UpdateTeacherController,
     ListerStudentsController,
     ListerTeachersController,
     ListerSubjectsController,
+    ListerUsersController,
     ListerMatriculasController,
     LoginUserController,
   ], //AppController
@@ -94,15 +109,20 @@ import { DeleteMatriculaService } from './Controllers/Matricula/Delete/deleteMat
     GetStudentService,
     GetTeacherService,
     GetSubjectService,
+    GetUserService,
     GetMatriculaService,
     DeleteStudentService,
     DeleteSubjectService,
+    DeleteTeacherService,
+    DeleteUserService,
     DeleteMatriculaService,
     UpdateStudentService,
     UpdateSubjectService,
+    UpdateTeacherService,
     ListerStudentsService,
     ListerTeachersService,
     ListerSubjectsService,
+    ListerUsersService,
     ListerMatriculasService,
     LoginUserService,
   ],
