@@ -23,16 +23,4 @@ export class GetMatriculaService {
 
     return matricula || null;
   }
-
-  // OBTENER MATRICULAS POR ID DE STUDENT
-  async getMatriculasByStudentId(studentId: number): Promise<MatriculaDb[]> {
-    const matriculas = await this.matriculaRepository.find({
-      where: {
-        student: { id: studentId },
-      },
-      relations: ['student', 'subject', 'teacher'],
-    });
-
-    return matriculas;
-  }
 }

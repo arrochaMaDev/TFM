@@ -54,6 +54,8 @@ import { DeleteTeacherService } from './Controllers/Teacher/Delete/deleteTeacher
 import { DeleteTeacherController } from './Controllers/Teacher/Delete/DeleteTeacher.controller';
 import { DeleteUserController } from './Controllers/User/Delete/deleteUser.controller';
 import { DeleteUserService } from './Controllers/User/Delete/deleteUser.service';
+import { GetMatriculaByStudentIdService } from './Controllers/Matricula/Get/getMatriculaByStudentId.service';
+import { GetMatriculaByStudentIdController } from './Controllers/Matricula/Get/getMatriculaByStudentId.controller';
 
 @Module({
   imports: [
@@ -85,6 +87,7 @@ import { DeleteUserService } from './Controllers/User/Delete/deleteUser.service'
     GetSubjectController,
     GetUserController,
     GetMatriculaController,
+    GetMatriculaByStudentIdController,
     DeleteStudentController,
     DeleteSubjectController,
     DeleteTeacherController,
@@ -111,6 +114,7 @@ import { DeleteUserService } from './Controllers/User/Delete/deleteUser.service'
     GetSubjectService,
     GetUserService,
     GetMatriculaService,
+    GetMatriculaByStudentIdService,
     DeleteStudentService,
     DeleteSubjectService,
     DeleteTeacherService,
