@@ -1,7 +1,6 @@
 <!-- eslint-disable vue/no-side-effects-in-computed-properties -->
 <script setup lang="ts">
-import { computed, inject, onMounted, ref, type Ref } from 'vue'
-import type { VueCookies } from 'vue-cookies'
+import { ref, watch, type Ref } from 'vue'
 
 // FETCH PARA ENVIAR DATOS DEL USUARIO A LA BD:
 function crearUsuario() {
@@ -49,16 +48,15 @@ let userUsernameRef: Ref<string> = ref('')
 let userEmailRef: Ref<string> = ref('')
 let userPassRef: Ref<string> = ref('')
 let userPassRefConfirmed: Ref<string> = ref('')
-let selectedPermisoRef: Ref<string> = ref('')
-let userPermisoRef: Ref<number | undefined> = ref(
-  computed(() => {
-    if (selectedPermisoRef.value === 'Alumno') return (userPermisoRef.value = 0)
-    if (selectedPermisoRef.value === 'Profesor') return (userPermisoRef.value = 1)
-    if (selectedPermisoRef.value === 'Administrador') return (userPermisoRef.value = 9)
-    return userPermisoRef.value
-  })
-)
+let selectedPermisoRef: Ref<string | null> = ref(null)
+let userPermisoRef: Ref<number | null> = ref(null)
 
+watch(selectedPermisoRef, () => {
+  if (selectedPermisoRef.value === 'Alumno') userPermisoRef.value = 0
+  else if (selectedPermisoRef.value === 'Profesor') userPermisoRef.value = 1
+  else if (selectedPermisoRef.value === 'Administrador') userPermisoRef.value = 9
+  else userPermisoRef.value = null
+})
 console.log(userPermisoRef.value)
 
 // para resetear los datos del formulario y poner cada ref a vacío
@@ -68,7 +66,6 @@ function resetearDatosForm() {
   userPassRef.value = ''
   userPassRefConfirmed.value = ''
   selectedPermisoRef.value = ''
-  userPermisoRef.value = undefined // lo pongo undefined para que no me aparezca ningún dato en el formulario
 }
 
 //mostrar o ocultar contraseña
@@ -104,7 +101,8 @@ const ToggleVerPass = () => {
         />
         <label class="green">Permisos</label>
         <select name="" id="permisoInput" required v-model="selectedPermisoRef">
-          <option selected disabled>Seleccione el permiso</option>
+          <!-- <option value="" disabled>Seleccione el permiso</option> -->
+          <option :value="''" :disabled="selectedPermisoRef !== ''">Seleccione el permiso</option>
           <option value="Alumno">Alumno</option>
           <option value="profesor">Profesor</option>
           <option value="Administrador">Administrador</option>

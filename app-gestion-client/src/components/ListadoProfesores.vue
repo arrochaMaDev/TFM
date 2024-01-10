@@ -190,11 +190,8 @@ const editarProfesor = async () => {
     </div>
     <div>
       <table id="tabla">
-        <th colspan="4"><h3>LISTADO DE PROFESORES</h3></th>
+        <th colspan="3"><h3>LISTADO DE PROFESORES</h3></th>
         <tr>
-          <th>
-            <h3>ID</h3>
-          </th>
           <th>
             <h3>Nombre</h3>
           </th>
@@ -206,7 +203,6 @@ const editarProfesor = async () => {
           </th>
         </tr>
         <tr id="alumno" v-for="teacher in teachersRefFromServer" :key="teacher.id">
-          <td>{{ teacher.id }}</td>
           <td>{{ teacher.nombre }}</td>
           <td>{{ teacher.apellidos }}</td>
           <td>{{ teacher.email }}</td>

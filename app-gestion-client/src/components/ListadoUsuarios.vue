@@ -10,23 +10,19 @@ import { useEditingStore } from '@/stores/editar'
 const router = useRouter() // router para ir al alumno cuando se clique en él
 const loadingStore = useLoadingStore() // store del Spinner
 
-// OBTENER DATOS DE TODOS LOS ESTUDIANTES
-let studentsRefFromServer: Ref<
+// OBTENER DATOS DE TODOS LOS USUARIOS
+let usersRefFromServer: Ref<
   {
     id: number
-    usuario_id: string
-    nombre: string
-    apellidos: string
-    dni: string
-    direccion: string
-    telefono: string
+    username: string
     email: string
+    permiso: number
   }[]
 > = ref([])
 
-const getStudentsData = async () => {
+const getUsersData = async () => {
   try {
-    const response = await fetch('http://localhost:3000/students', {
+    const response = await fetch('http://localhost:3000/usuarios', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -36,28 +32,19 @@ const getStudentsData = async () => {
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
-      loadingStore.loadingTrue()
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
       const data = (await response.json()) as {
         id: number
-        usuario_id: string
-        nombre: string
-        apellidos: string
-        dni: string
-        direccion: string
-        telefono: string
+        username: string
         email: string
+        permiso: number
       }[]
-      studentsRefFromServer.value = data
+      usersRefFromServer.value = data
       console.log(data)
-      console.log(studentsRefFromServer.value)
+      console.log(usersRefFromServer.value)
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
     alert('Ha ocurrido un error')
-  } finally {
-    loadingStore.loadingFalse()
   }
 }
 
@@ -65,28 +52,25 @@ const getStudentsData = async () => {
 // let arrayOrdenado: Ref<
 //   {
 //     id: number
-//     usuario_id: string
-//     nombre: string
-//     apellidos: string
-//     dni: string
-//     direccion: string
-//     telefono: string
+//     username: string
 //     email: string
+//     pass: string
+//     permiso: number
 //   }[]
 // > = ref([]) // Nuevo array Ref para ordenar la lsta según se indique
 
-let ordenarPor: Ref<'id' | 'nombre' | 'apellidos' | 'dni' | 'email'> = ref('id')
+let ordenarPor: Ref<'id' | 'username' | 'email' | 'permiso' | 'email'> = ref('id')
 
 const ordenarArray = () => {
-  // arrayOrdenado.value = [...studentsRefFromServer.value]
+  // arrayOrdenado.value = [...usersRefFromServer.value]
   const valor = ordenarPor.value
 
-  studentsRefFromServer.value.sort((a, b) => {
+  usersRefFromServer.value.sort((a, b) => {
+    const valorA = a[valor].toString().toLowerCase()
+    const valorB = b[valor].toString().toLowerCase()
     if (valor === 'id') {
       return a[valor] - b[valor]
     } else {
-      const valorA = a[valor].toLowerCase()
-      const valorB = b[valor].toLowerCase()
       if (valorA < valorB) {
         return -1
       }
@@ -100,9 +84,21 @@ const ordenarArray = () => {
 
 onMounted(() => {
   ordenarArray()
-  getStudentsData()
+  getUsersData()
 })
 
+const obtenerPermisoString = (permiso: number) => {
+  switch (permiso) {
+    case 0:
+      return 'Alumno'
+    case 1:
+      return 'Profesor'
+    case 9:
+      return 'Administrador'
+    default:
+      return 'Desconocido'
+  }
+}
 // LÓGICA BORRAR ALUMNO
 let popupVisible: Ref<boolean> = ref(false) // ref para ocultar o mostrar el popup
 let idAlumnoSeleccionado: Ref<number | null> = ref(null) // ref del id del alumno seleccionado para borrar
@@ -122,7 +118,7 @@ const borrarAlumno = async () => {
       await new Promise((resolve) => setTimeout(resolve, 2000))
       alert('Alumno borrado con éxito')
       popupVisible.value = false
-      getStudentsData()
+      getUsersData()
     } else {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
     }
@@ -218,51 +214,38 @@ const goToStudent = (id: number) => {
     <div id="ordenarPor">
       <label for="ordenarPor">Ordenar por:</label>
       <select v-model="ordenarPor" @change="ordenarArray">
-        <option value="nombre">Nombre</option>
-        <option value="apellidos">Apellidos</option>
-        <option value="dni">DNI</option>
+        <option value="username">Username</option>
         <option value="email">Email</option>
+        <option value="pass">Pass</option>
+        <option value="permiso">Permiso</option>
       </select>
     </div>
     <div>
       <table id="tabla">
-        <th colspan="6"><h3>LISTADO DE ALUMNOS</h3></th>
+        <th colspan="3"><h3>LISTADO DE USUARIOS</h3></th>
         <tr>
           <th>
-            <h3>Nombre</h3>
-          </th>
-          <th>
-            <h3>Apellidos</h3>
-          </th>
-          <th>
-            <h3>DNI</h3>
-          </th>
-          <th>
-            <h3>Teléfono</h3>
-          </th>
-          <th>
-            <h3>Dirección</h3>
+            <h3>Username</h3>
           </th>
           <th>
             <h3>Email</h3>
           </th>
+          <th>
+            <h3>Permiso</h3>
+          </th>
         </tr>
-        <tr id="alumno" v-for="student in studentsRefFromServer" :key="student.id">
-          <td>{{ student.nombre }}</td>
-          <td>{{ student.apellidos }}</td>
-          <td>{{ student.dni }}</td>
-          <td>{{ student.telefono }}</td>
-          <td>{{ student.direccion }}</td>
-          <td>{{ student.email }}</td>
+        <tr id="user" v-for="user in usersRefFromServer" :key="user.id">
+          <td>{{ user.username }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ obtenerPermisoString(user.permiso) }}</td>
+          <!-- llamo a la funcion obtenerPermiso para que me obtenga el number y me genere el texto para mostrarlo -->
           <td>
-            <button type="button" @click="goToStudent(student.id)">Ver</button>
+            <button type="button" @click="goToStudent(user.id)">Ver</button>
           </td>
           <td>
-            <button type="button" @click="editarAlumno(student), mostrarAltaAlumno()">
-              Editar
-            </button>
+            <button type="button" @click="editarAlumno(user), mostrarAltaAlumno()">Editar</button>
           </td>
-          <td><button type="button" @click="mostrarPopup(student.id)">Borrar</button></td>
+          <td><button type="button" @click="mostrarPopup(user.id)">Borrar</button></td>
           <!-- le paso el id del alumno que quiero borrar -->
         </tr>
       </table>
@@ -273,7 +256,7 @@ const goToStudent = (id: number) => {
       v-if="popUpState"
       :isEditing="popUpState"
       @cerrarPopUp="resetearPopUpState"
-      @obtenerAlumnos="getStudentsData()"
+      @obtenerAlumnos="getUsersData()"
       @resetearAlumno="editarAlumno(alumnoEditar)"
       :alumnoParaEditar="alumnoEditar"
     >
