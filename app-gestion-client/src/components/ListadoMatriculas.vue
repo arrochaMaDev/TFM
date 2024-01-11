@@ -53,7 +53,6 @@ const getStudentsData = async () => {
     } else {
       loadingStore.loadingTrue()
       await new Promise((resolve) => setTimeout(resolve, 2000))
-
       const data = await response.json()
       matriculasRefFromServer.value = data
       console.log(data)

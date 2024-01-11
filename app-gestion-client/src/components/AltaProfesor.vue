@@ -1,109 +1,64 @@
 <script setup lang="ts">
 import { ref, type Ref } from 'vue'
 
-// FETCH PARA ENVIAR DATOS DEL PROFESOR A LA BD:
-function crearProfesor() {
-  fetch('http://localhost:3000/teacher', {
-    method: 'POST',
-    body: JSON.stringify({
-      nombre: teacherNombreRef.value,
-      apellidos: teacherApellidosRef.value,
-      email: teacherEmailRef.value,
-      asignaturas: teacherAsignaturasToString.value
-    }),
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include'
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
-      } else {
-        alert('Profesor añadido')
-        // Imprimo los datos que he introducido
-        const datosProfesor = [
-          teacherNombreRef.value,
-          teacherApellidosRef.value,
-          teacherEmailRef.value,
-          teacherAsignaturasToString.value
-        ]
-        console.log(datosProfesor)
-
-        // Vacío el formulario después de enviar los datos:
-        teacherNombreRef.value = ''
-        teacherApellidosRef.value = ''
-        teacherEmailRef.value = ''
-        teacherAsignaturas.value = [''] // teacherAsignaturasToString depende de teacherAsignaturas
-      }
-    })
-    .catch((error) => {
-      console.error('Error en la solicitud:', error)
-      alert('Ha ocurrido un error')
-    })
-}
-
 //Referencias del formulario
-let teacherNombreRef: Ref<string> = ref('')
-let teacherApellidosRef: Ref<string> = ref('')
-let teacherEmailRef: Ref<string> = ref('')
-let asignaturaSelected: Ref<string> = ref('')
-let teacherAsignaturas: Ref<string[]> = ref([])
-let teacherAsignaturasToString: Ref<string> = ref('')
-let fotoURL: Ref<string> = ref('')
+const teacherRef = {
+  nombre: ref<string | undefined>(undefined),
+  apellidos: ref<string | undefined>(undefined),
+  email: ref<string | undefined>(undefined),
+  asignaturas: ref<string[]>([])
+}
+const asignaturaSelected: Ref<string> = ref('')
 
 // para resetear los datos del formulario y poner cada ref a vacío
 function resetearDatosForm() {
-  teacherNombreRef.value = ''
-  teacherApellidosRef.value = ''
-  teacherEmailRef.value = ''
-  asignaturaSelected.value = ''
-  teacherAsignaturas.value = []
-  teacherAsignaturasToString.value = ''
-  let botonEliminarAsignatura = ref()
+  teacherRef.nombre.value = undefined
+  teacherRef.apellidos.value = undefined
+  teacherRef.email.value = undefined
+  teacherRef.asignaturas.value = []
 }
 
-// OBTENER LISTADO DE PROFESORES
-let teachersRefFromServer: Ref<
-  {
-    id: number
-    usuario_id: string
-    nombre: string
-    apellidos: string
-    email: string
-  }[]
-> = ref([])
-
-// FETCH PARA OBTENER DATOS DE LA BD
-function getTeachersData() {
-  fetch('http://localhost:3000/teachers', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include'
-  })
-    .then(async (response) => {
-      const data = (await response.json()) as {
-        id: number
-        usuario_id: string
-        nombre: string
-        apellidos: string
-        email: string
-      }[]
-      teachersRefFromServer.value = data
-      console.log(data)
-      console.log(teachersRefFromServer.value)
+// FETCH PARA ENVIAR DATOS DEL PROFESOR A LA BD:
+const crearProfesor = async () => {
+  try {
+    const response = await fetch('http://localhost:3000/teacher', {
+      method: 'POST',
+      body: JSON.stringify({
+        nombre: teacherRef.nombre.value,
+        apellidos: teacherRef.apellidos.value,
+        email: teacherRef.email.value,
+        asignaturas: teacherRef.asignaturas.value.toString()
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
     })
-    .catch((error) => {
-      alert('Hay un error' + error)
-      console.log('hay un error', error)
-    })
+    if (!response.ok) {
+      throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      alert('Profesor creado')
+      // Imprimo los datos que he introducido
+      const datosProfesor = [
+        teacherRef.nombre.value,
+        teacherRef.apellidos.value,
+        teacherRef.email.value,
+        teacherRef.asignaturas.value
+      ]
+      console.log(datosProfesor)
+      // Vacío el formulario después de enviar los datos:
+      teacherRef.nombre.value = undefined
+      teacherRef.apellidos.value = undefined
+      teacherRef.email.value = undefined
+      teacherRef.asignaturas.value = []
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    alert('Ha ocurrido un error')
+  }
 }
-getTeachersData()
 
-// OBTENER Y AÑADIR ASIGNATURAS DADAS DE ALTA
-
+// OBTENER ASIGNATURAS DE LA BD
 let asignaturas: Ref<
   {
     id: number
@@ -111,26 +66,29 @@ let asignaturas: Ref<
   }[]
 > = ref([])
 
-function getSubjectsData() {
-  fetch('http://localhost:3000/asignaturas', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include'
-  })
-    .then(async (response) => {
+const getSubjectsData = async () => {
+  try {
+    const response = await fetch('http://localhost:3000/asignaturas', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
       const data = (await response.json()) as {
         id: number
         nombre: string
       }[]
       asignaturas.value = data
       console.log(data)
-    })
-    .catch((error) => {
-      alert('Hay un error' + error)
-      console.log('hay un error', error)
-    })
+    }
+  } catch (error) {
+    alert('Hay un error' + error)
+    console.log('hay un error', error)
+  }
 }
 getSubjectsData()
 
@@ -139,70 +97,145 @@ function agregarAsignatura() {
     // si quieren insertar un valor vacío salta una alerta
     alert('Tienes que selecionar alguna asignatura')
   } else {
-    teacherAsignaturas.value.push(asignaturaSelected.value)
-    teacherAsignaturasToString.value = teacherAsignaturas.value
+    teacherRef.asignaturas.value.push(asignaturaSelected.value)
+    const teacherAsignaturasToString = teacherRef.asignaturas.value
       .map((elemento) => ' ' + elemento) // recorro el array añadiendo un espacio a cada elemento
       .toString() // lo convierto en string
       .trimStart() // elimino el espacio al principio
     asignaturaSelected.value = ''
-    console.log(teacherAsignaturasToString.value)
+    console.log(teacherAsignaturasToString)
   }
 }
 
 const eliminarAsignatura = (index: any) => {
-  teacherAsignaturas.value.splice(index, 1)
-  if (teacherAsignaturas.value.length === 0) {
-    teacherAsignaturasToString.value = ''
+  teacherRef.asignaturas.value.splice(index, 1)
+}
+
+// COMPONENTE COMO POPUP PARA EDITAR
+const emit = defineEmits(['cerrarPopUp', 'obtenerProfesores', 'resetearProfesor'])
+const props = defineProps<{
+  profesorParaEditar:
+    | {
+        id: number
+        nombre: string
+        apellidos: string
+        email: string
+        asignaturas: string
+      }
+    | undefined
+  isEditing: boolean
+}>()
+
+let profesorEditado = ref({ ...props.profesorParaEditar })
+
+let popUpStyle: Ref<boolean> = ref(props.isEditing) // variable para activar el estilo popUp
+
+// FETCH PARA ACTUALIZAR DATOS DEL PROFESOR:
+const actualizarProfesor = async () => {
+  try {
+    const response = await fetch(`http://localhost:3000/teacher/${profesorEditado.value?.id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        nombre: profesorEditado.value?.nombre,
+        apellidos: profesorEditado.value?.apellidos,
+        email: profesorEditado.value?.email,
+        asignaturas: profesorEditado.value?.asignaturas?.toString()
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      alert('Profesor Editado')
+      // Imprimo los datos que he introducido
+      const profesorActualizado = [
+        profesorEditado.value?.nombre,
+        profesorEditado.value?.apellidos,
+        profesorEditado.value?.email,
+        profesorEditado.value?.asignaturas
+      ]
+      console.table(profesorActualizado)
+      popUpStyle.value = false
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    alert('Ha ocurrido un error')
+  } finally {
+    emit('cerrarPopUp')
+    emit('obtenerProfesores')
+  }
+}
+
+// para resetear los valores como están actualmente en la BD
+const resetearValoresIniciales = () => {
+  console.log('resetear valores iniciales')
+  profesorEditado.value.nombre = props.profesorParaEditar?.nombre
+  profesorEditado.value.apellidos = props.profesorParaEditar?.apellidos
+  profesorEditado.value.email = props.profesorParaEditar?.email
+  profesorEditado.value.asignaturas = props.profesorParaEditar?.asignaturas
+  emit('resetearProfesor', profesorEditado) // hago el emit y paso además el ProfesorEditado según el valor de solo lectura de las props recibidas
+}
+// FUNCION PARA ENVIAR DATOS DEL FORMULARIO
+const enviarDatosFormulario = () => {
+  if (popUpStyle.value) {
+    actualizarProfesor() // Función para actualizar Profesor en modo edición
+  } else {
+    crearProfesor() // Función para crear un nuevo Profesor
   }
 }
 </script>
 
 <template>
-  <div class="centradoVertical">
-    <div class="form">
-      <h1 class="green">Alta Profesores</h1>
-      <form @submit.prevent="crearProfesor(), getTeachersData()">
-        <label class="green">Nombre</label>
-        <input type="text" name="" id="nombreInput" v-model="teacherNombreRef" />
-        <label class="green">Apellidos</label>
-        <input type="text" name="" id="apellidosInput" v-model="teacherApellidosRef" />
-        <label class="green">Email</label>
-        <input type="email" name="" id="emailInput" v-model="teacherEmailRef" />
-        <label class="green">Asignaturas</label>
-        <select name="" id="asignaturasInput" v-model="asignaturaSelected">
-          <option selected disabled>Seleccione la asignatura</option>
-          <option v-for="asignatura in asignaturas" :key="asignatura.id">
-            {{ asignatura.nombre }}
-          </option>
-        </select>
-        <button type="button" @click="agregarAsignatura()">Agregar</button>
-        <label for="myfile">Selecciona una foto de perfil:</label>
-        <input type="file" id="" name="" />
-        <!--TODO: averiguar cómo pasar un archivo y que VUE aplicación me recoga la URL y me la muestre en la vista previa-->
-        <button type="reset" @click="resetearDatosForm()">Resetear</button>
-        <button type="submit">Enviar datos</button>
-        <!--TODO: Modificar el backend y la BD para un array de asignaturas y una foto de perfil -->
+  <div class="container" :class="{ altaProfesorPopup: popUpStyle }">
+    <div class="form" :class="{ 'altaProfesorPopup-content': popUpStyle }">
+      <h1 v-if="popUpStyle" class="green">Editar profesor</h1>
+      <h1 v-else class="green">Alta profesor</h1>
+      <form @submit.prevent="enviarDatosFormulario()">
+        <div v-if="!popUpStyle">
+          <!--MODO CREAR -->
+          <label class="green">Nombre</label>
+          <input required type="text" id="nombreInput" v-model="teacherRef.nombre.value" />
+          <label class="green">Apellidos</label>
+          <input required type="text" id="apellidosInput" v-model="teacherRef.apellidos.value" />
+          <label class="green">Email</label>
+          <input required type="email" id="emailInput" v-model="teacherRef.email.value" />
+          <label class="green">Asignaturas</label>
+          <select required id="asignaturasInput" v-model="asignaturaSelected">
+            <option selected disabled>Seleccione la asignatura</option>
+            <option v-for="asignatura in asignaturas" :key="asignatura.id">
+              {{ asignatura.nombre }}
+            </option>
+          </select>
+          <button type="button" @click="agregarAsignatura()">Agregar</button>
+        </div>
+        <div v-if="popUpStyle">
+          <!--MODO ACTUALIZAR -->
+          <label class="green">Nombre</label>
+          <input type="text" id="nombreInput" required v-model="profesorEditado.nombre" />
+          <label class="green">Apellidos</label>
+          <input type="text" id="apellidosInput" required v-model="profesorEditado.apellidos" />
+          <label class="green">Email</label>
+          <input required type="email" id="emailInput" v-model="profesorEditado.email" />
+        </div>
+        <button type="reset" @click="resetearDatosForm()">Borrar datos</button>
+        <button type="reset" v-if="popUpStyle" @click="resetearValoresIniciales">Resetear</button>
+        <button type="submit">{{ popUpStyle ? 'Actualizar' : 'Enviar' }}</button>
+        <button type="button" v-if="popUpStyle" @click="emit('cerrarPopUp')">Cancelar</button>
       </form>
     </div>
-    <div class="vistaPrevia">
-      <h2>Vista previa del profesor:</h2>
-      <p>Nombre: {{ teacherNombreRef }}</p>
-      <p>Apellidos: {{ teacherApellidosRef }}</p>
-      <p>Email: {{ teacherEmailRef }}</p>
-      <div>
-        <table id="asignaturasSeleccionadas">
-          <th colspan="2">Asignaturas seleccionadas:</th>
-          <tr v-for="(asignatura, index) in teacherAsignaturas" :key="index">
-            {{
-              asignatura
-            }}
-            <td><button type="submit" @click="eliminarAsignatura">Eliminar</button></td>
-          </tr>
-        </table>
-      </div>
-      <div>
-        <img class="" src="../utils/img/miguelarrocha.png" alt="" width="100" height="100" />
-      </div>
+    <div v-if="!popUpStyle" class="vistaPrevia">
+      <table id="asignaturasSeleccionadas">
+        <th colspan="2">Asignaturas seleccionadas:</th>
+        <tr v-for="(asignatura, index) in teacherRef.asignaturas.value" :key="index">
+          {{
+            asignatura
+          }}
+          <td><button type="submit" @click="eliminarAsignatura">Eliminar</button></td>
+        </tr>
+      </table>
     </div>
   </div>
 </template>
@@ -217,16 +250,21 @@ const eliminarAsignatura = (index: any) => {
 
   & Form {
     display: flex;
+    flex-wrap: wrap;
     flex-direction: column;
     justify-content: center;
   }
 
-  & input {
+  div label {
+    display: block;
+  }
+
+  div input {
     height: 25px;
     border-radius: 5px;
   }
 
-  & button {
+  button {
     margin-top: 10px;
     width: 100px;
     height: 25px;
@@ -234,6 +272,57 @@ const eliminarAsignatura = (index: any) => {
     color: white;
     border: 1px solid hsla(160, 100%, 37%, 1);
     border-radius: 5px;
+    cursor: pointer;
+  }
+}
+
+.container.altaProfesorPopup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.altaProfesorPopup-content {
+  background: #000000;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid white;
+  display: flex;
+  flex-direction: column; /* Añadido para disponer los elementos verticalmente */
+
+  & label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  & input {
+    height: 25px;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+
+  & button {
+    margin-top: 10px;
+    width: 100px;
+    height: 30px;
+    background-color: hsla(160, 100%, 37%, 1);
+    color: white;
+    border: 1px solid hsla(160, 100%, 37%, 1);
+    border-radius: 5px;
+    cursor: pointer;
+    margin: auto;
+    margin-top: 10px;
   }
 }
 .vistaPrevia {
@@ -282,6 +371,7 @@ table {
     color: white;
     border: 1px solid hsla(160, 100%, 37%, 1);
     border-radius: 5px;
+    cursor: pointer;
   }
 }
 </style>

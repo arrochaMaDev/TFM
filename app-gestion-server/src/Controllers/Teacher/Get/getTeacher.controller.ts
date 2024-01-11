@@ -16,6 +16,7 @@ export class GetTeacherController {
       nombre: teacher.nombre,
       apellidos: teacher.apellidos,
       email: teacher.email,
+      asignaturas: teacher.asignaturas,
     };
     response.send(teacherDto).status(200);
   }

@@ -7,6 +7,7 @@ import AltaAsignatura from '@/components/AltaAsignatura.vue'
 import BuscadorAlumno from '@/components/BuscadorAlumno.vue'
 import ListadoAlumnos from '@/components/ListadoAlumnos.vue'
 import Alumno from '@/components/Alumno.vue'
+import Profesor from '@/components/Profesor.vue'
 import LoginUser from '@/components/LoginUser.vue'
 import ListadoProfesores from '@/components/ListadoProfesores.vue'
 import Matricula from '@/components/Matricula.vue'
@@ -72,6 +73,14 @@ const router = createRouter({
       name: 'alumno',
 
       component: Alumno,
+      // props: { shouldGetData: true } // para pasar información mediante los props (ejemplo: id)
+      props: true // para pasar información mediante los props (ejemplo: id)
+    },
+    {
+      path: '/profesor/:id',
+      name: 'profesor',
+
+      component: Profesor,
       // props: { shouldGetData: true } // para pasar información mediante los props (ejemplo: id)
       props: true // para pasar información mediante los props (ejemplo: id)
     },

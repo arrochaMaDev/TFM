@@ -55,6 +55,29 @@ let invertedStudentsRefFromServer = ref(
   })
 )
 console.log(invertedStudentsRefFromServer.value)
+
+// FUNCION AGREGAR ASIGNATURA COMPONENTE ALTA ALUMNO COMO ARRAY
+function agregarAsignatura() {
+  if (asignaturaSelected.value === '') {
+    // si quieren insertar un valor vacío salta una alerta
+    alert('Tienes que selecionar alguna asignatura')
+  } else {
+    teacherAsignaturas.value.push(asignaturaSelected.value)
+    teacherAsignaturasToString.value = teacherAsignaturas.value
+      .map((elemento) => ' ' + elemento) // recorro el array añadiendo un espacio a cada elemento
+      .toString() // lo convierto en string
+      .trimStart() // elimino el espacio al principio
+    asignaturaSelected.value = ''
+    console.log(teacherAsignaturasToString.value)
+  }
+}
+
+const eliminarAsignatura = (index: any) => {
+  teacherAsignaturas.value.splice(index, 1)
+  if (teacherAsignaturas.value.length === 0) {
+    teacherAsignaturasToString.value = ''
+  }
+}
 </script>
 <template>
   <!--· VISTA PREVIA DEL COMPONENTE ALTA ALUMNO -->
@@ -107,6 +130,27 @@ console.log(invertedStudentsRefFromServer.value)
       </tr>
     </table>
   </section>
+
+  <!--· SELECCIONAR ASIGNATURAS DEL COMPONENTE ALTA ALUMNO. SE AÑADEN COMO UN ARRAY -->
+  <label class="green">Asignaturas</label>
+  <select name="" id="asignaturasInput" v-model="asignaturaSelected">
+    <option selected disabled>Seleccione la asignatura</option>
+    <option v-for="asignatura in asignaturas" :key="asignatura.id">
+      {{ asignatura.nombre }}
+    </option>
+  </select>
+  <button type="button" @click="agregarAsignatura()">Agregar</button>
+  <div>
+    <table id="asignaturasSeleccionadas">
+      <th colspan="2" v-if="teacherAsignaturasToString">Asignaturas seleccionadas:</th>
+      <tr v-for="(asignatura, index) in teacherAsignaturas" :key="index">
+        {{
+          asignatura
+        }}
+        <td><button type="submit" @click="eliminarAsignatura">Eliminar</button></td>
+      </tr>
+    </table>
+  </div>
 </template>
 <style>
 .vistaPrevia {

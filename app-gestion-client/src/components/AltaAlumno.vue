@@ -2,95 +2,75 @@
 import { ref, type Ref } from 'vue'
 
 // Referencias del formulario
-let studentNombreRef: Ref<string | undefined> = ref(undefined)
-let studentApellidosRef: Ref<string | undefined> = ref(undefined)
-let studentDniRef: Ref<string | undefined> = ref(undefined)
-let studentDireccionRef: Ref<string | undefined> = ref(undefined)
-let studentTelefonoRef: Ref<number | undefined> = ref(undefined)
-let studentEmailRef: Ref<string | undefined> = ref(undefined)
+const studentRef = {
+  nombre: ref<string | undefined>(undefined),
+  apellidos: ref<string | undefined>(undefined),
+  dni: ref<string | undefined>(undefined),
+  direccion: ref<string | undefined>(undefined),
+  telefono: ref<number | undefined>(undefined),
+  email: ref<string | undefined>(undefined)
+}
 
 // Resetear los datos del formulario y poner cada ref a vacío
 const borrarDatosForm = () => {
-  studentNombreRef.value = undefined
-  studentApellidosRef.value = undefined
-  studentDniRef.value = undefined
-  studentDireccionRef.value = undefined
-  studentTelefonoRef.value = undefined
-  studentEmailRef.value = undefined
-  asignaturaSelected.value = ''
-  teacherAsignaturas.value = []
-  teacherAsignaturasToString.value = ''
-  console.log('Borrar Datos')
+  studentRef.nombre.value = undefined
+  studentRef.apellidos.value = undefined
+  studentRef.dni.value = undefined
+  studentRef.direccion.value = undefined
+  studentRef.telefono.value = undefined
+  studentRef.email.value = undefined
 }
 
 // VALIDAR DATOS DEL FORMULARIO
 const patronTel = /^\d{9}$/
 const patronEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const validarDatos = () => {
-  console.log('validar Datos')
-  if (
-    !studentNombreRef.value ||
-    !studentApellidosRef.value ||
-    !studentDniRef.value ||
-    !studentDireccionRef.value ||
-    !studentTelefonoRef.value ||
-    !studentEmailRef.value
-  ) {
-    alert('Por favor, complete todos los campos obligatorios.')
-    return false
-  }
-  if (!studentTelefonoRef.value || !patronTel.test(studentTelefonoRef.value.toString())) {
-    alert('El número de teléfono debe tener 9 dígitos numéricos.')
-    return false
-  }
-  if (!studentEmailRef.value || !patronEmail.test(studentEmailRef.value)) {
-    alert('Por favor, introduce un email válido.')
-    return false
-  }
-  return true
-}
 
 // FETCH PARA ENVIAR DATOS DEL ALUMNO A LA BD:
-function crearAlumno() {
-  const datosValidos = validarDatos()
-  if (datosValidos) {
-    fetch('http://localhost:3000/student', {
-      method: 'POST',
-      body: JSON.stringify({
-        nombre: studentNombreRef.value,
-        apellidos: studentApellidosRef.value,
-        dni: studentDniRef.value,
-        direccion: studentDireccionRef.value,
-        telefono: studentTelefonoRef.value,
-        email: studentEmailRef.value
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
-        } else {
-          alert('Alumno Creado')
-          // Imprimo los datos que he introducido
-          const datosAlumno = [
-            studentNombreRef.value,
-            studentApellidosRef.value,
-            studentDniRef.value,
-            studentDireccionRef.value,
-            studentTelefonoRef.value,
-            studentEmailRef.value
-          ]
-          console.table(datosAlumno)
-          borrarDatosForm()
-        }
+const crearAlumno = async () => {
+  if (!studentRef.telefono.value || !patronTel.test(studentRef.telefono.value.toString())) {
+    alert('El número de teléfono debe tener 9 dígitos numéricos.')
+    return
+  }
+  if (!studentRef.email.value || !patronEmail.test(studentRef.email.value)) {
+    alert('Por favor, introduce un email válido.')
+    return
+  } else {
+    try {
+      const response = await fetch('http://localhost:3000/student', {
+        method: 'POST',
+        body: JSON.stringify({
+          nombre: studentRef.nombre.value,
+          apellidos: studentRef.apellidos.value,
+          dni: studentRef.dni.value,
+          direccion: studentRef.direccion.value,
+          telefono: Number(studentRef.telefono.value),
+          email: studentRef.email.value
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
       })
-      .catch((error) => {
-        console.error('Error en la solicitud:', error)
-        alert('Ha ocurrido un error')
-      })
+      if (!response.ok) {
+        throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+      } else {
+        alert('Alumno Creado')
+        // Imprimo los datos que he introducido
+        const datosAlumno = [
+          studentRef.nombre.value,
+          studentRef.apellidos.value,
+          studentRef.dni.value,
+          studentRef.direccion.value,
+          studentRef.telefono.value,
+          studentRef.email.value
+        ]
+        console.table(datosAlumno)
+        borrarDatosForm()
+      }
+    } catch (error) {
+      console.error('Error en la solicitud:', error)
+      alert('Ha ocurrido un error')
+    }
   }
 }
 
@@ -100,7 +80,7 @@ const props = defineProps<{
   alumnoParaEditar:
     | {
         id: number
-        usuario_id: string
+        // usuario_id: string
         nombre: string
         apellidos: string
         dni: string
@@ -133,7 +113,7 @@ const actualizarAlumno = async () => {
           apellidos: alumnoEditado.value?.apellidos,
           dni: alumnoEditado.value?.dni,
           direccion: alumnoEditado.value?.direccion,
-          telefono: alumnoEditado.value?.telefono,
+          telefono: Number(alumnoEditado.value?.telefono),
           email: alumnoEditado.value?.email
         }),
         headers: {
@@ -141,10 +121,12 @@ const actualizarAlumno = async () => {
         },
         credentials: 'include'
       })
-      if (response.ok) {
+      if (!response.ok) {
+        throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+      } else {
         alert('Alumno Editado')
         // Imprimo los datos que he introducido
-        const AlumnoActualizado = [
+        const alumnoActualizado = [
           alumnoEditado.value?.nombre,
           alumnoEditado.value?.apellidos,
           alumnoEditado.value?.dni,
@@ -152,10 +134,8 @@ const actualizarAlumno = async () => {
           alumnoEditado.value?.telefono,
           alumnoEditado.value?.email
         ]
-        console.table(AlumnoActualizado)
+        console.table(alumnoActualizado)
         popUpStyle.value = false
-      } else {
-        throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
       }
     } catch (error) {
       console.error('Error en la solicitud:', error)
@@ -175,64 +155,15 @@ const resetearValoresIniciales = () => {
   alumnoEditado.value.telefono = props.alumnoParaEditar?.telefono
   alumnoEditado.value.direccion = props.alumnoParaEditar?.direccion
   alumnoEditado.value.email = props.alumnoParaEditar?.email
-  emit('resetearAlumno', alumnoEditado) // hago el emit y paso además el alumnoEdidado según el valor de solo lectura de las props recibidas
+  emit('resetearAlumno', alumnoEditado) // hago el emit y paso además el alumnoEditado según el valor de solo lectura de las props recibidas
 }
 
-// OBTENER Y AÑADIR ASIGNATURAS DADAS DE ALTA
-
-let asignaturas: Ref<
-  {
-    id: number
-    nombre: string
-  }[]
-> = ref([])
-
-let asignaturaSelected: Ref<string> = ref('')
-let teacherAsignaturas: Ref<string[]> = ref([])
-let teacherAsignaturasToString: Ref<string> = ref('')
-
-function getSubjectsData() {
-  fetch('http://localhost:3000/asignaturas', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include'
-  })
-    .then(async (response) => {
-      const data = (await response.json()) as {
-        id: number
-        nombre: string
-      }[]
-      asignaturas.value = data
-      console.log(data)
-    })
-    .catch((error) => {
-      alert('Hay un error' + error)
-      console.log('hay un error', error)
-    })
-}
-getSubjectsData()
-
-function agregarAsignatura() {
-  if (asignaturaSelected.value === '') {
-    // si quieren insertar un valor vacío salta una alerta
-    alert('Tienes que selecionar alguna asignatura')
+// FUNCION PARA ENVIAR DATOS DEL FORMULARIO
+const enviarDatosFormulario = () => {
+  if (popUpStyle.value) {
+    actualizarAlumno() // Función para actualizar alumno en modo edición
   } else {
-    teacherAsignaturas.value.push(asignaturaSelected.value)
-    teacherAsignaturasToString.value = teacherAsignaturas.value
-      .map((elemento) => ' ' + elemento) // recorro el array añadiendo un espacio a cada elemento
-      .toString() // lo convierto en string
-      .trimStart() // elimino el espacio al principio
-    asignaturaSelected.value = ''
-    console.log(teacherAsignaturasToString.value)
-  }
-}
-
-const eliminarAsignatura = (index: any) => {
-  teacherAsignaturas.value.splice(index, 1)
-  if (teacherAsignaturas.value.length === 0) {
-    teacherAsignaturasToString.value = ''
+    crearAlumno() // Función para crear un nuevo alumno
   }
 }
 </script>
@@ -242,136 +173,52 @@ const eliminarAsignatura = (index: any) => {
     <div class="form" :class="{ 'altaAlumnosPopup-content': popUpStyle }">
       <h1 v-if="popUpStyle" class="green">Editar alumno</h1>
       <h1 v-else class="green">Alta alumno</h1>
-      <form @submit.prevent="crearAlumno()">
-        <label class="green">Nombre</label>
-        <input
-          v-if="!popUpStyle"
-          type="text"
-          name=""
-          id="nombreInput"
-          required
-          v-model="studentNombreRef"
-        />
-        <!-- :value="popUpStyle ? alumnoEditado?.nombre : studentNombreRef" -->
-        <input
-          v-if="popUpStyle"
-          type="text"
-          name=""
-          id="nombreInput"
-          required
-          v-model="alumnoEditado.nombre"
-        />
-        <!-- si popUpStyle es true, v-model son las props que le paso desde el componente padre -->
-        <label class="green">Apellidos</label>
-        <input
-          v-if="!popUpStyle"
-          type="text"
-          name=""
-          id="apellidosInput"
-          required
-          v-model="studentApellidosRef"
-        />
-        <input
-          v-if="popUpStyle"
-          type="text"
-          name=""
-          id="apellidosInput"
-          required
-          v-model="alumnoEditado.apellidos"
-        />
-        <label class="green">Dni</label>
-        <input
-          v-if="!popUpStyle"
-          type="text"
-          name=""
-          id="dniInput"
-          required
-          v-model="studentDniRef"
-        />
-        <input
-          v-if="popUpStyle"
-          type="text"
-          name=""
-          id="dniInput"
-          required
-          v-model="alumnoEditado.dni"
-        />
-        <label class="green">Teléfono</label>
-        <input
-          v-if="!popUpStyle"
-          type="tel"
-          pattern="^\d{9}$"
-          name=""
-          id="telefonoInput"
-          required
-          v-model="studentTelefonoRef"
-        />
-        <input
-          v-if="popUpStyle"
-          type="tel"
-          pattern="^\d{9}$"
-          name=""
-          id="telefonoInput"
-          required
-          v-model="alumnoEditado.telefono"
-        />
-        <label class="green">Dirección</label>
-        <input
-          v-if="!popUpStyle"
-          type="text"
-          name=""
-          id="direcciónInput"
-          required
-          v-model="studentDireccionRef"
-        />
-        <input
-          v-if="popUpStyle"
-          type="text"
-          name=""
-          id="direcciónInput"
-          required
-          v-model="alumnoEditado.direccion"
-        />
-        <label class="green">Email</label>
-        <input
-          v-if="!popUpStyle"
-          type="email"
-          name=""
-          id="emailInput"
-          required
-          v-model="studentEmailRef"
-        />
-        <input
-          v-if="popUpStyle"
-          required
-          type="email"
-          name=""
-          id="emailInput"
-          v-model="alumnoEditado.email"
-        />
-        <label class="green">Asignaturas</label>
-        <select name="" id="asignaturasInput" v-model="asignaturaSelected">
-          <option selected disabled>Seleccione la asignatura</option>
-          <option v-for="asignatura in asignaturas" :key="asignatura.id">
-            {{ asignatura.nombre }}
-          </option>
-        </select>
-        <button type="button" @click="agregarAsignatura()">Agregar</button>
-        <div>
-          <table id="asignaturasSeleccionadas">
-            <th colspan="2" v-if="teacherAsignaturasToString">Asignaturas seleccionadas:</th>
-            <tr v-for="(asignatura, index) in teacherAsignaturas" :key="index">
-              {{
-                asignatura
-              }}
-              <td><button type="submit" @click="eliminarAsignatura">Eliminar</button></td>
-            </tr>
-          </table>
+      <form @submit.prevent="enviarDatosFormulario()">
+        <div v-if="!popUpStyle">
+          <!--MODO CREAR -->
+          <label class="green">Nombre</label>
+          <input type="text" id="nombreInput" required v-model="studentRef.nombre.value" />
+          <label class="green">Apellidos</label>
+          <input type="text" id="apellidosInput" required v-model="studentRef.apellidos.value" />
+          <label class="green">Dni</label>
+          <input type="text" id="dniInput" required v-model="studentRef.dni.value" />
+          <label class="green">Teléfono</label>
+          <input
+            type="tel"
+            pattern="^\d{9}$"
+            id="telefonoInput"
+            required
+            v-model="studentRef.telefono.value"
+          />
+          <label class="green">Dirección</label>
+          <input type="text" id="direcciónInput" required v-model="studentRef.direccion.value" />
+          <label class="green">Email</label>
+          <input type="email" id="emailInput" required v-model="studentRef.email.value" />
         </div>
-        <button type="reset" @click="borrarDatosForm()">Borrar</button>
+        <div v-if="popUpStyle">
+          <!--MODO ACTUALIZAR -->
+          <label class="green">Nombre</label>
+          <input type="text" id="nombreInput" required v-model="alumnoEditado.nombre" />
+          <label class="green">Apellidos</label>
+          <input type="text" id="apellidosInput" required v-model="alumnoEditado.apellidos" />
+          <label class="green">Dni</label>
+          <input type="text" id="dniInput" required v-model="alumnoEditado.dni" />
+          <label class="green">Teléfono</label>
+          <input
+            type="tel"
+            pattern="^\d{9}$"
+            id="telefonoInput"
+            required
+            v-model="alumnoEditado.telefono"
+          />
+          <label class="green">Dirección</label>
+          <input type="text" id="direcciónInput" required v-model="alumnoEditado.direccion" />
+          <label class="green">Email</label>
+          <input required type="email" id="emailInput" v-model="alumnoEditado.email" />
+        </div>
+        <button type="reset" @click="borrarDatosForm()">Borrar datos</button>
         <button type="reset" v-if="popUpStyle" @click="resetearValoresIniciales">Resetear</button>
-        <button type="submit" v-if="!popUpStyle" @click="crearAlumno()">Enviar</button>
-        <button type="button" v-if="popUpStyle" @click="actualizarAlumno()">Enviar</button>
+        <button type="submit">{{ popUpStyle ? 'Actualizar' : 'Enviar' }}</button>
         <button type="button" v-if="popUpStyle" @click="emit('cerrarPopUp')">Cancelar</button>
       </form>
     </div>
@@ -388,16 +235,20 @@ const eliminarAsignatura = (index: any) => {
 
   & Form {
     display: flex;
+    flex-wrap: wrap;
     flex-direction: column;
     justify-content: center;
   }
+  div label {
+    display: block;
+  }
 
-  & input {
+  div input {
     height: 25px;
     border-radius: 5px;
   }
 
-  & button {
+  button {
     margin-top: 10px;
     width: 100px;
     height: 25px;
@@ -408,7 +259,7 @@ const eliminarAsignatura = (index: any) => {
     cursor: pointer;
   }
 }
-.altaAlumnosPopup {
+.container.altaAlumnosPopup {
   position: fixed;
   top: 0;
   left: 0;
@@ -426,31 +277,35 @@ const eliminarAsignatura = (index: any) => {
   padding: 10px;
   border-radius: 10px;
   border: 1px solid white;
+  display: flex;
+  flex-direction: column; /* Añadido para disponer los elementos verticalmente */
 
-  & button {
-    cursor: pointer;
-  }
-}
-
-#asignaturasSeleccionadas {
-  /* display: flex;
-  flex-wrap: column; */
-  width: fit-content;
-  border: none;
-
-  & td {
-    text-align: center;
-    vertical-align: text-bottom;
-    border: none;
+  & label {
+    display: block;
+    margin-bottom: 5px;
   }
 
-  & button {
-    width: 100px;
+  & input {
     height: 25px;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+
+  & button {
+    margin-top: 10px;
+    width: 100px;
+    height: 30px;
     background-color: hsla(160, 100%, 37%, 1);
     color: white;
     border: 1px solid hsla(160, 100%, 37%, 1);
     border-radius: 5px;
+    cursor: pointer;
+    margin: auto;
+    margin-top: 10px;
   }
 }
 </style>

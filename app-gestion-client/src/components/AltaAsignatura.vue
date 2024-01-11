@@ -81,7 +81,6 @@ function getAsignaturasData() {
       } else {
         //   loadingStore.loadingTrue()
         //   await new Promise((resolve) => setTimeout(resolve, 2000))
-
         const data = (await response.json()) as {
           id: number
           nombre: string
