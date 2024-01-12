@@ -110,7 +110,7 @@ const borrarProfesor = async () => {
     if (response.status === 204) {
       loadingStore.loadingTrue()
       await new Promise((resolve) => setTimeout(resolve, 2000))
-      alert('Alumno borrado con éxito')
+      alert('Profesor borrado con éxito')
       popupVisible.value = false
       getTeachersData()
     } else {

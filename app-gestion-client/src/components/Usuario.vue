@@ -5,25 +5,39 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const props = defineProps<{
-  teacherData: {
+  userData: {
     id: number
-    nombre: string
-    apellidos: string
+    username: string
     email: string
-    asignaturas: string
+    pass: string
+    permiso: number
   }
 }>()
 
-let teacherIdRef: Ref<number | undefined> = ref(undefined) // Puede ser number o undefined y el valor por defecto es undefined
+// OBTENER PERMISO A STRING
+const obtenerPermisoString = (permiso: number) => {
+  switch (permiso) {
+    case 0:
+      return 'Alumno'
+    case 1:
+      return 'Profesor'
+    case 9:
+      return 'Administrador'
+    default:
+      return 'Desconocido'
+  }
+}
 
-let teacherDataFromServer = ref(props.teacherData) // datos del estudiante de la base de datos que se pasan como props
+let userIdRef: Ref<number | undefined> = ref(undefined) // Puede ser number o undefined y el valor por defecto es undefined
 
-teacherIdRef.value = Number(router.currentRoute.value.params.id)
-const teacherId = Number(router.currentRoute.value.params.id)
-console.log(teacherId)
+let userDataFromServer = ref(props.userData) // datos del estudiante de la base de datos que se pasan como props
+
+userIdRef.value = Number(router.currentRoute.value.params.id)
+const userId = Number(router.currentRoute.value.params.id)
+console.log(userId)
 console.log(router.currentRoute.value.params['id'])
 
-fetch(`http://localhost:3000/teacher/${teacherIdRef.value}`, {
+fetch(`http://localhost:3000/usuario/${userIdRef.value}`, {
   method: 'GET',
   headers: {
     'Content-Type': 'application/json'
@@ -32,19 +46,19 @@ fetch(`http://localhost:3000/teacher/${teacherIdRef.value}`, {
 }).then(async (response) => {
   const data = (await response.json()) as {
     id: number
-    nombre: string
-    apellidos: string
+    username: string
     email: string
-    asignaturas: string
+    pass: string
+    permiso: number
   }
-  teacherDataFromServer.value = data
+  userDataFromServer.value = data
   console.log(data)
 })
 
-// LÓGICA BORRAR PROFESOR
-const borrarProfesor = async () => {
+// LÓGICA BORRAR USUARIO
+const borrarUsuario = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/teacher/${teacherIdRef.value}`, {
+    const response = await fetch(`http://localhost:3000/usuario/${userIdRef.value}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json'
@@ -52,8 +66,8 @@ const borrarProfesor = async () => {
       credentials: 'include'
     })
     if (response.status === 204) {
-      alert('Profesor borrado con éxito')
-      router.push('/listado-profesores')
+      alert('Usuario borrado con éxito')
+      router.push('/listado-usuarios')
     } else {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
     }
@@ -72,17 +86,17 @@ const confirmacionBorrar = () => {
 </script>
 
 <template>
-  <div v-if="teacherDataFromServer">
-    <h2>Detalle del Profesor</h2>
-    <p>Nombre: {{ teacherDataFromServer.nombre }}</p>
-    <p>Apellidos: {{ teacherDataFromServer.apellidos }}</p>
-    <p>Email: {{ teacherDataFromServer.email }}</p>
-    <p>Asignaturas: {{ teacherDataFromServer.asignaturas }}</p>
-    <button type="button" @click="confirmacionBorrar">Borrar profesor</button>
+  <div v-if="userDataFromServer">
+    <h2>Detalle del Usuario</h2>
+    <p>Username: {{ userDataFromServer.username }}</p>
+    <p>Email: {{ userDataFromServer.email }}</p>
+    <p>Pass: {{ userDataFromServer.pass }}</p>
+    <p>Permiso: {{ obtenerPermisoString(userDataFromServer.permiso) }}</p>
+    <button type="button" @click="confirmacionBorrar">Borrar usuario</button>
     <div v-show="confirmacionEliminar">
       <!-- Este div se muestra para confirmar el borrado  -->
-      <h4>¿Estás seguro que quieres borrar el profesor?</h4>
-      <button type="button" @click="borrarProfesor">Si</button>
+      <h4>¿Estás seguro que quieres borrar el usuario?</h4>
+      <button type="button" @click="borrarUsuario">Si</button>
       <button type="button" @click="confirmacionBorrar">No</button>
     </div>
   </div>

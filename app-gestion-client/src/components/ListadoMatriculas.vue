@@ -5,7 +5,6 @@ import Popup from './Popup.vue'
 import AltaAlumno from './AltaAlumno.vue'
 import { useLoadingStore } from '@/stores/loading'
 import { useEditingStore } from '@/stores/editar'
-// import { getStudentsData } from '@/utils/peticionesFetch'
 
 const router = useRouter() // router para ir al alumno cuando se clique en él
 const loadingStore = useLoadingStore() // store del Spinner

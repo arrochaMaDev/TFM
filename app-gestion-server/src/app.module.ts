@@ -58,6 +58,8 @@ import { GetMatriculasByStudentIdService } from './Controllers/Matricula/Get/lis
 import { GetMatriculasByStudentIdController } from './Controllers/Matricula/Get/listerMatriculasByStudentId.controller';
 import { UpdateMatriculaController } from './Controllers/Matricula/Update/updateMatricula.controller';
 import { UpdateMatriculaService } from './Controllers/Matricula/Update/updateMatricula.service';
+import { UpdateUserController } from './Controllers/User/Update/updateUser.controller';
+import { UpdateUserService } from './Controllers/User/Update/updateUser.service';
 
 @Module({
   imports: [
@@ -98,6 +100,7 @@ import { UpdateMatriculaService } from './Controllers/Matricula/Update/updateMat
     UpdateStudentController,
     UpdateSubjectController,
     UpdateTeacherController,
+    UpdateUserController,
     UpdateMatriculaController,
     ListerStudentsController,
     ListerTeachersController,
@@ -126,6 +129,7 @@ import { UpdateMatriculaService } from './Controllers/Matricula/Update/updateMat
     UpdateStudentService,
     UpdateSubjectService,
     UpdateTeacherService,
+    UpdateUserService,
     UpdateMatriculaService,
     ListerStudentsService,
     ListerTeachersService,

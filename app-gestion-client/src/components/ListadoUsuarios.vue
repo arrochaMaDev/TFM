@@ -2,12 +2,11 @@
 import { type Ref, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Popup from './Popup.vue'
-import AltaAlumno from './AltaAlumno.vue'
+import AltaUsuario from './AltaUsuario.vue'
 import { useLoadingStore } from '@/stores/loading'
 import { useEditingStore } from '@/stores/editar'
-// import { getStudentsData } from '@/utils/peticionesFetch'
 
-const router = useRouter() // router para ir al alumno cuando se clique en él
+const router = useRouter() // router para ir al usuario cuando se clique en él
 const loadingStore = useLoadingStore() // store del Spinner
 
 // OBTENER DATOS DE TODOS LOS USUARIOS
@@ -99,14 +98,14 @@ const obtenerPermisoString = (permiso: number) => {
       return 'Desconocido'
   }
 }
-// LÓGICA BORRAR ALUMNO
+// LÓGICA BORRAR USUARIO
 let popupVisible: Ref<boolean> = ref(false) // ref para ocultar o mostrar el popup
-let idAlumnoSeleccionado: Ref<number | null> = ref(null) // ref del id del alumno seleccionado para borrar
+let idUsuarioSeleccionado: Ref<number | null> = ref(null) // ref del id del usuario seleccionado para borrar
 
-const borrarAlumno = async () => {
+const borrarUsuario = async () => {
   // funcion con async/await y try/catch en vez de fetch con .then y .catch
   try {
-    const response = await fetch(`http://localhost:3000/student/${idAlumnoSeleccionado.value}`, {
+    const response = await fetch(`http://localhost:3000/usuario/${idUsuarioSeleccionado.value}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json'
@@ -116,7 +115,7 @@ const borrarAlumno = async () => {
     if (response.status === 204) {
       loadingStore.loadingTrue()
       await new Promise((resolve) => setTimeout(resolve, 2000))
-      alert('Alumno borrado con éxito')
+      alert('Usuario borrado con éxito')
       popupVisible.value = false
       getUsersData()
     } else {
@@ -134,22 +133,22 @@ const borrarAlumno = async () => {
 const cancelarBorrar = () => {
   // si se da click en NO se cancela el borrado
   popupVisible.value = false
-  idAlumnoSeleccionado.value = null
+  idUsuarioSeleccionado.value = null
 }
 
 const mostrarPopup = (id: number) => {
-  // si se da click en SI, se muestra el popup y recibe el id del alumno a borrar
-  idAlumnoSeleccionado.value = id
+  // si se da click en SI, se muestra el popup y recibe el id del usuario a borrar
+  idUsuarioSeleccionado.value = id
   popupVisible.value = true
 }
 
 // LÓGICA EDITAR ALUMNO
-const editingStore = useEditingStore() // store del componente editar Alumno
+const editingStore = useEditingStore() // store del componente editar Usuario
 
 let popUpState: Ref<boolean> = ref(editingStore.editarFalse()) // variable del estado del popUp
 console.log(popUpState.value)
 
-let alumnoEditar: Ref<
+let usuarioEditar: Ref<
   | {
       id: number
       usuario_id: string
@@ -163,12 +162,12 @@ let alumnoEditar: Ref<
   | undefined
 > = ref(undefined)
 
-const editarAlumno = (student: any) => {
+const editarUsuario = (student: any) => {
   // popUpState.value = true
   editingStore.editarTrue()
-  alumnoEditar.value = student
-  // fetch para obtener los datos del alumno
-  fetch(`http://localhost:3000/student/${alumnoEditar.value?.id}`, {
+  usuarioEditar.value = student
+  // fetch para obtener los datos del usuario
+  fetch(`http://localhost:3000/student/${usuarioEditar.value?.id}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -185,12 +184,12 @@ const editarAlumno = (student: any) => {
       telefono: number
       email: string
     }
-    alumnoEditar.value = data
+    usuarioEditar.value = data
     console.table(data)
   })
 }
 
-const mostrarAltaAlumno = () => {
+const mostrarAltaUsuario = () => {
   // popUpState.value = true
   popUpState.value = editingStore.editarTrue()
   console.log(popUpState.value)
@@ -202,10 +201,10 @@ const resetearPopUpState = () => {
   console.log(popUpState.value)
 }
 
-// Ir a la página idividual del alumno
+// Ir a la página idividual del usuario
 const goToStudent = (id: number) => {
   router.push({
-    path: `/alumno/${id}`
+    path: `/usuario/${id}`
   })
 }
 </script>
@@ -243,25 +242,25 @@ const goToStudent = (id: number) => {
             <button type="button" @click="goToStudent(user.id)">Ver</button>
           </td>
           <td>
-            <button type="button" @click="editarAlumno(user), mostrarAltaAlumno()">Editar</button>
+            <button type="button" @click="editarUsuario(user), mostrarAltaUsuario()">Editar</button>
           </td>
           <td><button type="button" @click="mostrarPopup(user.id)">Borrar</button></td>
-          <!-- le paso el id del alumno que quiero borrar -->
+          <!-- le paso el id del usuario que quiero borrar -->
         </tr>
       </table>
     </div>
-    <Popup v-if="popupVisible" @confirmar="borrarAlumno" @cancelar="cancelarBorrar"></Popup>
-    <!-- recibo un emit de confirmar que ejecuta la funcion borrarAlumno y otro emit de cancelar que ejecuta cancelarBorrar -->
-    <AltaAlumno
+    <Popup v-if="popupVisible" @confirmar="borrarUsuario" @cancelar="cancelarBorrar"></Popup>
+    <!-- recibo un emit de confirmar que ejecuta la funcion borrarUsuario y otro emit de cancelar que ejecuta cancelarBorrar -->
+    <AltaUsuario
       v-if="popUpState"
       :isEditing="popUpState"
       @cerrarPopUp="resetearPopUpState"
-      @obtenerAlumnos="getUsersData()"
-      @resetearAlumno="editarAlumno(alumnoEditar)"
-      :alumnoParaEditar="alumnoEditar"
+      @obtenerUsuarios="getUsersData()"
+      @resetearUsuario="editarUsuario(usuarioEditar)"
+      :usuarioParaEditar="usuarioEditar"
     >
-      <!-- para resetear valores, recibo un emit y vuelvo a ejecutar la funcion editarAlumnos con los parámetros recibidos del componente hijo-->
-    </AltaAlumno>
+      <!-- para resetear valores, recibo un emit y vuelvo a ejecutar la funcion editarUsuarios con los parámetros recibidos del componente hijo-->
+    </AltaUsuario>
   </div>
 </template>
 <style scoped>

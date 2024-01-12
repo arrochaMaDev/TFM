@@ -8,6 +8,7 @@ import BuscadorAlumno from '@/components/BuscadorAlumno.vue'
 import ListadoAlumnos from '@/components/ListadoAlumnos.vue'
 import Alumno from '@/components/Alumno.vue'
 import Profesor from '@/components/Profesor.vue'
+import Usuario from '@/components/Usuario.vue'
 import LoginUser from '@/components/LoginUser.vue'
 import ListadoProfesores from '@/components/ListadoProfesores.vue'
 import Matricula from '@/components/Matricula.vue'
@@ -81,6 +82,14 @@ const router = createRouter({
       name: 'profesor',
 
       component: Profesor,
+      // props: { shouldGetData: true } // para pasar información mediante los props (ejemplo: id)
+      props: true // para pasar información mediante los props (ejemplo: id)
+    },
+    {
+      path: '/usuario/:id',
+      name: 'usuario',
+
+      component: Usuario,
       // props: { shouldGetData: true } // para pasar información mediante los props (ejemplo: id)
       props: true // para pasar información mediante los props (ejemplo: id)
     },
