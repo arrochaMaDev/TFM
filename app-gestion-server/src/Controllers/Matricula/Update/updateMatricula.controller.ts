@@ -15,8 +15,8 @@ export class UpdateMatriculaController {
     @Param('id') matriculaId: number,
     @Body()
     updatedData: {
-      newSubjectId?: Partial<SubjectDb>; // en este caso se maneja en la petición mediante las propiedades del objeto
-      newTeacherId?: Partial<TeacherDb>;
+      newSubject?: Partial<SubjectDb>; // en este caso se maneja en la petición mediante las propiedades del objeto
+      newTeacher?: Partial<TeacherDb>;
       // newTeacherId?: number // Otra opción es manejarlo como number. En este caso, solo le estaremos pasando el id. No el objeto y sus propiedades
     },
     @Res() response: Response,
@@ -25,8 +25,8 @@ export class UpdateMatriculaController {
       const updatedMatricula =
         await this.updateMatriculaService.updateMatricula(
           matriculaId,
-          updatedData.newSubjectId,
-          updatedData.newTeacherId,
+          updatedData.newSubject,
+          updatedData.newTeacher,
         );
 
       if (!updatedMatricula) {

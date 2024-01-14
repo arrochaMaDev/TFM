@@ -203,7 +203,7 @@ const enviarDatosFormulario = () => {
           <label class="green">Email</label>
           <input required type="email" id="emailInput" v-model="teacherRef.email.value" />
           <label class="green">Asignaturas</label>
-          <select required id="asignaturasInput" v-model="asignaturaSelected">
+          <select id="asignaturasInput" v-model="asignaturaSelected">
             <option selected disabled>Seleccione la asignatura</option>
             <option v-for="asignatura in asignaturas" :key="asignatura.id">
               {{ asignatura.nombre }}

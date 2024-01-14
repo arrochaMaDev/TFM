@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, type Ref } from 'vue'
 import { useRouter } from 'vue-router'
+import Popup from './Popup.vue'
+import Matricula from './Matricula.vue'
+import { useEditingStore } from '@/stores/editar'
 
 const router = useRouter()
 
@@ -26,33 +29,38 @@ const studentId = Number(router.currentRoute.value.params.id)
 console.log(studentId)
 console.log(router.currentRoute.value.params['id'])
 
-fetch(`http://localhost:3000/student/${studentIdRef.value}`, {
-  method: 'GET',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  credentials: 'include'
-}).then(async (response) => {
-  const data = (await response.json()) as {
-    id: number
-    usuario_id: string
-    nombre: string
-    apellidos: string
-    dni: string
-    direccion: string
-    telefono: string
-    email: string
+// OBTENER DATOS DEL ESTUDIANTE
+const getStudentData = async () => {
+  try {
+    const response = await fetch(`http://localhost:3000/student/${studentIdRef.value}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      const data = (await response.json()) as {
+        id: number
+        usuario_id: string
+        nombre: string
+        apellidos: string
+        dni: string
+        direccion: string
+        telefono: string
+        email: string
+      }
+      studentDataFromServer.value = data
+      console.log(data)
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    alert('Ha ocurrido un error')
   }
-  studentDataFromServer.value = data
-  console.log(data)
-})
-
-// Obtener la fecha actual
-const fechaActual = new Date()
-// Obtener el año de la fecha actual
-const añoActual = fechaActual.getFullYear()
-/**
- * !! OJO QUE SI SE HACE ASÍ, CUANDO ESTEMOS EN ENERO APARECERÁ EL AÑO 2024/2025 */
+}
+getStudentData()
 
 // LÓGICA BORRAR ALUMNO
 const borrarAlumno = async () => {
@@ -110,7 +118,7 @@ let matriculaFromServer: Ref<{
   }[]
 } | null> = ref(null)
 
-const getStudentData = async () => {
+const getMatriculasData = async () => {
   try {
     const response = await fetch(`http://localhost:3000/matriculas/student/${studentIdRef.value}`, {
       method: 'GET',
@@ -137,22 +145,140 @@ const getStudentData = async () => {
     alert('Ha ocurrido un error')
   }
 }
-getStudentData()
+getMatriculasData()
+
+// LÓGICA BORRAR MATRICULA
+let popupVisible: Ref<boolean> = ref(false) // ref para ocultar o mostrar el popup
+let idMatriculaSeleccionada: Ref<number | null> = ref(null) // ref del id de la matricula seleccionado para borrar
+
+const borrarMatricula = async () => {
+  try {
+    const response = await fetch(
+      `http://localhost:3000/matricula/${idMatriculaSeleccionada.value}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      }
+    )
+    if (response.status === 204) {
+      alert('Matricula borrada con éxito')
+      popupVisible.value = false
+      getMatriculasData()
+    } else {
+      throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    alert('Ha ocurrido un error')
+    popupVisible.value = false
+  }
+}
+const cancelarBorrar = () => {
+  // si se da click en NO se cancela el borrado
+  popupVisible.value = false
+  idMatriculaSeleccionada.value = null
+}
+
+const mostrarPopup = (id: number) => {
+  // si se da click en SI, se muestra el popup y recibe el id del alumno a borrar
+  idMatriculaSeleccionada.value = id
+  popupVisible.value = true
+}
+
+// LÓGICA EDITAR MATRICULA
+const editingStore = useEditingStore() // store del componente editar Alumno
+
+let popUpState: Ref<boolean> = ref(editingStore.editarFalse()) // variable del estado del popUp
+console.log(popUpState.value)
+
+let matriculaEditar: Ref<
+  | {
+      id: number
+      student: {
+        id: number
+        nombre: string
+        apellidos: string
+        dni: string
+      }
+      subject: {
+        id: number
+        nombre: string
+      }
+      teacher: {
+        id: number
+        nombre: string
+        apellidos: string
+      }
+    }
+  | undefined
+> = ref(undefined)
+
+const editarMatricula = (matricula: any) => {
+  // popUpState.value = true
+  editingStore.editarTrue()
+  matriculaEditar.value = matricula
+  // fetch para obtener los datos del alumno
+  fetch(`http://localhost:3000/matricula/${matriculaEditar.value?.id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
+  }).then(async (response) => {
+    const data = (await response.json()) as {
+      id: number
+      student: {
+        id: number
+        nombre: string
+        apellidos: string
+        dni: string
+      }
+      subject: {
+        id: number
+        nombre: string
+      }
+      teacher: {
+        id: number
+        nombre: string
+        apellidos: string
+      }
+    }
+    matriculaEditar.value = data
+    console.table(data)
+  })
+}
+
+const mostrarMatricula = () => {
+  // popUpState.value = true
+  popUpState.value = editingStore.editarTrue()
+  console.log(popUpState.value)
+}
+
+const resetearPopUpState = () => {
+  // popUpState.value = false
+  popUpState.value = editingStore.editarFalse()
+  console.log(popUpState.value)
+}
 </script>
 
 <template>
   <div v-if="studentDataFromServer">
     <h2>Detalle del Alumno</h2>
-    <p>Usuario_id: {{ studentDataFromServer.usuario_id }}</p>
-    <p>Nombre: {{ studentDataFromServer.nombre }}</p>
-    <p>Apellidos: {{ studentDataFromServer.apellidos }}</p>
-    <p>DNI: {{ studentDataFromServer.dni }}</p>
-    <p>Direccion: {{ studentDataFromServer.direccion }}</p>
-    <p>telefono: {{ studentDataFromServer.telefono }}</p>
-    <p>Email: {{ studentDataFromServer.email }}</p>
+    <ul>
+      <p>Usuario_id: {{ studentDataFromServer.usuario_id }}</p>
+      <p>Nombre: {{ studentDataFromServer.nombre }}</p>
+      <p>Apellidos: {{ studentDataFromServer.apellidos }}</p>
+      <p>DNI: {{ studentDataFromServer.dni }}</p>
+      <p>Direccion: {{ studentDataFromServer.direccion }}</p>
+      <p>telefono: {{ studentDataFromServer.telefono }}</p>
+      <p>Email: {{ studentDataFromServer.email }}</p>
+    </ul>
     <div>
       <table id="tabla" v-if="matriculaFromServer">
-        <th colspan="5"><h3>MATRICULAS</h3></th>
+        <th colspan="2"><h3>MATRICULAS</h3></th>
         <tr>
           <th>
             <h3>Asignatura</h3>
@@ -164,97 +290,73 @@ getStudentData()
         <tr id="alumno" v-for="matricula in matriculaFromServer?.matriculas" :key="matricula.id">
           <td>{{ matricula.subject.nombre }}</td>
           <td>{{ matricula.teacher.nombre + ' ' + matricula.teacher.apellidos }}</td>
+          <td>
+            <button type="button" @click="editarMatricula(matricula), mostrarMatricula()">
+              Editar
+            </button>
+          </td>
+          <td><button type="button" @click="mostrarPopup(matricula.id)">Borrar</button></td>
         </tr>
       </table>
     </div>
-    <div>
-      <table id="tabla">
-        <th colspan="2">
-          <h3>Cuotas {{ añoActual }} / {{ añoActual + 1 }}</h3>
-        </th>
-        <tr>
-          <th>
-            <h3>Mes</h3>
-          </th>
-          <th>
-            <h3>Estado</h3>
-          </th>
-        </tr>
-        <tr>
-          <td>Octubre</td>
-          <td>Pendiente</td>
-        </tr>
-        <tr>
-          <td>Noviembre</td>
-          <td>Pendiente</td>
-        </tr>
-        <tr>
-          <td>Diciembre</td>
-          <td>Pendiente</td>
-        </tr>
-        <tr>
-          <td>Enero</td>
-          <td>Pendiente</td>
-        </tr>
-        <tr>
-          <td>Febrero</td>
-          <td>Pendiente</td>
-        </tr>
-        <tr>
-          <td>Marzo</td>
-          <td>Pendiente</td>
-        </tr>
-        <tr>
-          <td>Abril</td>
-          <td>Pendiente</td>
-        </tr>
-        <tr>
-          <td>Mayo</td>
-          <td>Pendiente</td>
-        </tr>
-        <tr>
-          <td>Junio</td>
-          <td>Pendiente</td>
-        </tr>
-      </table>
-    </div>
+    <Popup v-if="popupVisible" @confirmar="borrarMatricula" @cancelar="cancelarBorrar"></Popup>
+    <Matricula
+      v-if="popUpState"
+      :isEditing="popUpState"
+      @cerrarPopUp="resetearPopUpState"
+      @obtenerMatriculas="getMatriculasData()"
+      @resetearMatricula="editarMatricula(matriculaEditar)"
+      :matriculaParaEditar="matriculaEditar"
+    >
+    </Matricula>
     <button type="button" @click="confirmacionBorrar">Borrar alumno</button>
     <div v-show="confirmacionEliminar">
       <!-- Este div se muestra para confirmar el borrado  -->
       <h4>¿Estás seguro que quieres borrar el alumno?</h4>
-      <button type="button" @click="borrarAlumno">Si</button>
+      <button type="button" id="borrarAlumno" @click="borrarAlumno">Si</button>
       <button type="button" @click="confirmacionBorrar">No</button>
     </div>
   </div>
 </template>
 
-<style>
+<style scoped>
+#ordenarPor {
+  margin: 0px;
+}
 table {
-  margin-top: 50px;
-  width: 300px;
-  border: 1px solid #ffffff;
+  margin-top: 0px;
+  width: max-content;
+  border: none;
 
   & th {
     background-color: rgb(79, 90, 86);
   }
-
   & td {
     width: fit-content;
-    text-align: center;
+    text-align: left;
     vertical-align: top;
-    border: 1px solid #ffffff;
+    border: none;
     border-spacing: 0;
   }
 }
 
+table tr:hover td {
+  transition: background-color 0.5s;
+  background-color: rgb(106, 98, 53);
+}
+
+table tr:hover td:nth-last-child(-n + 2) {
+  background-color: initial;
+}
+
 button {
-  margin-top: 10px;
-  width: 100px;
+  width: auto;
   height: 25px;
   background-color: hsla(160, 100%, 37%, 1);
   color: white;
   border: 1px solid hsla(160, 100%, 37%, 1);
   border-radius: 5px;
-  margin: 5px;
+  margin: 1px;
+  cursor: pointer;
 }
 </style>

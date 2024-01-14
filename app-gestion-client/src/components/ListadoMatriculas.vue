@@ -2,7 +2,7 @@
 import { type Ref, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Popup from './Popup.vue'
-import AltaAlumno from './AltaAlumno.vue'
+import Matricula from './Matricula.vue'
 import { useLoadingStore } from '@/stores/loading'
 import { useEditingStore } from '@/stores/editar'
 
@@ -38,7 +38,7 @@ let matriculasRefFromServer: Ref<
   }[]
 > = ref([])
 
-const getStudentsData = async () => {
+const getMatriculasData = async () => {
   try {
     const response = await fetch('http://localhost:3000/matriculas', {
       method: 'GET',
@@ -109,30 +109,31 @@ const ordenarMatriculas = () => {
 }
 onMounted(() => {
   ordenarMatriculas()
-  getStudentsData()
+  getMatriculasData()
 })
 
-/*
-// LÓGICA BORRAR ALUMNO
+// LÓGICA BORRAR MATRICULA
 let popupVisible: Ref<boolean> = ref(false) // ref para ocultar o mostrar el popup
-let idAlumnoSeleccionado: Ref<number | null> = ref(null) // ref del id del alumno seleccionado para borrar
+let idMatriculaSeleccionada: Ref<number | null> = ref(null) // ref del id de la matricula seleccionado para borrar
 
-const borrarAlumno = async () => {
-  // funcion con async/await y try/catch en vez de fetch con .then y .catch
+const borrarMatricula = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/student/${idAlumnoSeleccionado.value}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    })
+    const response = await fetch(
+      `http://localhost:3000/matricula/${idMatriculaSeleccionada.value}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      }
+    )
     if (response.status === 204) {
       loadingStore.loadingTrue()
       await new Promise((resolve) => setTimeout(resolve, 2000))
-      alert('Alumno borrado con éxito')
+      alert('Matricula borrada con éxito')
       popupVisible.value = false
-      getStudentsData()
+      getMatriculasData()
     } else {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
     }
@@ -148,43 +149,49 @@ const borrarAlumno = async () => {
 const cancelarBorrar = () => {
   // si se da click en NO se cancela el borrado
   popupVisible.value = false
-  idAlumnoSeleccionado.value = null
+  idMatriculaSeleccionada.value = null
 }
 
 const mostrarPopup = (id: number) => {
   // si se da click en SI, se muestra el popup y recibe el id del alumno a borrar
-  idAlumnoSeleccionado.value = id
+  idMatriculaSeleccionada.value = id
   popupVisible.value = true
 }
-*/
 
-/*
-// LÓGICA EDITAR ALUMNO
+// LÓGICA EDITAR MATRICULA
 const editingStore = useEditingStore() // store del componente editar Alumno
 
 let popUpState: Ref<boolean> = ref(editingStore.editarFalse()) // variable del estado del popUp
 console.log(popUpState.value)
 
-let alumnoEditar: Ref<
+let matriculaEditar: Ref<
   | {
       id: number
-      usuario_id: string
-      nombre: string
-      apellidos: string
-      dni: string
-      direccion: string
-      telefono: number
-      email: string
+      student: {
+        id: number
+        nombre: string
+        apellidos: string
+        dni: string
+      }
+      subject: {
+        id: number
+        nombre: string
+      }
+      teacher: {
+        id: number
+        nombre: string
+        apellidos: string
+      }
     }
   | undefined
 > = ref(undefined)
 
-const editarAlumno = (student: any) => {
+const editarMatricula = (matricula: any) => {
   // popUpState.value = true
   editingStore.editarTrue()
-  alumnoEditar.value = student
+  matriculaEditar.value = matricula
   // fetch para obtener los datos del alumno
-  fetch(`http://localhost:3000/student/${alumnoEditar.value?.id}`, {
+  fetch(`http://localhost:3000/matricula/${matriculaEditar.value?.id}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -193,20 +200,28 @@ const editarAlumno = (student: any) => {
   }).then(async (response) => {
     const data = (await response.json()) as {
       id: number
-      usuario_id: string
-      nombre: string
-      apellidos: string
-      dni: string
-      direccion: string
-      telefono: number
-      email: string
+      student: {
+        id: number
+        nombre: string
+        apellidos: string
+        dni: string
+      }
+      subject: {
+        id: number
+        nombre: string
+      }
+      teacher: {
+        id: number
+        nombre: string
+        apellidos: string
+      }
     }
-    alumnoEditar.value = data
+    matriculaEditar.value = data
     console.table(data)
   })
 }
 
-const mostrarAltaAlumno = () => {
+const mostrarMatricula = () => {
   // popUpState.value = true
   popUpState.value = editingStore.editarTrue()
   console.log(popUpState.value)
@@ -217,7 +232,6 @@ const resetearPopUpState = () => {
   popUpState.value = editingStore.editarFalse()
   console.log(popUpState.value)
 }
-*/
 
 // Ir a la página idividual del alumno
 const goToStudent = (id: number) => {
@@ -267,30 +281,29 @@ const goToStudent = (id: number) => {
           <td>
             <button type="button" @click="goToStudent(matricula.student.id)">Ver</button>
           </td>
-          <!-- <td>
-            <button type="button" @click="editarAlumno(student), mostrarAltaAlumno()">
+          <td>
+            <button type="button" @click="editarMatricula(matricula), mostrarMatricula()">
               Editar
             </button>
           </td>
-          <td><button type="button" @click="mostrarPopup(student.id)">Borrar</button></td> -->
+          <td><button type="button" @click="mostrarPopup(matricula.id)">Borrar</button></td>
           <!-- le paso el id del alumno que quiero borrar -->
         </tr>
       </table>
     </div>
-    <!-- 
-    <Popup v-if="popupVisible" @confirmar="borrarAlumno" @cancelar="cancelarBorrar"></Popup>
-    recibo un emit de confirmar que ejecuta la funcion borrarAlumno y otro emit de cancelar que ejecuta cancelarBorrar 
-    <AltaAlumno
+
+    <Popup v-if="popupVisible" @confirmar="borrarMatricula" @cancelar="cancelarBorrar"></Popup>
+    <!-- recibo un emit de confirmar que ejecuta la funcion borrarAlumno y otro emit de cancelar que ejecuta cancelarBorrar -->
+    <Matricula
       v-if="popUpState"
       :isEditing="popUpState"
       @cerrarPopUp="resetearPopUpState"
-      @obtenerAlumnos="getStudentsData()"
-      @resetearAlumno="editarAlumno(alumnoEditar)"
-      :alumnoParaEditar="alumnoEditar"
+      @obtenerMatriculas="getMatriculasData()"
+      @resetearMatricula="editarMatricula(matriculaEditar)"
+      :matriculaParaEditar="matriculaEditar"
     >
-    para resetear valores, recibo un emit y vuelvo a ejecutar la funcion editarAlumnos con los parámetros recibidos del componente hijo
-    </AltaAlumno>
-    -->
+      <!-- para resetear valores, recibo un emit y vuelvo a ejecutar la funcion editarAlumnos con los parámetros recibidos del componente hijo -->
+    </Matricula>
   </div>
 </template>
 <style scoped>
