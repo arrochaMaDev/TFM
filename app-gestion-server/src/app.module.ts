@@ -60,7 +60,9 @@ import { UpdateMatriculaController } from './Controllers/Matricula/Update/update
 import { UpdateMatriculaService } from './Controllers/Matricula/Update/updateMatricula.service';
 import { UpdateUserController } from './Controllers/User/Update/updateUser.controller';
 import { UpdateUserService } from './Controllers/User/Update/updateUser.service';
-import { AsignaturasProfesoresDb } from './Modelos/Asignaturas_profesores/asignaturasProfesoresDb';
+import { SubjectTeacherDb } from './Modelos/SubjectTeacher/subjectTeacherDb';
+import { RegisterSubjectTeacherController } from './Controllers/SubjectTeacher/Register/registerSubjectTeacher.controller';
+import { RegisterSubjectTeacherService } from './Controllers/SubjectTeacher/Register/registerSubjectTeacher.service';
 
 @Module({
   imports: [
@@ -77,7 +79,7 @@ import { AsignaturasProfesoresDb } from './Modelos/Asignaturas_profesores/asigna
         UserDb,
         SubjectDb,
         MatriculaDb,
-        AsignaturasProfesoresDb,
+        SubjectTeacherDb,
       ],
     }),
     TypeOrmModule.forFeature([
@@ -86,7 +88,7 @@ import { AsignaturasProfesoresDb } from './Modelos/Asignaturas_profesores/asigna
       UserDb,
       SubjectDb,
       MatriculaDb,
-      AsignaturasProfesoresDb,
+      SubjectTeacherDb,
     ]),
   ],
   controllers: [
@@ -95,6 +97,7 @@ import { AsignaturasProfesoresDb } from './Modelos/Asignaturas_profesores/asigna
     RegisterUserController,
     RegisterSubjectController,
     RegisterMatriculaController,
+    RegisterSubjectTeacherController,
     GetStudentController,
     GetTeacherController,
     GetSubjectController,
@@ -124,6 +127,7 @@ import { AsignaturasProfesoresDb } from './Modelos/Asignaturas_profesores/asigna
     RegisterUserService,
     RegisterSubjectService,
     RegisterMatriculaService,
+    RegisterSubjectTeacherService,
     GetStudentService,
     GetTeacherService,
     GetSubjectService,

@@ -28,6 +28,7 @@ export class RegisterMatriculaService {
     try {
       const { alumno, asignatura, profesor, year } = data;
 
+      // Obtengo los objetos alumno, asignatura y profesor completos
       const student = await this.getStudentService.getStudent(alumno);
       console.log(student);
 
