@@ -60,6 +60,7 @@ import { UpdateMatriculaController } from './Controllers/Matricula/Update/update
 import { UpdateMatriculaService } from './Controllers/Matricula/Update/updateMatricula.service';
 import { UpdateUserController } from './Controllers/User/Update/updateUser.controller';
 import { UpdateUserService } from './Controllers/User/Update/updateUser.service';
+import { AsignaturasProfesoresDb } from './Modelos/Asignaturas_profesores/asignaturasProfesoresDb';
 
 @Module({
   imports: [
@@ -70,7 +71,14 @@ import { UpdateUserService } from './Controllers/User/Update/updateUser.service'
       username: 'root',
       password: 'root',
       database: 'app_gestion',
-      entities: [StudentDb, TeacherDb, UserDb, SubjectDb, MatriculaDb],
+      entities: [
+        StudentDb,
+        TeacherDb,
+        UserDb,
+        SubjectDb,
+        MatriculaDb,
+        AsignaturasProfesoresDb,
+      ],
     }),
     TypeOrmModule.forFeature([
       StudentDb,
@@ -78,6 +86,7 @@ import { UpdateUserService } from './Controllers/User/Update/updateUser.service'
       UserDb,
       SubjectDb,
       MatriculaDb,
+      AsignaturasProfesoresDb,
     ]),
   ],
   controllers: [

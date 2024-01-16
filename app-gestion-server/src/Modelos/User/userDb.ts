@@ -25,9 +25,9 @@ export class UserDb {
   @Column()
   permiso: number;
 
-  @OneToMany(() => StudentDb, (student: StudentDb) => student.user)
+  @OneToMany(() => StudentDb, (student: StudentDb) => student.userId)
   students: StudentDb[];
 
-  @OneToOne(() => TeacherDb, (teacher: TeacherDb) => teacher.user)
+  @OneToOne(() => TeacherDb, (teacher: TeacherDb) => teacher.userId)
   teacher: TeacherDb;
 }

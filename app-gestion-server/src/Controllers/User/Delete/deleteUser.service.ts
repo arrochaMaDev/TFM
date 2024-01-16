@@ -17,7 +17,7 @@ export class DeleteUserService {
       },
     });
     if (!user) {
-      throw new Error('Profesor no encontrado');
+      throw new Error('Usuario no encontrado');
     }
     console.log(user);
     await this.userRepository.remove(user);

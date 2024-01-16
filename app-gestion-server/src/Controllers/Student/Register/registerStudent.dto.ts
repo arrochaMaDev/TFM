@@ -34,4 +34,7 @@ export class RegisterStudentDto {
   @IsNotEmpty()
   @IsEmail()
   email: string;
+
+  @IsNumber()
+  userId: number;
 }

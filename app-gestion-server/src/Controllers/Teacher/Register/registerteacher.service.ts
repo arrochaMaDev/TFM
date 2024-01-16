@@ -2,46 +2,67 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Teacher } from 'src/Modelos/Teacher/teacher';
 import { TeacherDb } from 'src/Modelos/Teacher/teacherDb';
+import { UserDb } from 'src/Modelos/User/userDb';
 import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
+import { RegisterTeacherDto } from './registerTeacher.dto';
+import { GetUserService } from '../../User/Get/getUser.service';
 
 @Injectable()
 export class RegisterTeacherService {
   constructor(
     @InjectRepository(TeacherDb)
     private readonly teacherRepository: Repository<TeacherDb>,
+    private readonly getUserService: GetUserService,
   ) {}
 
   async createTeacher(
-    nombre: string,
-    apellidos: string,
-    email: string,
-    asignaturas: string,
+    data: RegisterTeacherDto,
+    // nombre: string,
+    // apellidos: string,
+    // email: string,
+    // asignaturas: string,
+    // userId: UserDb,
   ) {
-    const usuario_uuid = await uuidv4();
-    console.log(usuario_uuid);
+    try {
+      const { nombre, apellidos, email, asignaturas, userId } = data;
 
-    const teacher = new Teacher(
-      0, //id
-      usuario_uuid,
-      nombre,
-      apellidos,
-      email,
-      asignaturas,
-    );
-    console.log(teacher);
+      const usuario_uuid = await uuidv4();
+      console.log(usuario_uuid);
 
-    const teacherDb: Partial<TeacherDb> = {
-      id: teacher.getId(),
-      usuario_id: teacher.getUsuario_id(),
-      nombre: teacher.getNombre(),
-      apellidos: teacher.getApellidos(),
-      email: teacher.getEmail(),
-      asignaturas: teacher.getAsignaturas(),
-    };
-    console.log(teacherDb);
+      // Obtengo el objeto usuario con el id añadido
+      const usuario_id = await this.getUserService.getUser(userId);
+      console.log(usuario_id);
 
-    // await this.teacherRepository.save(teacherDb);
-    await this.teacherRepository.insert(teacherDb);
+      const teacher = new Teacher(
+        0, //id
+        usuario_uuid,
+        nombre,
+        apellidos,
+        email,
+        asignaturas,
+        usuario_id,
+      );
+      console.log(teacher);
+
+      const teacherDb: Partial<TeacherDb> = {
+        id: teacher.getId(),
+        usuario_id: teacher.getUsuario_id(),
+        nombre: teacher.getNombre(),
+        apellidos: teacher.getApellidos(),
+        email: teacher.getEmail(),
+        asignaturas: teacher.getAsignaturas(),
+        userId: teacher.getUserId(),
+      };
+      console.log(teacherDb);
+
+      // await this.teacherRepository.save(teacherDb);
+      await this.teacherRepository.insert(teacherDb);
+
+      return teacherDb;
+    } catch (error) {
+      console.error('Error al crear la matrícula:', error);
+      throw new Error('No se pudo crear el profesor');
+    }
   }
 }

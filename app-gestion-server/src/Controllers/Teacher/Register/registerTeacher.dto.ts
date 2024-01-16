@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsEmail } from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail, IsNumber } from 'class-validator';
 
 export class RegisterTeacherDto {
   @IsString()
@@ -17,4 +17,7 @@ export class RegisterTeacherDto {
   @IsString()
   @IsNotEmpty()
   asignaturas: string;
+
+  @IsNumber()
+  userId: number;
 }

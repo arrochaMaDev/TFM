@@ -37,5 +37,5 @@ export class TeacherDb {
   // @OneToOne(() => UserDb, (user: UserDb) => user.teacher)
   @OneToOne(() => UserDb)
   @JoinColumn({ name: 'userId' })
-  user: UserDb;
+  userId: UserDb;
 }

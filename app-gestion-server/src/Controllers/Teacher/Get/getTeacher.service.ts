@@ -11,11 +11,16 @@ export class GetTeacherService {
   ) {}
 
   async getTeacher(id: number): Promise<TeacherDb> {
-    const teacher = await this.teacherRepository.findOne({
-      where: {
-        id,
-      },
-    });
+    // const teacher = await this.teacherRepository.findOne({
+    //   where: {
+    //     id,
+    //   },
+    // });
+    const teacher = await this.teacherRepository
+      .createQueryBuilder('teacher')
+      .leftJoinAndSelect('teacher.userId', 'user')
+      .where('teacher.id = :id', { id })
+      .getOne();
     console.log(teacher);
     return teacher;
   }

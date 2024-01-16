@@ -42,7 +42,7 @@ export class StudentDb {
   // @ManyToOne(() => UserDb, (user: UserDb) => user.students)
   @ManyToOne(() => UserDb)
   @JoinColumn({ name: 'userId' })
-  user: UserDb;
+  userId: UserDb;
 
   @OneToMany(() => SubjectDb, (subject: SubjectDb) => subject.student)
   subjects: SubjectDb[];

@@ -1,7 +1,7 @@
 import { SubjectDb } from '../Subject/subjectDb';
 import { TeacherDb } from '../Teacher/teacherDb';
 
-export class Matricula {
+export class AsignaturasProfesores {
   constructor(
     private readonly id: number,
     private readonly asignatura: SubjectDb,

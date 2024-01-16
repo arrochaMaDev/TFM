@@ -24,7 +24,7 @@ export class RegisterUserService {
     const user = new User(0, username, email, passHasheada, permiso);
     console.log(user);
 
-    const userDb: UserDb = {
+    const userDb: Partial<UserDb> = {
       id: user.getId(),
       username: user.getUsername(),
       email: user.getEmail(),

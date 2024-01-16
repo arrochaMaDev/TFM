@@ -11,7 +11,11 @@ export class ListerTeachersService {
   ) {}
 
   async listerTeachers(): Promise<TeacherDb[]> {
-    const listado = await this.teachersRepository.find();
+    // const listado = await this.teachersRepository.find();
+    const listado = await this.teachersRepository
+      .createQueryBuilder('teacher')
+      .leftJoinAndSelect('teacher.userId', 'user')
+      .getMany();
     console.log(listado);
     return listado;
   }
