@@ -11,14 +11,17 @@ export class ListerMatriculasService {
   ) {}
 
   async listerMatriculas(): Promise<MatriculaDb[]> {
-    // const listado = await this.matriculasRepository.find();
-    const listado = await this.matriculasRepository
-      .createQueryBuilder('matricula')
-      .leftJoinAndSelect('matricula.student', 'student')
-      .leftJoinAndSelect('matricula.subject', 'subject')
-      .leftJoinAndSelect('matricula.teacher', 'teacher')
-      .getMany();
-    console.table(listado);
+    const listado = await this.matriculasRepository.find({
+      relations: ['student', 'subject', 'teacher'],
+    });
+
+    // const listado = await this.matriculasRepository
+    //   .createQueryBuilder('matricula')
+    //   .leftJoinAndSelect('matricula.student', 'student')
+    //   .leftJoinAndSelect('matricula.subject', 'subject')
+    //   .leftJoinAndSelect('matricula.teacher', 'teacher')
+    //   .getMany();
+    // console.table(listado);
     return listado;
   }
 }

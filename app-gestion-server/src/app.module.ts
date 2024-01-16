@@ -63,6 +63,8 @@ import { UpdateUserService } from './Controllers/User/Update/updateUser.service'
 import { SubjectTeacherDb } from './Modelos/SubjectTeacher/subjectTeacherDb';
 import { RegisterSubjectTeacherController } from './Controllers/SubjectTeacher/Register/registerSubjectTeacher.controller';
 import { RegisterSubjectTeacherService } from './Controllers/SubjectTeacher/Register/registerSubjectTeacher.service';
+import { listerSubjectsTeachersController } from './Controllers/SubjectTeacher/Get/listerSubjectsTeachers.controller';
+import { listerSubjectsTeachersService } from './Controllers/SubjectTeacher/Get/listerSubjectsTeachers.service';
 
 @Module({
   imports: [
@@ -120,6 +122,7 @@ import { RegisterSubjectTeacherService } from './Controllers/SubjectTeacher/Regi
     ListerUsersController,
     ListerMatriculasController,
     LoginUserController,
+    listerSubjectsTeachersController,
   ], //AppController
   providers: [
     RegisterStudentService,
@@ -150,6 +153,7 @@ import { RegisterSubjectTeacherService } from './Controllers/SubjectTeacher/Regi
     ListerUsersService,
     ListerMatriculasService,
     LoginUserService,
+    listerSubjectsTeachersService,
   ],
 })
 export class AppModule {}
