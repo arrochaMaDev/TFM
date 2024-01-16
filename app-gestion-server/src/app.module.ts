@@ -65,6 +65,8 @@ import { RegisterSubjectTeacherController } from './Controllers/SubjectTeacher/R
 import { RegisterSubjectTeacherService } from './Controllers/SubjectTeacher/Register/registerSubjectTeacher.service';
 import { listerSubjectsTeachersController } from './Controllers/SubjectTeacher/Get/listerSubjectsTeachers.controller';
 import { listerSubjectsTeachersService } from './Controllers/SubjectTeacher/Get/listerSubjectsTeachers.service';
+import { GetSubjectteacherController } from './Controllers/SubjectTeacher/Get/getSubjectTeacher.controller';
+import { GetSubjectTeacherService } from './Controllers/SubjectTeacher/Get/getSubjectTeacher.service';
 
 @Module({
   imports: [
@@ -106,6 +108,7 @@ import { listerSubjectsTeachersService } from './Controllers/SubjectTeacher/Get/
     GetUserController,
     GetMatriculaController,
     GetMatriculasByStudentIdController,
+    GetSubjectteacherController,
     DeleteStudentController,
     DeleteSubjectController,
     DeleteTeacherController,
@@ -137,6 +140,7 @@ import { listerSubjectsTeachersService } from './Controllers/SubjectTeacher/Get/
     GetUserService,
     GetMatriculaService,
     GetMatriculasByStudentIdService,
+    GetSubjectTeacherService,
     DeleteStudentService,
     DeleteSubjectService,
     DeleteTeacherService,
