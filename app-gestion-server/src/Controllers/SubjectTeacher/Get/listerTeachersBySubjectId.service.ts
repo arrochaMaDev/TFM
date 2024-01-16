@@ -4,21 +4,21 @@ import { SubjectTeacherDb } from 'src/Modelos/SubjectTeacher/subjectTeacherDb';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class ListerSubjectsByTeacherIdService {
+export class ListerTeachersBySubjectIdService {
   constructor(
     @InjectRepository(SubjectTeacherDb)
     private readonly subjectsTeachersRepository: Repository<SubjectTeacherDb>,
   ) {}
 
-  // OBTENER ASIGNATURAS POR ID DEL PROFESOR
-  async getSubjectsByTeacherId(teacherId: number): Promise<SubjectTeacherDb[]> {
-    const subjectsByTeacherId = await this.subjectsTeachersRepository.find({
+  // OBTENER PROFESORES POR ID DE LA ASIGNATURA
+  async getTeachersBySubjectId(subjectId: number): Promise<SubjectTeacherDb[]> {
+    const teachersBySubjectId = await this.subjectsTeachersRepository.find({
       where: {
-        teacher: { id: teacherId },
+        subject: { id: subjectId },
       },
-      relations: ['subject', 'teacher'],
+      relations: ['subject', 'teacher', 'teacher.userId'],
     });
 
-    return subjectsByTeacherId;
+    return teachersBySubjectId;
   }
 }

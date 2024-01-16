@@ -1,52 +1,49 @@
 import { Controller, Get, Param, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { GetTeacherService } from 'src/Controllers/Teacher/Get/getTeacher.service';
-import { ListerSubjectsByTeacherIdService } from './listerSubjectsByTeacherId.service';
+import { ListerTeachersBySubjectIdService } from './listerTeachersBySubjectId.service';
+import { GetSubjectService } from 'src/Controllers/Subject/Get/getSubject.service';
 
 @Controller('asignaturas_profesores')
-export class ListerSubjectsByTeacherIdController {
+export class ListerTeachersBySubjectIdController {
   constructor(
-    private readonly getSubjectsByTeacherIdService: ListerSubjectsByTeacherIdService,
-    private readonly getTeacherService: GetTeacherService,
+    private readonly getTeachersBySubjectIdService: ListerTeachersBySubjectIdService,
+    private readonly getSubjectService: GetSubjectService,
   ) {}
 
   // OBTENER MATRICULA POR ID DEL STUDENT
-  @Get('teacher/:id')
-  async getSubjectsByTeacherId(
+  @Get('subject/:id')
+  async getTeachersBySubjectId(
     @Param('id') id: number,
     @Res() response: Response,
   ) {
     try {
-      const teacherId = Number(id);
-      const subjects =
-        await this.getSubjectsByTeacherIdService.getSubjectsByTeacherId(
-          teacherId,
+      const subjectId = Number(id);
+      const teachers =
+        await this.getTeachersBySubjectIdService.getTeachersBySubjectId(
+          subjectId,
         );
 
-      if (!subjects || subjects.length === 0) {
+      if (!teachers || teachers.length === 0) {
         return response
           .status(404)
-          .json({ message: 'Asignaturas no encontradas para este profesor' });
+          .json({ message: 'Profesores no encontrados para esta asignatura' });
       }
       // Controlo los datos mediante un DTO
-      const teacher = await this.getTeacherService.getTeacher(teacherId);
-      if (!teacher) {
+      const subject = await this.getSubjectService.getSubject(subjectId);
+      if (!subject) {
         return response
           .status(404)
-          .json({ message: 'No se encuentra este profesor' });
+          .json({ message: 'No se encuentra esta asignatura' });
       }
 
-      const subjectsDto = {
-        profesor: teacher, // recibo primero los datos del profesor y luego le añado el array de asignaturas
-        asignaturas: subjects.map(({ id, subject }) => ({
+      const teachersDto = {
+        asignatura: subject, // recibo primero los datos de la asignatura y luego le añado el array de profesores
+        profesores: teachers.map(({ id, teacher }) => ({
           id,
-          subject: {
-            id: subject.id,
-            nombre: subject.nombre,
-          },
+          teacher,
         })),
       };
-      return response.status(200).json(subjectsDto);
+      return response.status(200).json(teachersDto);
     } catch (error) {
       console.error(error);
       return response

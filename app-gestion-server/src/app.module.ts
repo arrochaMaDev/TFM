@@ -54,8 +54,8 @@ import { DeleteTeacherService } from './Controllers/Teacher/Delete/deleteTeacher
 import { DeleteTeacherController } from './Controllers/Teacher/Delete/DeleteTeacher.controller';
 import { DeleteUserController } from './Controllers/User/Delete/deleteUser.controller';
 import { DeleteUserService } from './Controllers/User/Delete/deleteUser.service';
-import { GetMatriculasByStudentIdService } from './Controllers/Matricula/Get/listerMatriculasByStudentId.service';
-import { GetMatriculasByStudentIdController } from './Controllers/Matricula/Get/listerMatriculasByStudentId.controller';
+import { ListerMatriculasByStudentIdService } from './Controllers/Matricula/Get/listerMatriculasByStudentId.service';
+import { ListerMatriculasByStudentIdController } from './Controllers/Matricula/Get/listerMatriculasByStudentId.controller';
 import { UpdateMatriculaController } from './Controllers/Matricula/Update/updateMatricula.controller';
 import { UpdateMatriculaService } from './Controllers/Matricula/Update/updateMatricula.service';
 import { UpdateUserController } from './Controllers/User/Update/updateUser.controller';
@@ -69,6 +69,8 @@ import { GetSubjectteacherController } from './Controllers/SubjectTeacher/Get/ge
 import { GetSubjectTeacherService } from './Controllers/SubjectTeacher/Get/getSubjectTeacher.service';
 import { ListerSubjectsByTeacherIdController } from './Controllers/SubjectTeacher/Get/listerSubjectsByTeacherId.controller';
 import { ListerSubjectsByTeacherIdService } from './Controllers/SubjectTeacher/Get/listerSubjectsByTeacherId.service';
+import { ListerTeachersBySubjectIdController } from './Controllers/SubjectTeacher/Get/listerTeachersBySubjectId.controller';
+import { ListerTeachersBySubjectIdService } from './Controllers/SubjectTeacher/Get/listerTeachersBySubjectId.service';
 
 @Module({
   imports: [
@@ -109,7 +111,6 @@ import { ListerSubjectsByTeacherIdService } from './Controllers/SubjectTeacher/G
     GetSubjectController,
     GetUserController,
     GetMatriculaController,
-    GetMatriculasByStudentIdController,
     GetSubjectteacherController,
     DeleteStudentController,
     DeleteSubjectController,
@@ -126,9 +127,11 @@ import { ListerSubjectsByTeacherIdService } from './Controllers/SubjectTeacher/G
     ListerSubjectsController,
     ListerUsersController,
     ListerMatriculasController,
+    ListerMatriculasByStudentIdController,
     LoginUserController,
     ListerSubjectsTeachersController,
     ListerSubjectsByTeacherIdController,
+    ListerTeachersBySubjectIdController,
   ], //AppController
   providers: [
     RegisterStudentService,
@@ -142,7 +145,6 @@ import { ListerSubjectsByTeacherIdService } from './Controllers/SubjectTeacher/G
     GetSubjectService,
     GetUserService,
     GetMatriculaService,
-    GetMatriculasByStudentIdService,
     GetSubjectTeacherService,
     DeleteStudentService,
     DeleteSubjectService,
@@ -159,9 +161,11 @@ import { ListerSubjectsByTeacherIdService } from './Controllers/SubjectTeacher/G
     ListerSubjectsService,
     ListerUsersService,
     ListerMatriculasService,
+    ListerMatriculasByStudentIdService,
     LoginUserService,
     ListerSubjectsTeachersService,
     ListerSubjectsByTeacherIdService,
+    ListerTeachersBySubjectIdService,
   ],
 })
 export class AppModule {}
