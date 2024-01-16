@@ -11,14 +11,18 @@ export class RegisterMatriculaController {
   @Post()
   async registerMatriculaController(@Body() data: RegisterMatriculaDto) {
     try {
-      // const { alumno, asignatura, profesor, nota } = data;
-      const matriculaData = await this.registerMatriculaService.createMatricula(
-        data,
-        // alumno,
-        // asignatura,
-        // profesor,
-        // nota,
-      );
+      // const { alumno, asignatura, profesor, year } = data;
+      const matriculaData =
+        await this.registerMatriculaService.createMatricula(data);
+
+      //OBTENER AÑO ESCOLAR AUTOMÁTICAMENTE
+      const fullDate = new Date();
+      let añoEscolar = new Date().getFullYear(); //2024
+      if (fullDate.getMonth() < 7) {
+        añoEscolar -= 1;
+        // si estamos en julio es que ya habrá acabado el curso escolar anterior
+      }
+      console.log(añoEscolar);
 
       const matricula = {
         alumno: {
@@ -30,8 +34,7 @@ export class RegisterMatriculaController {
           nombre: matriculaData.teacher.nombre,
           apellidos: matriculaData.teacher.apellidos,
         },
-        // nota: matriculaData.nota,
-        // EL CAMPO NOTA SE RESERVA PARA LA EVALUACION
+        year: añoEscolar,
       };
       return matricula;
     } catch (error) {

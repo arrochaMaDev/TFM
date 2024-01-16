@@ -10,7 +10,6 @@ export class RegisterMatriculaDto {
   @IsNumber()
   profesor: number;
 
-  // @IsNumber()
-  // nota: number;
-  // EL CAMPO NOTA SE RESERVA PARA LA EVALUACION
+  @IsNumber()
+  year: number;
 }

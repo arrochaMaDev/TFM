@@ -210,7 +210,7 @@ const asignaturasRefFromServerOrdenadas = computed(() =>
         <input type="text" name="" id="AsignaturaInput" required v-model="asignaturaRef" />
         <button type="reset" @click="resetearDatosForm()">Resetear</button>
         <button type="submit" v-if="!modoEditar">Enviar</button>
-        <button type="button" v-if="modoEditar" @click="editarAsignatura()">Editar</button>
+        <button type="button" v-if="modoEditar" @click="editarAsignatura()">Actualizar</button>
       </form>
     </div>
     <div>

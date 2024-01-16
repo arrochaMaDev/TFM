@@ -39,7 +39,7 @@ export class GetMatriculasByStudentIdController {
 
       const matriculasDto = {
         student, // recibo primero los datos del estudiante y luego le añado el array de matriculas
-        matriculas: matriculas.map(({ id, subject, teacher }) => ({
+        matriculas: matriculas.map(({ id, subject, teacher, year }) => ({
           id,
           subject: {
             id: subject.id,
@@ -51,6 +51,7 @@ export class GetMatriculasByStudentIdController {
             apellidos: teacher.apellidos,
             asignaturas: teacher.asignaturas,
           },
+          year,
         })),
       };
       return response.status(200).json(matriculasDto);

@@ -39,6 +39,7 @@ export class GetMatriculaController {
           apellidos: matricula.teacher.apellidos,
           asignaturas: matricula.teacher.asignaturas,
         },
+        year: matricula.year,
       };
       return response.status(200).json(matriculaDto);
     } catch (error) {

@@ -130,8 +130,8 @@ nav a.router-link-exact-active:hover {
 nav a {
   display: flex;
   flex-direction: column;
-  /* padding: 0 1rem;
-  border-left: 1px solid var(--color-border); */
+  /* adding: 0 1rem;
+  border-left: 1px solid var(--color-border);  */
   cursor: pointer;
 }
 

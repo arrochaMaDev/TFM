@@ -226,7 +226,7 @@ const enviarDatosFormulario = () => {
 </template>
 
 <style scoped>
-.form {
+/* .form {
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
@@ -278,7 +278,7 @@ const enviarDatosFormulario = () => {
   border-radius: 10px;
   border: 1px solid white;
   display: flex;
-  flex-direction: column; /* Añadido para disponer los elementos verticalmente */
+  flex-direction: column; 
 
   & label {
     display: block;
@@ -307,5 +307,5 @@ const enviarDatosFormulario = () => {
     margin: auto;
     margin-top: 10px;
   }
-}
+} */
 </style>

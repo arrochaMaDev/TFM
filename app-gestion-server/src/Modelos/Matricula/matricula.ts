@@ -10,7 +10,8 @@ export class Matricula {
     private readonly id: number,
     private readonly alumno: StudentDb, // en vez de ser el Id, es el propio objeto
     private readonly asignatura: SubjectDb,
-    private readonly profesor: TeacherDb, // private readonly nota: number,
+    private readonly profesor: TeacherDb,
+    private readonly year: number,
   ) {}
 
   getId(): number {
@@ -25,8 +26,7 @@ export class Matricula {
   getProfesor(): TeacherDb {
     return this.profesor;
   }
-  // getNota(): number {
-  //   return this.nota;
-  // }
-  // EL CAMPO NOTA SE RESERVA PARA LA EVALUACION
+  getYear(): number {
+    return this.year;
+  }
 }

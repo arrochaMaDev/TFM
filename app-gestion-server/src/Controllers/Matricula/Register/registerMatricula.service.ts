@@ -23,16 +23,10 @@ export class RegisterMatriculaService {
     // alumno: number,
     // asignatura: number,
     // profesor: number,
-    // nota: number,
+    // year: number,
   ) {
     try {
-      const {
-        alumno,
-        asignatura,
-        profesor,
-        // nota
-        // EL CAMPO NOTA SE RESERVA PARA LA EVALUACION
-      } = data;
+      const { alumno, asignatura, profesor, year } = data;
 
       const student = await this.getStudentService.getStudent(alumno);
       console.log(student);
@@ -48,7 +42,7 @@ export class RegisterMatriculaService {
         student,
         subject,
         teacher,
-        // nota,
+        year,
       );
       console.log(matricula);
 
@@ -59,7 +53,7 @@ export class RegisterMatriculaService {
       //   student: { id: alumno },
       //   subject: { id: asignatura },
       //   teacher: { id: profesor },
-      //   nota,
+      //   year,
       // });
       // const matriculaJSON = JSON.stringify(matricula);
       // console.table(matriculaJSON);
@@ -69,7 +63,7 @@ export class RegisterMatriculaService {
         student: matricula.getAlumno(),
         subject: matricula.getAsignatura(),
         teacher: matricula.getProfesor(),
-        // nota: matricula.getNota(),
+        year: matricula.getYear(),
       };
       console.table(matriculaDb);
 

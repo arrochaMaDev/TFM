@@ -10,7 +10,7 @@ import { SubjectDb } from '../Subject/subjectDb';
 import { TeacherDb } from '../Teacher/teacherDb';
 import { IsNumber } from 'class-validator';
 
-@Entity({ name: 'alumnos_asignaturas' })
+@Entity({ name: 'matricula' })
 export class MatriculaDb {
   @PrimaryGeneratedColumn()
   id: number;
@@ -33,9 +33,7 @@ export class MatriculaDb {
   @JoinColumn({ name: 'profesor' })
   teacher: TeacherDb;
 
-  // @Column({ type: 'decimal', precision: 3, scale: 1 })
-  // @IsNumber()
-  // nota: number;
-
-  // EL CAMPO NOTA SE RESERVA PARA LA EVALUACION
+  @Column()
+  @IsNumber()
+  year: number;
 }
