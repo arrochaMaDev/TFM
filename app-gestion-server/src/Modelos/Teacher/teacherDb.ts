@@ -3,9 +3,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { StudentDb } from '../Student/studentDb';
+import { UserDb } from '../User/userDb';
 
 @Entity({ name: 'profesor' })
 export class TeacherDb {
@@ -30,4 +32,8 @@ export class TeacherDb {
   @ManyToOne(() => StudentDb, (student: StudentDb) => student.teachers)
   @JoinColumn({ name: 'id' })
   student: TeacherDb;
+
+  @OneToOne(() => UserDb, (user: UserDb) => user.teacher)
+  @JoinColumn({ name: 'userId' })
+  user: UserDb;
 }

@@ -1,5 +1,7 @@
 // import { v4 as uuidv4 } from 'uuid';
 
+import { UserDb } from '../User/userDb';
+
 export class Student {
   constructor(
     private readonly id: number,
@@ -10,6 +12,7 @@ export class Student {
     private readonly direccion: string,
     private readonly telefono: number,
     private readonly email: string,
+    private readonly userId: UserDb,
   ) {}
 
   getId(): number {
@@ -35,5 +38,8 @@ export class Student {
   }
   getEmail(): string {
     return this.email;
+  }
+  getUserId(): UserDb {
+    return this.userId;
   }
 }

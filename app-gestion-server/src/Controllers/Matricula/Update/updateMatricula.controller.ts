@@ -54,6 +54,7 @@ export class UpdateMatriculaController {
           apellidos: updatedMatricula.teacher.apellidos,
           asignaturas: updatedMatricula.teacher.asignaturas,
         },
+        year: updatedMatricula.year,
       };
       return response.status(200).json(updatedMatriculaDto); // Devuelve la matricula actualizada
     } catch (error) {

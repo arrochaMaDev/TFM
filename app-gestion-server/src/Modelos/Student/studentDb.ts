@@ -1,7 +1,15 @@
 import { IsEmail, IsNumber } from 'class-validator';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { SubjectDb } from '../Subject/subjectDb';
 import { TeacherDb } from '../Teacher/teacherDb';
+import { UserDb } from '../User/userDb';
 
 @Entity({ name: 'alumno' })
 export class StudentDb {
@@ -30,6 +38,10 @@ export class StudentDb {
   @Column()
   @IsEmail()
   email: string;
+
+  @ManyToOne(() => UserDb, (user: UserDb) => user.students)
+  @JoinColumn({ name: 'userId' })
+  user: UserDb;
 
   @OneToMany(() => SubjectDb, (subject: SubjectDb) => subject.student)
   subjects: SubjectDb[];

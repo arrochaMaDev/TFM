@@ -1,4 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { StudentDb } from '../Student/studentDb';
+import { TeacherDb } from '../Teacher/teacherDb';
 
 @Entity({ name: 'usuario' })
 export class UserDb {
@@ -17,5 +25,9 @@ export class UserDb {
   @Column()
   permiso: number;
 
-  // Relaciones @OnetoMany para relacionar username y el login con usuario_id de un profesor o de uno o varios alumnos
+  @OneToMany(() => StudentDb, (student: StudentDb) => student.user)
+  students: StudentDb[];
+
+  @OneToOne(() => TeacherDb, (teacher: TeacherDb) => teacher.user)
+  teacher: TeacherDb;
 }
