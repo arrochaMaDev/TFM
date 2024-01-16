@@ -29,11 +29,13 @@ export class TeacherDb {
   @Column()
   asignaturas: string;
 
-  @ManyToOne(() => StudentDb, (student: StudentDb) => student.teachers)
+  // @ManyToOne(() => StudentDb, (student: StudentDb) => student.teachers)
+  @ManyToOne(() => StudentDb)
   @JoinColumn({ name: 'id' })
   student: TeacherDb;
 
-  @OneToOne(() => UserDb, (user: UserDb) => user.teacher)
+  // @OneToOne(() => UserDb, (user: UserDb) => user.teacher)
+  @OneToOne(() => UserDb)
   @JoinColumn({ name: 'userId' })
   user: UserDb;
 }

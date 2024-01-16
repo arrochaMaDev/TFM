@@ -15,7 +15,8 @@ export class SubjectDb {
   @Column()
   nombre: string;
 
-  @ManyToOne(() => StudentDb, (student: StudentDb) => student.subjects)
+  // @ManyToOne(() => StudentDb, (student: StudentDb) => student.subjects)
+  @ManyToOne(() => StudentDb)
   @JoinColumn({ name: 'id' })
   student: StudentDb;
 }
