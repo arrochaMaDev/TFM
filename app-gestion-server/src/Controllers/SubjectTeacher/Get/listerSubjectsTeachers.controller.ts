@@ -1,10 +1,10 @@
 import { Controller, Get } from '@nestjs/common';
-import { listerSubjectsTeachersService } from './listerSubjectsTeachers.service';
+import { ListerSubjectsTeachersService } from './listerSubjectsTeachers.service';
 
 @Controller('asignaturas_profesores')
-export class listerSubjectsTeachersController {
+export class ListerSubjectsTeachersController {
   constructor(
-    private listerSubjectsTeachersService: listerSubjectsTeachersService,
+    private listerSubjectsTeachersService: ListerSubjectsTeachersService,
   ) {}
 
   @Get()

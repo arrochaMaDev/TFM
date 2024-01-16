@@ -5,7 +5,7 @@ import { SubjectTeacherDb } from 'src/Modelos/SubjectTeacher/subjectTeacherDb';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class listerSubjectsTeachersService {
+export class ListerSubjectsTeachersService {
   constructor(
     @InjectRepository(SubjectTeacherDb)
     private readonly subjectsTeachersRepository: Repository<SubjectTeacherDb>,

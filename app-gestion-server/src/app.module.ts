@@ -63,10 +63,12 @@ import { UpdateUserService } from './Controllers/User/Update/updateUser.service'
 import { SubjectTeacherDb } from './Modelos/SubjectTeacher/subjectTeacherDb';
 import { RegisterSubjectTeacherController } from './Controllers/SubjectTeacher/Register/registerSubjectTeacher.controller';
 import { RegisterSubjectTeacherService } from './Controllers/SubjectTeacher/Register/registerSubjectTeacher.service';
-import { listerSubjectsTeachersController } from './Controllers/SubjectTeacher/Get/listerSubjectsTeachers.controller';
-import { listerSubjectsTeachersService } from './Controllers/SubjectTeacher/Get/listerSubjectsTeachers.service';
+import { ListerSubjectsTeachersController } from './Controllers/SubjectTeacher/Get/listerSubjectsTeachers.controller';
+import { ListerSubjectsTeachersService } from './Controllers/SubjectTeacher/Get/listerSubjectsTeachers.service';
 import { GetSubjectteacherController } from './Controllers/SubjectTeacher/Get/getSubjectTeacher.controller';
 import { GetSubjectTeacherService } from './Controllers/SubjectTeacher/Get/getSubjectTeacher.service';
+import { ListerSubjectsByTeacherIdController } from './Controllers/SubjectTeacher/Get/listerSubjectsByTeacherId.controller';
+import { ListerSubjectsByTeacherIdService } from './Controllers/SubjectTeacher/Get/listerSubjectsByTeacherId.service';
 
 @Module({
   imports: [
@@ -125,7 +127,8 @@ import { GetSubjectTeacherService } from './Controllers/SubjectTeacher/Get/getSu
     ListerUsersController,
     ListerMatriculasController,
     LoginUserController,
-    listerSubjectsTeachersController,
+    ListerSubjectsTeachersController,
+    ListerSubjectsByTeacherIdController,
   ], //AppController
   providers: [
     RegisterStudentService,
@@ -157,7 +160,8 @@ import { GetSubjectTeacherService } from './Controllers/SubjectTeacher/Get/getSu
     ListerUsersService,
     ListerMatriculasService,
     LoginUserService,
-    listerSubjectsTeachersService,
+    ListerSubjectsTeachersService,
+    ListerSubjectsByTeacherIdService,
   ],
 })
 export class AppModule {}

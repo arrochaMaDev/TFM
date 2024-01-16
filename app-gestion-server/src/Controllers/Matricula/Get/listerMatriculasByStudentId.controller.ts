@@ -31,7 +31,7 @@ export class GetMatriculasByStudentIdController {
       }
       // Controlo los datos mediante un DTO
       const student = await this.getStudentService.getStudent(studentId);
-      if (!student || matriculas.length === 0) {
+      if (!student) {
         return response
           .status(404)
           .json({ message: 'No se encuentra este estudiante' });
