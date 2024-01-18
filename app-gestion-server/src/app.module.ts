@@ -71,6 +71,14 @@ import { ListerSubjectsByTeacherIdController } from './Controllers/SubjectTeache
 import { ListerSubjectsByTeacherIdService } from './Controllers/SubjectTeacher/Get/listerSubjectsByTeacherId.service';
 import { ListerTeachersBySubjectIdController } from './Controllers/SubjectTeacher/Get/listerTeachersBySubjectId.controller';
 import { ListerTeachersBySubjectIdService } from './Controllers/SubjectTeacher/Get/listerTeachersBySubjectId.service';
+import { DeleteSubjectTeacherController } from './Controllers/SubjectTeacher/Delete/deleteSubjectTeacher.controller';
+import { DeleteSubjectTeacherService } from './Controllers/SubjectTeacher/Delete/deleteSubjectTeacher.service';
+import { DeleteSubjectTeacherBySubjectIdService } from './Controllers/SubjectTeacher/Delete/deleteSubjectTeacherBySubjectId.service';
+import { DeleteSubjectTeacherBySubjectIdController } from './Controllers/SubjectTeacher/Delete/deleteSubjectTeacherBySubjectId.controller';
+import { DeleteSubjectTeacherByTeacherIdController } from './Controllers/SubjectTeacher/Delete/deleteSubjectTeacherByTeacherId.controller';
+import { DeleteSubjectTeacherByTeacherIdService } from './Controllers/SubjectTeacher/Delete/deleteSubjectTeacherByTeacherId.service';
+import { UpdateSubjectTeacherController } from './Controllers/SubjectTeacher/Update/updateSubjectTeacher.controller';
+import { UpdateSubjectTeacherService } from './Controllers/SubjectTeacher/Update/updateSubjectTeacher.service';
 
 @Module({
   imports: [
@@ -117,11 +125,15 @@ import { ListerTeachersBySubjectIdService } from './Controllers/SubjectTeacher/G
     DeleteTeacherController,
     DeleteUserController,
     DeleteMatriculaController,
+    DeleteSubjectTeacherController,
+    DeleteSubjectTeacherBySubjectIdController,
+    DeleteSubjectTeacherByTeacherIdController,
     UpdateStudentController,
     UpdateSubjectController,
     UpdateTeacherController,
     UpdateUserController,
     UpdateMatriculaController,
+    UpdateSubjectTeacherController,
     ListerStudentsController,
     ListerTeachersController,
     ListerSubjectsController,
@@ -151,11 +163,15 @@ import { ListerTeachersBySubjectIdService } from './Controllers/SubjectTeacher/G
     DeleteTeacherService,
     DeleteUserService,
     DeleteMatriculaService,
+    DeleteSubjectTeacherService,
+    DeleteSubjectTeacherBySubjectIdService,
+    DeleteSubjectTeacherByTeacherIdService,
     UpdateStudentService,
     UpdateSubjectService,
     UpdateTeacherService,
     UpdateUserService,
     UpdateMatriculaService,
+    UpdateSubjectTeacherService,
     ListerStudentsService,
     ListerTeachersService,
     ListerSubjectsService,

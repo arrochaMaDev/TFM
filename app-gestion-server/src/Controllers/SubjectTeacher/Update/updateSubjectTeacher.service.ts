@@ -4,38 +4,39 @@ import { MatriculaDb } from 'src/Modelos/Matricula/matriculaDb';
 import { SubjectDb } from 'src/Modelos/Subject/subjectDb';
 import { TeacherDb } from 'src/Modelos/Teacher/teacherDb';
 import { Repository } from 'typeorm';
-import { GetMatriculaService } from '../Get/getMatricula.service';
+import { GetSubjectTeacherService } from '../Get/getSubjectTeacher.service';
+import { SubjectTeacherDb } from 'src/Modelos/SubjectTeacher/subjectTeacherDb';
 
 @Injectable()
-export class UpdateMatriculaService {
+export class UpdateSubjectTeacherService {
   constructor(
-    @InjectRepository(MatriculaDb)
-    private readonly matriculaRepository: Repository<MatriculaDb>,
+    @InjectRepository(SubjectTeacherDb)
+    private readonly subjectTeacherRepository: Repository<SubjectTeacherDb>,
     @InjectRepository(TeacherDb)
     private readonly teacherRepository: Repository<TeacherDb>,
     @InjectRepository(SubjectDb)
     private readonly subjectRepository: Repository<SubjectDb>,
-    private readonly getMatriculaService: GetMatriculaService,
+    private readonly getSubjectTeacher: GetSubjectTeacherService,
   ) {}
-  // Solo existen 2 opciones: se actualiza la el ID de la asignatura o el ID profesor
-  async updateMatricula(
-    matriculaId: number,
+
+  async updateSubjectTeacher(
+    subjectTeacherId: number,
     subject?: Partial<SubjectDb>, // solo se pasa el id, pero se maneja como un objeto en vez de con un number
     teacher?: Partial<TeacherDb>,
-  ): Promise<MatriculaDb> {
+  ): Promise<SubjectTeacherDb> {
     try {
-      // OBTENGO LA MATRICULA A ACTUALIZAR
-      const matriculaToUpdate =
-        await this.getMatriculaService.getMatricula(matriculaId);
+      // OBTENGO LA RELACION A ACTUALIZAR
+      const subjectTeacherToUpdate =
+        await this.getSubjectTeacher.getSubjectTeacher(subjectTeacherId);
 
-      // OBTENGO EL PROFESOR NUEVO  A PARTIR DE SU ID
+      // OBTENGO EL PROFESOR NUEVO A PARTIR DE SU ID
       if (teacher) {
         const newTeacher = await this.teacherRepository.findOne({
           where: {
             id: teacher.id,
           },
         });
-        matriculaToUpdate.teacher = newTeacher;
+        subjectTeacherToUpdate.teacher = newTeacher;
 
         if (!teacher) {
           throw new Error('Profesor no encontrado');
@@ -48,13 +49,13 @@ export class UpdateMatriculaService {
             id: subject.id,
           },
         });
-        matriculaToUpdate.subject = newSubject;
+        subjectTeacherToUpdate.subject = newSubject;
 
         if (!subject) {
           throw new Error('Asignatura no encontrada');
         }
       }
-      return this.matriculaRepository.save(matriculaToUpdate);
+      return this.subjectTeacherRepository.save(subjectTeacherToUpdate);
     } catch (error) {
       console.error('Error al actualizar la matrícula:', error);
       throw new Error('No se pudo actualizar la matrícula');

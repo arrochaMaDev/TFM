@@ -10,7 +10,7 @@ export class DeleteMatriculaService {
     private readonly matriculaRepository: Repository<MatriculaDb>,
   ) {}
 
-  // OBTENER MATRICULAS POR ID DE MATRICULA
+  // BORRAR MATRICULAS POR ID DE MATRICULA
   async deleteMatricula(id: number): Promise<MatriculaDb | null> {
     // se pone null para gestionar mejor si no se obtiene ninguna matricula, porque si no, devuelve undefined
     const matricula = await this.matriculaRepository
@@ -29,7 +29,7 @@ export class DeleteMatriculaService {
     return await this.matriculaRepository.remove(matricula);
   }
 
-  // OBTENER MATRICULAS POR ID DE STUDENT
+  // BORRAR MATRICULAS POR ID DE STUDENT
   async deleteMatriculasByStudentId(studentId: number): Promise<MatriculaDb[]> {
     const matriculas = await this.matriculaRepository.find({
       where: {
