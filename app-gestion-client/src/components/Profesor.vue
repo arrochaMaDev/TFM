@@ -68,38 +68,85 @@ const confirmacionBorrar = () => {
   // funcion para confirmar el borrado mostrando un div para seleccionar si o no
   confirmacionEliminar.value = !confirmacionEliminar.value
 }
+
+// OBTENER ASIGNATURAS DEL PROFESOR
+let subjectsByTeacherIdFromServer: Ref<{
+  teacher: {
+    id: number
+    nombre: string
+    apellidos: string
+    asignaturas: string
+  }
+  asignaturas: {
+    id: number
+    subject: {
+      id: number
+      nombre: string
+    }
+  }[]
+} | null> = ref(null)
+
+const getSubjectsByTeacherData = async () => {
+  try {
+    const response = await fetch(
+      `http://localhost:3000/asignaturas_profesores/teacher/${teacherIdRef.value}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      }
+    )
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      // loadingStore.loadingTrue()
+      // await new Promise((resolve) => setTimeout(resolve, 2000))
+      const data = await response.json()
+      subjectsByTeacherIdFromServer.value = data
+      console.log(data)
+      console.log(subjectsByTeacherIdFromServer.value)
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    alert('Ha ocurrido un error')
+  }
+  // finally {
+  //   loadingStore.loadingFalse()
+  // }
+}
+getSubjectsByTeacherData()
+
 // OBTENER ALUMNOS MATRICULADOS CON EL PROFESOR
-let matriculasRefFromServer: Ref<
-  {
+let matriculasRefFromServer: Ref<{
+  teacher: {
+    id: number
+    nombre: string
+    apellidos: string
+    asignaturas: string
+  }
+  matriculas: {
     id: number
     student: {
       id: number
-      usuario_id: string
       nombre: string
       apellidos: string
       dni: string
       direccion: string
-      telefono: number
+      telefono: string
       email: string
     }
     subject: {
       id: number
       nombre: string
     }
-    teacher: {
-      id: number
-      usuario_id: string
-      nombre: string
-      apellidos: string
-      email: string
-      asignaturas: string | null
-    }
   }[]
-> = ref([])
+} | null> = ref(null)
 
 const getMatriculasData = async () => {
   try {
-    const response = await fetch('http://localhost:3000/matriculas', {
+    const response = await fetch(`http://localhost:3000/matriculas/teacher/${teacherIdRef.value}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -124,6 +171,7 @@ const getMatriculasData = async () => {
   //   loadingStore.loadingFalse()
   // }
 }
+getMatriculasData()
 </script>
 
 <template>
@@ -132,10 +180,22 @@ const getMatriculasData = async () => {
     <p>Nombre: {{ teacherDataFromServer.nombre }}</p>
     <p>Apellidos: {{ teacherDataFromServer.apellidos }}</p>
     <p>Email: {{ teacherDataFromServer.email }}</p>
-    <p>Asignaturas: {{ teacherDataFromServer.asignaturas }}</p>
+    <div>
+      <table id="tabla" v-if="subjectsByTeacherIdFromServer">
+        <th colspan="2"><h3>LISTADO DE ASIGNATURAS</h3></th>
+        <tr
+          id="subject"
+          v-for="subject in subjectsByTeacherIdFromServer.asignaturas"
+          :key="subject.id"
+        >
+          <td>{{ subject.subject.nombre }}</td>
+        </tr>
+      </table>
+    </div>
+
     <div>
       <table id="tabla" v-if="matriculasRefFromServer">
-        <th colspan="2"><h3>ALUMNADO</h3></th>
+        <th colspan="4"><h3>ALUMNADO</h3></th>
         <tr>
           <th>
             <h3>Nombre</h3>
@@ -150,15 +210,18 @@ const getMatriculasData = async () => {
             <h3>Asignatura</h3>
           </th>
         </tr>
-        <tr id="alumno" v-for="matricula in matriculasRefFromServer" :key="matricula.id">
+        <tr id="alumno" v-for="matricula in matriculasRefFromServer.matriculas" :key="matricula.id">
+          <td>{{ matricula.student.nombre }}</td>
+          <td>{{ matricula.student.apellidos }}</td>
+          <td>{{ matricula.student.dni }}</td>
           <td>{{ matricula.subject.nombre }}</td>
-          <td>{{ matricula.teacher.nombre + ' ' + matricula.teacher.apellidos }}</td>
-          <td>
+          <!-- <td>
             <button type="button" @click="editarMatricula(matricula), mostrarMatricula()">
               Editar
             </button>
           </td>
           <td><button type="button" @click="mostrarPopup(matricula.id)">Borrar</button></td>
+        </tr> -->
         </tr>
       </table>
     </div>
@@ -172,34 +235,44 @@ const getMatriculasData = async () => {
   </div>
 </template>
 
-<style>
+<style scoped>
+#ordenarPor {
+  margin: 0px;
+}
 table {
-  margin-top: 50px;
-  width: 300px;
-  border: 1px solid #ffffff;
+  margin-top: 0px;
+  width: max-content;
+  border: none;
 
   & th {
     background-color: rgb(79, 90, 86);
   }
-
   & td {
     width: fit-content;
-    text-align: center;
+    text-align: left;
     vertical-align: top;
-    border: 1px solid #ffffff;
+    border: none;
     border-spacing: 0;
   }
 }
 
+table tr:hover td {
+  transition: background-color 0.5s;
+  background-color: rgb(106, 98, 53);
+}
+
+table tr:hover td:nth-last-child(-n + 3) {
+  background-color: initial;
+}
+
 button {
-  margin-top: 10px;
-  width: 120px;
+  width: auto;
   height: 25px;
   background-color: hsla(160, 100%, 37%, 1);
   color: white;
   border: 1px solid hsla(160, 100%, 37%, 1);
   border-radius: 5px;
-  margin: 5px;
+  margin: 1px;
   cursor: pointer;
 }
 </style>

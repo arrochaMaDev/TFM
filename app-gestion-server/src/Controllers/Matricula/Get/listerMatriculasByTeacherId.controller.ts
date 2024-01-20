@@ -41,7 +41,8 @@ export class ListerMatriculasByTeacherIdController {
         matriculas: matriculas.map(({ id, student, subject, year }) => ({
           id,
           student: {
-            nombre: student.id,
+            id: student.id,
+            nombre: student.nombre,
             apellidos: student.apellidos,
             dni: student.dni,
             email: student.email,
