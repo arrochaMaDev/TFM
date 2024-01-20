@@ -115,6 +115,7 @@ let matriculaFromServer: Ref<{
       apellidos: string
       asignaturas: string
     }
+    year: number
   }[]
 } | null> = ref(null)
 
@@ -278,8 +279,9 @@ const resetearPopUpState = () => {
     </ul>
     <div>
       <table id="tabla" v-if="matriculaFromServer">
-        <th colspan="2"><h3>MATRICULAS</h3></th>
+        <th colspan="3"><h3>MATRICULAS</h3></th>
         <tr>
+          <th>Curso Escolar</th>
           <th>
             <h3>Asignatura</h3>
           </th>
@@ -288,6 +290,7 @@ const resetearPopUpState = () => {
           </th>
         </tr>
         <tr id="alumno" v-for="matricula in matriculaFromServer?.matriculas" :key="matricula.id">
+          <td>{{ matricula.year }} / {{ matricula.year + 1 }}</td>
           <td>{{ matricula.subject.nombre }}</td>
           <td>{{ matricula.teacher.nombre + ' ' + matricula.teacher.apellidos }}</td>
           <td>

@@ -35,6 +35,7 @@ let matriculasRefFromServer: Ref<
       email: string
       asignaturas: string | null
     }
+    year: number
   }[]
 > = ref([])
 
@@ -67,8 +68,13 @@ const getMatriculasData = async () => {
 
 // ORDENAR RESULTADOS POR VALOR QUE SE INDIQUE
 let ordenarPor: Ref<
-  'student.nombre' | 'student.apellidos' | 'student.dni' | 'subject.nombre' | 'teacher.nombre'
-> = ref('student.nombre')
+  | 'year'
+  | 'student.nombre'
+  | 'student.apellidos'
+  | 'student.dni'
+  | 'subject.nombre'
+  | 'teacher.nombre'
+> = ref('year')
 
 const ordenarMatriculas = () => {
   function eliminarTildes(elemento: string): string {
@@ -79,6 +85,10 @@ const ordenarMatriculas = () => {
     let valorA = ''
     let valorB = ''
 
+    if (ordenarPor.value === 'year') {
+      valorA = a.year.toString()
+      valorB = b.year.toString()
+    }
     if (ordenarPor.value === 'student.nombre') {
       valorA = eliminarTildes(a.student.nombre.toLowerCase())
       valorB = eliminarTildes(b.student.nombre.toLowerCase())
@@ -245,6 +255,7 @@ const goToStudent = (id: number) => {
     <div id="ordenarPor">
       <label for="ordenarPor">Ordenar por:</label>
       <select v-model="ordenarPor" @change="ordenarMatriculas()">
+        <option value="year">Curso Escolar</option>
         <option value="student.nombre">Nombre Alumno</option>
         <option value="student.apellidos">Apellidos Alumno</option>
         <option value="student.dni">DNI</option>
@@ -256,6 +267,7 @@ const goToStudent = (id: number) => {
       <table id="tabla">
         <th colspan="5"><h3>LISTADO DE MATRICULAS</h3></th>
         <tr>
+          <th>Curso Escolar</th>
           <th>
             <h3>Nombre</h3>
           </th>
@@ -273,6 +285,7 @@ const goToStudent = (id: number) => {
           </th>
         </tr>
         <tr id="alumno" v-for="matricula in matriculasRefFromServer" :key="matricula.id">
+          <td>{{ matricula.year }} / {{ matricula.year + 1 }}</td>
           <td>{{ matricula.student.nombre }}</td>
           <td>{{ matricula.student.apellidos }}</td>
           <td>{{ matricula.student.dni }}</td>

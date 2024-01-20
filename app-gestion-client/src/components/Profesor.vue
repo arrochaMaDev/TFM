@@ -141,6 +141,7 @@ let matriculasRefFromServer: Ref<{
       id: number
       nombre: string
     }
+    year: number
   }[]
 } | null> = ref(null)
 
@@ -197,6 +198,7 @@ getMatriculasData()
       <table id="tabla" v-if="matriculasRefFromServer">
         <th colspan="4"><h3>ALUMNADO</h3></th>
         <tr>
+          <th>Curso Escolar</th>
           <th>
             <h3>Nombre</h3>
           </th>
@@ -211,6 +213,7 @@ getMatriculasData()
           </th>
         </tr>
         <tr id="alumno" v-for="matricula in matriculasRefFromServer.matriculas" :key="matricula.id">
+          <td>{{ matricula.year }} / {{ matricula.year + 1 }}</td>
           <td>{{ matricula.student.nombre }}</td>
           <td>{{ matricula.student.apellidos }}</td>
           <td>{{ matricula.student.dni }}</td>
