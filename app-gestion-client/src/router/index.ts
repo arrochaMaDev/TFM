@@ -15,6 +15,7 @@ import Matricula from '@/components/Matricula.vue'
 import ListadoMatriculas from '@/components/ListadoMatriculas.vue'
 import ListadoUsuarios from '@/components/ListadoUsuarios.vue'
 import AltaAsignaturaProfesorVue from '@/components/AltaAsignaturaProfesor.vue'
+import ListadoAsignaturasProfesoresVue from '@/components/ListadoAsignaturasProfesores.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -137,6 +138,12 @@ const router = createRouter({
       name: 'listado-usuarios',
 
       component: ListadoUsuarios
+    },
+    {
+      path: '/listado-asignaciones',
+      name: 'listado-asignaciones',
+
+      component: ListadoAsignaturasProfesoresVue
     }
   ]
 })

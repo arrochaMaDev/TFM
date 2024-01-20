@@ -9,7 +9,7 @@ import { useEditingStore } from '@/stores/editar'
 const router = useRouter() // router para ir al alumno cuando se clique en él
 const loadingStore = useLoadingStore() // store del Spinner
 
-// OBTENER DATOS DE TODOS LOS ESTUDIANTES
+// OBTENER DATOS DE TODOS LOS PROFESORES
 let teachersRefFromServer: Ref<
   {
     id: number

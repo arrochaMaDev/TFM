@@ -79,6 +79,8 @@ import { DeleteSubjectTeacherByTeacherIdController } from './Controllers/Subject
 import { DeleteSubjectTeacherByTeacherIdService } from './Controllers/SubjectTeacher/Delete/deleteSubjectTeacherByTeacherId.service';
 import { UpdateSubjectTeacherController } from './Controllers/SubjectTeacher/Update/updateSubjectTeacher.controller';
 import { UpdateSubjectTeacherService } from './Controllers/SubjectTeacher/Update/updateSubjectTeacher.service';
+import { ListerMatriculasByTeacherIdService } from './Controllers/Matricula/Get/listerMatriculasByTeacherId.service';
+import { ListerMatriculasByTeacherIdController } from './Controllers/Matricula/Get/listerMatriculasByTeacherId.controller';
 
 @Module({
   imports: [
@@ -140,6 +142,7 @@ import { UpdateSubjectTeacherService } from './Controllers/SubjectTeacher/Update
     ListerUsersController,
     ListerMatriculasController,
     ListerMatriculasByStudentIdController,
+    ListerMatriculasByTeacherIdController,
     LoginUserController,
     ListerSubjectsTeachersController,
     ListerSubjectsByTeacherIdController,
@@ -178,6 +181,7 @@ import { UpdateSubjectTeacherService } from './Controllers/SubjectTeacher/Update
     ListerUsersService,
     ListerMatriculasService,
     ListerMatriculasByStudentIdService,
+    ListerMatriculasByTeacherIdService,
     LoginUserService,
     ListerSubjectsTeachersService,
     ListerSubjectsByTeacherIdService,

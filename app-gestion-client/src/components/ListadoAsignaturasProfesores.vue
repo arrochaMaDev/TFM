@@ -2,45 +2,33 @@
 import { type Ref, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Popup from './Popup.vue'
-import Matricula from './Matricula.vue'
+import AltaAsignaturaProfesor from './AltaAsignaturaProfesor.vue'
 import { useLoadingStore } from '@/stores/loading'
 import { useEditingStore } from '@/stores/editar'
 
 const router = useRouter() // router para ir al alumno cuando se clique en él
 const loadingStore = useLoadingStore() // store del Spinner
 
-// OBTENER DATOS DE TODOS LOS ESTUDIANTES
-let matriculasRefFromServer: Ref<
+// OBTENER DATOS DE TODAS LAS ASIGNACIONES
+let subjectsTeachersRefFromServer: Ref<
   {
     id: number
-    student: {
-      id: number
-      usuario_id: string
-      nombre: string
-      apellidos: string
-      dni: string
-      direccion: string
-      telefono: number
-      email: string
-    }
     subject: {
       id: number
       nombre: string
     }
     teacher: {
       id: number
-      usuario_id: string
       nombre: string
       apellidos: string
       email: string
-      asignaturas: string | null
     }
   }[]
 > = ref([])
 
-const getMatriculasData = async () => {
+const getSubjectsTeachersData = async () => {
   try {
-    const response = await fetch('http://localhost:3000/matriculas', {
+    const response = await fetch('http://localhost:3000/asignaturas_profesores', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -53,9 +41,9 @@ const getMatriculasData = async () => {
       loadingStore.loadingTrue()
       await new Promise((resolve) => setTimeout(resolve, 2000))
       const data = await response.json()
-      matriculasRefFromServer.value = data
+      subjectsTeachersRefFromServer.value = data
       console.log(data)
-      console.log(matriculasRefFromServer.value)
+      console.log(subjectsTeachersRefFromServer.value)
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
@@ -66,35 +54,28 @@ const getMatriculasData = async () => {
 }
 
 // ORDENAR RESULTADOS POR VALOR QUE SE INDIQUE
-let ordenarPor: Ref<
-  'student.nombre' | 'student.apellidos' | 'student.dni' | 'subject.nombre' | 'teacher.nombre'
-> = ref('student.nombre')
+let ordenarPor: Ref<'teacher.nombre' | 'teacher.apellidos' | 'subject.nombre'> =
+  ref('teacher.nombre')
 
 const ordenarMatriculas = () => {
   function eliminarTildes(elemento: string): string {
     return elemento.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   }
 
-  const matriculasOrdenadas = matriculasRefFromServer.value.slice().sort((a, b) => {
+  const datosOrdenados = subjectsTeachersRefFromServer.value.slice().sort((a, b) => {
     let valorA = ''
     let valorB = ''
 
-    if (ordenarPor.value === 'student.nombre') {
-      valorA = eliminarTildes(a.student.nombre.toLowerCase())
-      valorB = eliminarTildes(b.student.nombre.toLowerCase())
-    } else if (ordenarPor.value === 'student.apellidos') {
-      valorA = eliminarTildes(a.student.apellidos.toLowerCase())
-      valorB = eliminarTildes(b.student.apellidos.toLowerCase())
+    if (ordenarPor.value === 'teacher.nombre') {
+      valorA = eliminarTildes(a.teacher.nombre.toLowerCase())
+      valorB = eliminarTildes(b.teacher.nombre.toLowerCase())
+    } else if (ordenarPor.value === 'teacher.apellidos') {
+      valorA = eliminarTildes(a.teacher.apellidos.toLowerCase())
+      valorB = eliminarTildes(b.teacher.apellidos.toLowerCase())
       console.log('ordenado')
-    } else if (ordenarPor.value === 'student.dni') {
-      valorA = eliminarTildes(a.student.dni.toLowerCase())
-      valorB = eliminarTildes(b.student.dni.toLowerCase())
     } else if (ordenarPor.value === 'subject.nombre') {
       valorA = eliminarTildes(a.subject.nombre.toLowerCase())
       valorB = eliminarTildes(b.subject.nombre.toLowerCase())
-    } else if (ordenarPor.value === 'teacher.nombre') {
-      valorA = eliminarTildes(a.teacher.nombre.toLowerCase())
-      valorB = eliminarTildes(b.teacher.nombre.toLowerCase())
     }
 
     if (valorA < valorB) {
@@ -105,21 +86,21 @@ const ordenarMatriculas = () => {
     }
     return 0
   })
-  matriculasRefFromServer.value = matriculasOrdenadas
+  subjectsTeachersRefFromServer.value = datosOrdenados
 }
 onMounted(() => {
   ordenarMatriculas()
-  getMatriculasData()
+  getSubjectsTeachersData()
 })
 
-// LÓGICA BORRAR MATRICULA
+// LÓGICA BORRAR ASIGNACIÓN
 let popupVisible: Ref<boolean> = ref(false) // ref para ocultar o mostrar el popup
-let idMatriculaSeleccionada: Ref<number | null> = ref(null) // ref del id de la matricula seleccionado para borrar
+let idSubjectTeacherSelected: Ref<number | null> = ref(null) // ref del id seleccionado para borrar
 
-const borrarMatricula = async () => {
+const borrarSubjectTeacher = async () => {
   try {
     const response = await fetch(
-      `http://localhost:3000/matricula/${idMatriculaSeleccionada.value}`,
+      `http://localhost:3000/asignatura_profesor/${idSubjectTeacherSelected.value}`,
       {
         method: 'DELETE',
         headers: {
@@ -129,11 +110,11 @@ const borrarMatricula = async () => {
       }
     )
     if (response.ok) {
-      loadingStore.loadingTrue()
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      alert('Matricula borrada con éxito')
+      // loadingStore.loadingTrue()
+      // await new Promise((resolve) => setTimeout(resolve, 2000))
+      alert('Realizado con éxito')
       popupVisible.value = false
-      getMatriculasData()
+      getSubjectsTeachersData()
     } else {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
     }
@@ -141,20 +122,21 @@ const borrarMatricula = async () => {
     console.error('Error en la solicitud:', error)
     alert('Ha ocurrido un error')
     popupVisible.value = false
-  } finally {
-    loadingStore.loadingFalse()
   }
+  // finally {
+  //   loadingStore.loadingFalse()
+  // }
 }
 
 const cancelarBorrar = () => {
   // si se da click en NO se cancela el borrado
   popupVisible.value = false
-  idMatriculaSeleccionada.value = null
+  idSubjectTeacherSelected.value = null
 }
 
 const mostrarPopup = (id: number) => {
-  // si se da click en SI, se muestra el popup y recibe el id del alumno a borrar
-  idMatriculaSeleccionada.value = id
+  // si se da click en SI, se muestra el popup y recibe el id a borrar
+  idSubjectTeacherSelected.value = id
   popupVisible.value = true
 }
 
@@ -164,15 +146,9 @@ const editingStore = useEditingStore() // store del componente editar Alumno
 let popUpState: Ref<boolean> = ref(editingStore.editarFalse()) // variable del estado del popUp
 console.log(popUpState.value)
 
-let matriculaEditar: Ref<
+let subjectTeacherEditar: Ref<
   | {
       id: number
-      student: {
-        id: number
-        nombre: string
-        apellidos: string
-        dni: string
-      }
       subject: {
         id: number
         nombre: string
@@ -186,12 +162,12 @@ let matriculaEditar: Ref<
   | undefined
 > = ref(undefined)
 
-const editarMatricula = (matricula: any) => {
+const editarSubjectTeacher = (subjectTeacher: any) => {
   // popUpState.value = true
   editingStore.editarTrue()
-  matriculaEditar.value = matricula
+  subjectTeacherEditar.value = subjectTeacher
   // fetch para obtener los datos del alumno
-  fetch(`http://localhost:3000/matricula/${matriculaEditar.value?.id}`, {
+  fetch(`http://localhost:3000/asignatura_profesor/${subjectTeacherEditar.value?.id}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -200,12 +176,6 @@ const editarMatricula = (matricula: any) => {
   }).then(async (response) => {
     const data = (await response.json()) as {
       id: number
-      student: {
-        id: number
-        nombre: string
-        apellidos: string
-        dni: string
-      }
       subject: {
         id: number
         nombre: string
@@ -216,12 +186,13 @@ const editarMatricula = (matricula: any) => {
         apellidos: string
       }
     }
-    matriculaEditar.value = data
+    subjectTeacherEditar.value = data
     console.table(data)
   })
+  getSubjectsTeachersData()
 }
 
-const mostrarMatricula = () => {
+const mostrarSubjectTeacher = () => {
   // popUpState.value = true
   popUpState.value = editingStore.editarTrue()
   console.log(popUpState.value)
@@ -234,9 +205,9 @@ const resetearPopUpState = () => {
 }
 
 // Ir a la página idividual del alumno
-const goToStudent = (id: number) => {
+const goToTeacher = (id: number) => {
   router.push({
-    path: `/alumno/${id}`
+    path: `/profesor/${id}`
   })
 }
 </script>
@@ -245,16 +216,14 @@ const goToStudent = (id: number) => {
     <div id="ordenarPor">
       <label for="ordenarPor">Ordenar por:</label>
       <select v-model="ordenarPor" @change="ordenarMatriculas()">
-        <option value="student.nombre">Nombre Alumno</option>
-        <option value="student.apellidos">Apellidos Alumno</option>
-        <option value="student.dni">DNI</option>
-        <option value="subject.nombre">Asignatura</option>
         <option value="teacher.nombre">Nombre Profesor</option>
+        <option value="teacher.apellidos">Apellidos Profesor</option>
+        <option value="subject.nombre">Asignatura</option>
       </select>
     </div>
     <div>
       <table id="tabla">
-        <th colspan="5"><h3>LISTADO DE MATRICULAS</h3></th>
+        <th colspan="3"><h3>LISTADO DE ASIGNACIONES</h3></th>
         <tr>
           <th>
             <h3>Nombre</h3>
@@ -263,47 +232,48 @@ const goToStudent = (id: number) => {
             <h3>Apellidos</h3>
           </th>
           <th>
-            <h3>DNI</h3>
-          </th>
-          <th>
             <h3>Asignatura</h3>
           </th>
-          <th>
-            <h3>Profesor</h3>
-          </th>
         </tr>
-        <tr id="alumno" v-for="matricula in matriculasRefFromServer" :key="matricula.id">
-          <td>{{ matricula.student.nombre }}</td>
-          <td>{{ matricula.student.apellidos }}</td>
-          <td>{{ matricula.student.dni }}</td>
-          <td>{{ matricula.subject.nombre }}</td>
-          <td>{{ matricula.teacher.nombre + ' ' + matricula.teacher.apellidos }}</td>
+        <tr
+          id="alumno"
+          v-for="subjectTeacher in subjectsTeachersRefFromServer"
+          :key="subjectTeacher.id"
+        >
+          <td>{{ subjectTeacher.teacher.nombre }}</td>
+          <td>{{ subjectTeacher.teacher.apellidos }}</td>
+          <td>{{ subjectTeacher.subject.nombre }}</td>
           <td>
-            <button type="button" @click="goToStudent(matricula.student.id)">Ver</button>
+            <button type="button" @click="goToTeacher(subjectTeacher.teacher.id)">Ver</button>
           </td>
           <td>
-            <button type="button" @click="editarMatricula(matricula), mostrarMatricula()">
+            <button
+              type="button"
+              @click="editarSubjectTeacher(subjectTeacher), mostrarSubjectTeacher()"
+            >
               Editar
             </button>
           </td>
-          <td><button type="button" @click="mostrarPopup(matricula.id)">Borrar</button></td>
-          <!-- le paso el id del alumno que quiero borrar -->
+          <td>
+            <button type="button" @click="mostrarPopup(subjectTeacher.id)">Borrar</button>
+          </td>
+          <!-- le paso el id que quiero borrar -->
         </tr>
       </table>
     </div>
 
-    <Popup v-if="popupVisible" @confirmar="borrarMatricula" @cancelar="cancelarBorrar"></Popup>
+    <Popup v-if="popupVisible" @confirmar="borrarSubjectTeacher" @cancelar="cancelarBorrar"></Popup>
     <!-- recibo un emit de confirmar que ejecuta la funcion borrarAlumno y otro emit de cancelar que ejecuta cancelarBorrar -->
-    <Matricula
+    <AltaAsignaturaProfesor
       v-if="popUpState"
       :isEditing="popUpState"
       @cerrarPopUp="resetearPopUpState"
-      @obtenerMatriculas="getMatriculasData()"
-      @resetearMatricula="editarMatricula(matriculaEditar)"
-      :matriculaParaEditar="matriculaEditar"
+      @obtenerSubjectsTeachers="getSubjectsTeachersData()"
+      @resetearSubjectTeacher="editarSubjectTeacher(subjectTeacherEditar)"
+      :subjectTeacherParaEditar="subjectTeacherEditar"
     >
       <!-- para resetear valores, recibo un emit y vuelvo a ejecutar la funcion editarAlumnos con los parámetros recibidos del componente hijo -->
-    </Matricula>
+    </AltaAsignaturaProfesor>
   </div>
 </template>
 <style scoped>

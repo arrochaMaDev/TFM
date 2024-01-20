@@ -69,6 +69,61 @@ const confirmacionBorrar = () => {
   confirmacionEliminar.value = !confirmacionEliminar.value
 }
 // OBTENER ALUMNOS MATRICULADOS CON EL PROFESOR
+let matriculasRefFromServer: Ref<
+  {
+    id: number
+    student: {
+      id: number
+      usuario_id: string
+      nombre: string
+      apellidos: string
+      dni: string
+      direccion: string
+      telefono: number
+      email: string
+    }
+    subject: {
+      id: number
+      nombre: string
+    }
+    teacher: {
+      id: number
+      usuario_id: string
+      nombre: string
+      apellidos: string
+      email: string
+      asignaturas: string | null
+    }
+  }[]
+> = ref([])
+
+const getMatriculasData = async () => {
+  try {
+    const response = await fetch('http://localhost:3000/matriculas', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      // loadingStore.loadingTrue()
+      // await new Promise((resolve) => setTimeout(resolve, 2000))
+      const data = await response.json()
+      matriculasRefFromServer.value = data
+      console.log(data)
+      console.log(matriculasRefFromServer.value)
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    alert('Ha ocurrido un error')
+  }
+  // finally {
+  //   loadingStore.loadingFalse()
+  // }
+}
 </script>
 
 <template>
@@ -78,6 +133,35 @@ const confirmacionBorrar = () => {
     <p>Apellidos: {{ teacherDataFromServer.apellidos }}</p>
     <p>Email: {{ teacherDataFromServer.email }}</p>
     <p>Asignaturas: {{ teacherDataFromServer.asignaturas }}</p>
+    <div>
+      <table id="tabla" v-if="matriculasRefFromServer">
+        <th colspan="2"><h3>ALUMNADO</h3></th>
+        <tr>
+          <th>
+            <h3>Nombre</h3>
+          </th>
+          <th>
+            <h3>Apellidos</h3>
+          </th>
+          <th>
+            <h3>DNI</h3>
+          </th>
+          <th>
+            <h3>Asignatura</h3>
+          </th>
+        </tr>
+        <tr id="alumno" v-for="matricula in matriculasRefFromServer" :key="matricula.id">
+          <td>{{ matricula.subject.nombre }}</td>
+          <td>{{ matricula.teacher.nombre + ' ' + matricula.teacher.apellidos }}</td>
+          <td>
+            <button type="button" @click="editarMatricula(matricula), mostrarMatricula()">
+              Editar
+            </button>
+          </td>
+          <td><button type="button" @click="mostrarPopup(matricula.id)">Borrar</button></td>
+        </tr>
+      </table>
+    </div>
     <button type="button" @click="confirmacionBorrar">Borrar profesor</button>
     <div v-show="confirmacionEliminar">
       <!-- Este div se muestra para confirmar el borrado  -->

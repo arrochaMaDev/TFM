@@ -172,17 +172,11 @@ const fetchSubjectTeacher = async (subjectId: number, teacherId: number) => {
 }
 
 // COMPONENTE COMO POPUP PARA EDITAR
-const emit = defineEmits(['cerrarPopUp', 'obtenerMatriculas', 'resetearMatricula'])
+const emit = defineEmits(['cerrarPopUp', 'obtenerSubjectsTeachers', 'resetearSubjectTeacher'])
 const props = defineProps<{
-  matriculaParaEditar:
+  subjectTeacherParaEditar:
     | {
         id: number
-        student: {
-          id: number
-          nombre: string
-          apellidos: string
-          dni: string
-        }
         subject: {
           id: number
           nombre: string
@@ -197,7 +191,7 @@ const props = defineProps<{
   isEditing: boolean
 }>()
 
-let matriculaEditada = ref({ ...props.matriculaParaEditar })
+let subjectTeacherEditada = ref({ ...props.subjectTeacherParaEditar })
 // let matriculaEditada = ref({
 //   id: props.matriculaParaEditar?.id || 0,
 //   student: {
@@ -220,33 +214,39 @@ let matriculaEditada = ref({ ...props.matriculaParaEditar })
 let popUpStyle: Ref<boolean> = ref(props.isEditing) // variable para activar el estilo popUp
 
 // FETCH PARA ACTUALIZAR MATRICULA:
-const actualizarMatricula = async () => {
+const actualizarSubjectTeacher = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/matricula/${matriculaEditada.value?.id}`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        newSubject: matriculaEditada.value?.subject,
-        newTeacher: matriculaEditada.value?.teacher
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    })
+    const response = await fetch(
+      `http://localhost:3000/asignatura_profesor/${subjectTeacherEditada.value?.id}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({
+          newSubject: subjectTeacherEditada.value?.subject,
+          newTeacher: subjectTeacherEditada.value?.teacher
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      }
+    )
     if (!response.ok) {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
-      alert('Matricula Editada')
+      alert('Realizado con éxito')
       // Imprimo los datos que he introducido
-      const matriculaAcualizada = [
-        matriculaEditada.value?.student?.nombre,
-        matriculaEditada.value?.student?.apellidos,
-        matriculaEditada.value?.student?.dni,
-        matriculaEditada.value?.subject?.nombre,
-        matriculaEditada.value?.teacher?.nombre,
-        matriculaEditada.value?.teacher?.apellidos
-      ]
-      console.table(matriculaAcualizada)
+      const subjectTeacherAcualizada = {
+        subject: {
+          id: subjectTeacherEditada.value.subject?.id,
+          nombre: subjectTeacherEditada.value.subject?.nombre
+        },
+        teacher: {
+          id: subjectTeacherEditada.value.teacher?.id,
+          nombre: subjectTeacherEditada.value.teacher?.nombre,
+          apellidos: subjectTeacherEditada.value.teacher?.apellidos
+        }
+      }
+      console.table(subjectTeacherAcualizada)
       popUpStyle.value = false
     }
   } catch (error) {
@@ -254,35 +254,35 @@ const actualizarMatricula = async () => {
     alert('Ha ocurrido un error')
   } finally {
     emit('cerrarPopUp')
-    emit('obtenerMatriculas')
+    emit('obtenerSubjectsTeachers')
   }
 }
 
 // para resetear los valores como están actualmente en la BD
-const resetearValoresIniciales = () => {
-  console.log('resetear valores iniciales')
-  const subject = props.matriculaParaEditar?.subject
-  const teacher = props.matriculaParaEditar?.teacher
+// const resetearValoresIniciales = () => {
+//   console.log('resetear valores iniciales')
+//   const subject = props.matriculaParaEditar?.subject
+//   const teacher = props.matriculaParaEditar?.teacher
 
-  if (subject && teacher) {
-    matriculaEditada.value.subject = { id: subject.id, nombre: subject.nombre }
-    matriculaEditada.value.teacher = {
-      id: teacher.id,
-      nombre: teacher.nombre,
-      apellidos: teacher.apellidos
-    }
-  }
+//   if (subject && teacher) {
+//     matriculaEditada.value.subject = { id: subject.id, nombre: subject.nombre }
+//     matriculaEditada.value.teacher = {
+//       id: teacher.id,
+//       nombre: teacher.nombre,
+//       apellidos: teacher.apellidos
+//     }
+//   }
 
-  // matriculaEditada.value.subject = props.matriculaParaEditar?.subject
-  // matriculaEditada.value.teacher = props.matriculaParaEditar?.teacher
-  emit('resetearMatricula', matriculaEditada) // hago el emit y paso además matriculaEditada según el valor de solo lectura de las props recibidas
+// matriculaEditada.value.subject = props.matriculaParaEditar?.subject
+// matriculaEditada.value.teacher = props.matriculaParaEditar?.teacher
+//   emit( 'resetearSubjectTeacher',  subjectTeacherEditada) // hago el emit y paso además matriculaEditada según el valor de solo lectura de las props recibidas
 
-  return matriculaEditada.value
-}
+//   return matriculaEditada.value
+// }
 
 const handleSubjectTeacher = () => {
   if (popUpStyle.value) {
-    actualizarMatricula()
+    actualizarSubjectTeacher()
   } else {
     crearSubjectTeacher()
   }
@@ -341,20 +341,19 @@ const handleSubjectTeacher = () => {
 
         <div v-if="popUpStyle">
           <!--MODO ACTUALIZAR -->
-          <label for="asignatura">Selecciona la asignatura</label>
-          <select name="asignatura" id="" v-model="matriculaEditada.subject">
-            <option v-for="subject in subjectsRefFromServer" :key="subject.id" :value="subject">
-              {{ subject.nombre }}
-            </option>
-          </select>
           <label for="profesor">Selecciona el profesor</label>
-          <select name="profesor" id="" v-model="matriculaEditada.teacher">
+          <select name="profesor" id="" v-model="subjectTeacherEditada.teacher">
             <option v-for="teacher in teachersRefFromServer" :key="teacher.id" :value="teacher">
               {{ teacher.nombre }} {{ teacher.apellidos }}
             </option>
           </select>
+          <label for="asignatura">Selecciona la asignatura</label>
+          <select name="asignatura" id="" v-model="subjectTeacherEditada.subject">
+            <option v-for="subject in subjectsRefFromServer" :key="subject.id" :value="subject">
+              {{ subject.nombre }}
+            </option>
+          </select>
         </div>
-
         <button type="submit">{{ popUpStyle ? 'Actualizar' : 'Enviar' }}</button>
         <button type="button" v-if="popUpStyle" @click="emit('cerrarPopUp')">Cancelar</button>
       </form>
@@ -373,7 +372,7 @@ table {
     vertical-align: top;
     border: none;
     border-spacing: 0;
-    text-align: center; /* Centrar contenido de celdas */
+    text-align: center;
   }
 }
 .form {
@@ -428,7 +427,7 @@ table {
   border-radius: 10px;
   border: 1px solid white;
   display: flex;
-  flex-direction: column; /* Añadido para disponer los elementos verticalmente */
+  flex-direction: column;
 
   & label {
     display: block;
