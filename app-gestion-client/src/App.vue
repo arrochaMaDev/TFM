@@ -80,6 +80,9 @@ const deleteCookie = (user: string) => {
     <RouterLink to="/alta-alumno" v-if="adminMode">Alta Alumno</RouterLink>
     <RouterLink to="/alta-profesor" v-if="adminMode">Alta Profesor</RouterLink>
     <RouterLink to="/alta-asignatura" v-if="adminMode">Alta Asignatura</RouterLink>
+    <RouterLink to="/alta-asignatura-profesor" v-if="adminMode"
+      >Alta Asignatura-Profesor</RouterLink
+    >
     <RouterLink to="/matricula" v-if="adminMode">Matricula</RouterLink>
     <RouterLink to="/buscador-alumno" v-if="adminMode">Buscar Alumnos</RouterLink>
     <RouterLink to="/listado-usuarios" v-if="adminMode">Listado Usuarios</RouterLink>

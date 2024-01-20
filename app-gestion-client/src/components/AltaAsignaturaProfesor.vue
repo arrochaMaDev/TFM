@@ -4,56 +4,6 @@ import { type Ref, ref } from 'vue'
 
 const loadingStore = useLoadingStore() // store del Spinner
 
-// OBTENER DATOS DE TODOS LOS ESTUDIANTES
-let studentsRefFromServer: Ref<
-  {
-    id: number
-    usuario_id: string
-    nombre: string
-    apellidos: string
-    dni: string
-    direccion: string
-    telefono: string
-    email: string
-  }[]
-> = ref([])
-
-const getStudentsData = async () => {
-  try {
-    const response = await fetch('http://localhost:3000/students', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    })
-    if (!response.ok) {
-      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
-    } else {
-      const data = (await response.json()) as {
-        id: number
-        usuario_id: string
-        nombre: string
-        apellidos: string
-        dni: string
-        direccion: string
-        telefono: string
-        email: string
-      }[]
-      studentsRefFromServer.value = data
-      console.log(data)
-      console.log(studentsRefFromServer.value)
-    }
-  } catch (error) {
-    console.error('Error en la solicitud:', error)
-    alert('Ha ocurrido un error')
-  } finally {
-    loadingStore.loadingFalse()
-  }
-}
-
-getStudentsData()
-
 // OBTENER DATOS DE TODAS LAS ASIGNATURAS
 let subjectsRefFromServer: Ref<
   {
@@ -132,40 +82,61 @@ const getTeachersData = async () => {
 
 getTeachersData()
 
-// REFERENCIAS DE LA MATRICULA
-let subjectMatricula: Ref<{
+// REFERENCIAS DE LA ASIGNACIÓN
+let subjectSelected: Ref<{
   id: number
   nombre: string
 } | null> = ref(null)
 
-let teacherMatricula: Ref<{
+let selectedSubjects: Ref<
+  {
+    // Array de las asignaturas seleccionadas
+    id: number
+    nombre: string
+  }[]
+> = ref([])
+
+let teacherSelected: Ref<{
   id: number
   nombre: string
   apellidos: string
 } | null> = ref(null)
 
-let studentMatricula: Ref<{
-  id: number
-  usuario_id: string
-  nombre: string
-  apellidos: string
-  dni: string
-  direccion: string
-  telefono: string
-  email: string
-} | null> = ref(null)
+const agregarAsignatura = () => {
+  if (subjectSelected.value) {
+    const existingSubject = selectedSubjects.value.find(
+      (subject) => subject.id === subjectSelected.value?.id
+    )
+    if (!existingSubject) {
+      // Si la asignatura no está en el array
+      selectedSubjects.value.push(subjectSelected.value)
+    } else {
+      // Si la asignatura ya está
+      console.log('La asignatura ya está en la lista')
+    }
+  }
+}
+const borrarAsignatura = (subjectId: number) => {
+  // se usa el metodo filter para crear un nuevo array eliminando la asignatura seleccionada
+  selectedSubjects.value = selectedSubjects.value.filter((subject) => subject.id !== subjectId)
+}
 
-// ENVIO DATOS POST A LA BD DE LA MATRICULA
-const crearMatricula = async () => {
+// CREAR RELACIÓN ASIGNATURA-PROFESOR
+const crearSubjectTeacher = () => {
+  selectedSubjects.value.forEach((subject) => {
+    if (teacherSelected.value) {
+      fetchSubjectTeacher(subject.id, teacherSelected.value.id)
+    }
+  })
+}
+
+const fetchSubjectTeacher = async (subjectId: number, teacherId: number) => {
   try {
-    const response = await fetch('http://localhost:3000/matricula', {
+    const response = await fetch('http://localhost:3000/asignatura_profesor', {
       method: 'POST',
       body: JSON.stringify({
-        alumno: studentMatricula.value?.id,
-        asignatura: subjectMatricula.value?.id,
-        profesor: teacherMatricula.value?.id
-        // nota: nota.value
-        // LA NOTA SE RESERVA PARA LAS EVALUACION
+        asignatura: teacherId,
+        profesor: subjectId
       }),
       headers: {
         'Content-Type': 'application/json'
@@ -175,36 +146,28 @@ const crearMatricula = async () => {
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
-      loadingStore.loadingTrue()
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      alert('Matricula creada')
+      alert('Realizado correctamente')
 
-      const matricula = {
-        alumno: {
-          nombre: studentMatricula.value?.nombre,
-          apellidos: studentMatricula.value?.apellidos
-        },
-        asignatura: subjectMatricula.value?.nombre,
+      const subjectTeacher = {
         profesor: {
-          nombre: teacherMatricula.value?.nombre,
-          apellidos: teacherMatricula.value?.apellidos
-        }
-        // nota: nota.value // LA NOTA SE RESERVA PARA LA EVALUACION
+          nombre: teacherSelected.value?.nombre,
+          apellidos: teacherSelected.value?.apellidos
+        },
+        asignatura: subjectSelected.value?.nombre
       }
 
-      const data = (await response.json()) as typeof matricula
+      const data = (await response.json()) as typeof subjectTeacher
 
       console.table(data)
 
-      // reiniciar todos los valores menos el del alumno
-      subjectMatricula.value = null
-      teacherMatricula.value = null
+      // reiniciar todos los valores
+      teacherSelected.value = null
+      subjectSelected.value = null
+      selectedSubjects.value = []
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
     alert('Ha ocurrido un error')
-  } finally {
-    loadingStore.loadingFalse()
   }
 }
 
@@ -235,6 +198,24 @@ const props = defineProps<{
 }>()
 
 let matriculaEditada = ref({ ...props.matriculaParaEditar })
+// let matriculaEditada = ref({
+//   id: props.matriculaParaEditar?.id || 0,
+//   student: {
+//     id: props.matriculaParaEditar?.student.id || 0,
+//     nombre: props.matriculaParaEditar?.student.nombre || '',
+//     apellidos: props.matriculaParaEditar?.student.apellidos || '',
+//     dni: props.matriculaParaEditar?.student.dni || ''
+//   },
+//   subject: {
+//     id: props.matriculaParaEditar?.subject.id || 0,
+//     nombre: props.matriculaParaEditar?.subject.nombre || ''
+//   },
+//   teacher: {
+//     id: props.matriculaParaEditar?.teacher.id || 0,
+//     nombre: props.matriculaParaEditar?.teacher.nombre || '',
+//     apellidos: props.matriculaParaEditar?.teacher.apellidos || ''
+//   }
+// })
 
 let popUpStyle: Ref<boolean> = ref(props.isEditing) // variable para activar el estilo popUp
 
@@ -278,32 +259,32 @@ const actualizarMatricula = async () => {
 }
 
 // para resetear los valores como están actualmente en la BD
-// const resetearValoresIniciales = () => {
-//   console.log('resetear valores iniciales')
-//   const subject = props.matriculaParaEditar?.subject
-//   const teacher = props.matriculaParaEditar?.teacher
+const resetearValoresIniciales = () => {
+  console.log('resetear valores iniciales')
+  const subject = props.matriculaParaEditar?.subject
+  const teacher = props.matriculaParaEditar?.teacher
 
-//   if (subject && teacher) {
-//     matriculaEditada.value.subject = { id: subject.id, nombre: subject.nombre }
-//     matriculaEditada.value.teacher = {
-//       id: teacher.id,
-//       nombre: teacher.nombre,
-//       apellidos: teacher.apellidos
-//     }
-//   }
+  if (subject && teacher) {
+    matriculaEditada.value.subject = { id: subject.id, nombre: subject.nombre }
+    matriculaEditada.value.teacher = {
+      id: teacher.id,
+      nombre: teacher.nombre,
+      apellidos: teacher.apellidos
+    }
+  }
 
-//   // matriculaEditada.value.subject = props.matriculaParaEditar?.subject
-//   // matriculaEditada.value.teacher = props.matriculaParaEditar?.teacher
-//   emit('resetearMatricula', matriculaEditada) // hago el emit y paso además matriculaEditada según el valor de solo lectura de las props recibidas
+  // matriculaEditada.value.subject = props.matriculaParaEditar?.subject
+  // matriculaEditada.value.teacher = props.matriculaParaEditar?.teacher
+  emit('resetearMatricula', matriculaEditada) // hago el emit y paso además matriculaEditada según el valor de solo lectura de las props recibidas
 
-//   return matriculaEditada.value
-// }
+  return matriculaEditada.value
+}
 
-const handleMatricula = () => {
+const handleSubjectTeacher = () => {
   if (popUpStyle.value) {
     actualizarMatricula()
   } else {
-    crearMatricula()
+    crearSubjectTeacher()
   }
 }
 </script>
@@ -311,36 +292,33 @@ const handleMatricula = () => {
 <template>
   <div class="container" :class="{ matriculaPopup: popUpStyle }">
     <div class="form" :class="{ 'matriculaPopup-content': popUpStyle }">
-      <h1>Matricula</h1>
-      <form @submit.prevent="handleMatricula()">
+      <h1>Relación de asignaturas</h1>
+      <form @submit.prevent="handleSubjectTeacher()">
         <div v-if="!popUpStyle">
           <!--MODO CREAR -->
           <table>
             <tr>
               <th>
-                <label for="alumno">Selecciona el alumno</label>
+                <label for="profesor">Selecciona el profesor</label>
               </th>
               <th>
                 <label for="asignatura">Selecciona la asignatura</label>
               </th>
-              <th>
-                <label for="profesor">Selecciona el profesor</label>
-              </th>
             </tr>
             <tr>
               <td>
-                <select name="alumno" id="" v-model="studentMatricula">
+                <select name="profesor" id="" v-model="teacherSelected">
                   <option
-                    v-for="student in studentsRefFromServer"
-                    :key="student.id"
-                    :value="student"
+                    v-for="teacher in teachersRefFromServer"
+                    :key="teacher.id"
+                    :value="teacher"
                   >
-                    {{ student.nombre }} {{ student.apellidos }} {{ student.dni }}
+                    {{ teacher.nombre }} {{ teacher.apellidos }}
                   </option>
                 </select>
               </td>
               <td>
-                <select name="asignatura" id="" v-model="subjectMatricula">
+                <select name="asignatura" id="" v-model="subjectSelected">
                   <option
                     v-for="subject in subjectsRefFromServer"
                     :key="subject.id"
@@ -350,11 +328,13 @@ const handleMatricula = () => {
                   </option>
                 </select>
               </td>
-              <select name="profesor" id="" v-model="teacherMatricula">
-                <option v-for="teacher in teachersRefFromServer" :key="teacher.id" :value="teacher">
-                  {{ teacher.nombre }} {{ teacher.apellidos }}
-                </option>
-              </select>
+              <td>
+                <button type="button" @click="agregarAsignatura()">Agregar</button>
+              </td>
+            </tr>
+            <tr v-for="subject in selectedSubjects" :key="subject.id">
+              <td>{{ subject.nombre }}</td>
+              <td><button type="button" @click="borrarAsignatura(subject.id)">Borrar</button></td>
             </tr>
           </table>
         </div>
@@ -373,9 +353,8 @@ const handleMatricula = () => {
               {{ teacher.nombre }} {{ teacher.apellidos }}
             </option>
           </select>
-          <input type="text" v-model="matriculaEditada.teacher" />
         </div>
-        <!-- <button type="reset" v-if="popUpStyle" @click="resetearValoresIniciales()">Resetear</button> -->
+
         <button type="submit">{{ popUpStyle ? 'Actualizar' : 'Enviar' }}</button>
         <button type="button" v-if="popUpStyle" @click="emit('cerrarPopUp')">Cancelar</button>
       </form>
