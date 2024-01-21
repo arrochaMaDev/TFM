@@ -100,7 +100,6 @@ const deleteCookie = (user: string) => {
 
   <!-- </div>
   </header> -->
-
   <RouterView />
   <Spinner v-if="isLoading"></Spinner>
 </template>

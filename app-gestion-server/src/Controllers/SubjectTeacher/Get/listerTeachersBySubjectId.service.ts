@@ -16,7 +16,11 @@ export class ListerTeachersBySubjectIdService {
       where: {
         subject: { id: subjectId },
       },
-      relations: ['subject', 'teacher', 'teacher.userId'],
+      relations: [
+        'subject',
+        'teacher',
+        // 'teacher.userId'
+      ],
     });
 
     return teachersBySubjectId;

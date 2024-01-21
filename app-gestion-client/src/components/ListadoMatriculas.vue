@@ -174,27 +174,24 @@ const editingStore = useEditingStore() // store del componente editar Alumno
 let popUpState: Ref<boolean> = ref(editingStore.editarFalse()) // variable del estado del popUp
 console.log(popUpState.value)
 
-let matriculaEditar: Ref<
-  | {
-      id: number
-      student: {
-        id: number
-        nombre: string
-        apellidos: string
-        dni: string
-      }
-      subject: {
-        id: number
-        nombre: string
-      }
-      teacher: {
-        id: number
-        nombre: string
-        apellidos: string
-      }
-    }
-  | undefined
-> = ref(undefined)
+let matriculaEditar: Ref<{
+  id: number
+  student: {
+    id: number
+    nombre: string
+    apellidos: string
+    dni: string
+  }
+  subject: {
+    id: number
+    nombre: string
+  }
+  teacher: {
+    id: number
+    nombre: string
+    apellidos: string
+  }
+} | null> = ref(null)
 
 const editarMatricula = (matricula: any) => {
   // popUpState.value = true
