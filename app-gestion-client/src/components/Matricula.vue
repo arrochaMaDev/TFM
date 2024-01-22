@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useLoadingStore } from '@/stores/loading'
-import { type Ref, ref } from 'vue'
+import { type Ref, ref, onMounted } from 'vue'
 
 const loadingStore = useLoadingStore() // store del Spinner
 
@@ -318,6 +318,10 @@ const handleMatricula = () => {
     crearMatricula()
   }
 }
+
+onMounted(() => {
+  getTeachersData()
+})
 </script>
 
 <template>
@@ -325,8 +329,8 @@ const handleMatricula = () => {
     <div class="form" :class="{ 'matriculaPopup-content': popUpStyle }">
       <h1>Matricula</h1>
       <form @submit.prevent="handleMatricula()">
+        <!--MODO CREAR -->
         <div v-if="!popUpStyle">
-          <!--MODO CREAR -->
           <table>
             <tr>
               <th>
@@ -374,9 +378,8 @@ const handleMatricula = () => {
             </tr>
           </table>
         </div>
-
+        <!-- MODO ACTUALIZAR -->
         <div v-if="popUpStyle">
-          <!--MODO ACTUALIZAR -->
           <label for="asignatura">Selecciona la asignatura</label>
           <select
             name="asignatura"

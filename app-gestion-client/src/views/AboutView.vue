@@ -1,6 +1,9 @@
 <template>
   <div class="about">
-    <h1>This is an about page</h1>
+    <div class="spinner-content">
+      <!-- <div class="spinner"></div> -->
+      <img src="../utils/img/loading.png" alt="Loading" class="spinner" />
+    </div>
   </div>
 </template>
 

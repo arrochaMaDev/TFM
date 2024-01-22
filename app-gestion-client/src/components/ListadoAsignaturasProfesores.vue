@@ -9,6 +9,51 @@ import { useEditingStore } from '@/stores/editar'
 const router = useRouter() // router para ir al alumno cuando se clique en él
 const loadingStore = useLoadingStore() // store del Spinner
 
+// OBTENER DATOS DE TODOS LOS PROFESORES
+let teachersRefFromServer: Ref<
+  {
+    id: number
+    usuario_id: string
+    nombre: string
+    apellidos: string
+    email: string
+  }[]
+> = ref([])
+
+const getTeachersData = async () => {
+  try {
+    const response = await fetch('http://localhost:3000/teachers', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      loadingStore.loadingTrue()
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
+      const data = (await response.json()) as {
+        id: number
+        usuario_id: string
+        nombre: string
+        apellidos: string
+        email: string
+      }[]
+      teachersRefFromServer.value = data
+      console.log(data)
+      console.log(teachersRefFromServer.value)
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    alert('Ha ocurrido un error')
+  } finally {
+    loadingStore.loadingFalse()
+  }
+}
+
 // OBTENER DATOS DE TODAS LAS ASIGNACIONES
 let subjectsTeachersRefFromServer: Ref<
   {
@@ -61,7 +106,33 @@ const ordenarMatriculas = () => {
   function eliminarTildes(elemento: string): string {
     return elemento.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   }
+  // Ordenar por nombre o apellidos del profesor
+  if (ordenarPor.value === 'teacher.nombre' || ordenarPor.value === 'teacher.apellidos') {
+    const datosOrdenados = teachersRefFromServer.value.slice().sort((a, b) => {
+        let valorA = '';
+        let valorB = '';
 
+    if (ordenarPor.value === 'teacher.nombre') {
+      valorA = eliminarTildes(a.nombre.toLowerCase())
+      valorB = eliminarTildes(b.nombre.toLowerCase())
+    } else if (ordenarPor.value === 'teacher.apellidos') {
+      valorA = eliminarTildes(a.apellidos.toLowerCase())
+      valorB = eliminarTildes(b.apellidos.toLowerCase())
+      console.log('ordenado')
+    }
+
+    if (valorA < valorB) {
+      return -1
+    }
+    if (valorA > valorB) {
+      return 1
+    }
+    return 0
+  });
+  teachersRefFromServer.value = datosOrdenados
+}
+  
+// Ordenar por nombre de la asignatura
   const datosOrdenados = subjectsTeachersRefFromServer.value.slice().sort((a, b) => {
     let valorA = ''
     let valorB = ''
@@ -91,6 +162,7 @@ const ordenarMatriculas = () => {
 onMounted(() => {
   ordenarMatriculas()
   getSubjectsTeachersData()
+  getTeachersData()
 })
 
 // LÓGICA BORRAR ASIGNACIÓN
@@ -231,21 +303,17 @@ const goToTeacher = (id: number) => {
           <th>
             <h3>Apellidos</h3>
           </th>
-          <th>
-            <h3>Asignatura</h3>
+          <th colspan="">
+            <h3>Asignaturas</h3>
           </th>
         </tr>
-        <tr
-          id="alumno"
-          v-for="subjectTeacher in subjectsTeachersRefFromServer"
-          :key="subjectTeacher.id"
-        >
-          <td>{{ subjectTeacher.teacher.nombre }}</td>
-          <td>{{ subjectTeacher.teacher.apellidos }}</td>
+        <tr v-for="teacher in teachersRefFromServer" :key="teacher.id">
+          <td>{{ teacher.nombre }}</td>
+          <td>{{ teacher.apellidos }}</td>
+          <tr v-for="subjectTeacher in subjectsTeachersRefFromServer"
+          :key="subjectTeacher.id">
           <td>{{ subjectTeacher.subject.nombre }}</td>
-          <td>
-            <button type="button" @click="goToTeacher(subjectTeacher.teacher.id)">Ver</button>
-          </td>
+          <td> <button type="button" @click="goToTeacher(subjectTeacher.teacher.id)">Ver</button></td>
           <td>
             <button
               type="button"
@@ -257,7 +325,7 @@ const goToTeacher = (id: number) => {
           <td>
             <button type="button" @click="mostrarPopup(subjectTeacher.id)">Borrar</button>
           </td>
-          <!-- le paso el id que quiero borrar -->
+        </tr>
         </tr>
       </table>
     </div>

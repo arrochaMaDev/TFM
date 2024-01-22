@@ -217,7 +217,14 @@ const enviarDatosFormulario = () => {
           <input required type="email" id="emailInput" v-model="alumnoEditado.email" />
         </div>
         <button type="reset" @click="borrarDatosForm()">Borrar datos</button>
-        <button type="reset" v-if="popUpStyle" @click="resetearValoresIniciales">Resetear</button>
+        <button
+          type="reset"
+          class="btn btn-outline-primary"
+          v-if="popUpStyle"
+          @click="resetearValoresIniciales"
+        >
+          Resetear
+        </button>
         <button type="submit">{{ popUpStyle ? 'Actualizar' : 'Enviar' }}</button>
         <button type="button" v-if="popUpStyle" @click="emit('cerrarPopUp')">Cancelar</button>
       </form>
@@ -225,7 +232,7 @@ const enviarDatosFormulario = () => {
   </div>
 </template>
 
-<style scoped>
+<style>
 /* .form {
   display: flex;
   flex-wrap: wrap;
