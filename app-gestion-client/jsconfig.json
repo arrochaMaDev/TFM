@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "allowJs": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
+
+// Se crea este archivo porque el sistema no puede generar el archivo JavaScript correspondiente al archivo Vue de la plantilla Sakai importada
