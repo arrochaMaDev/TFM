@@ -28,23 +28,23 @@ const model = ref<MenuItem[]>([
   {
     label: 'Registrar',
     items: [
-      { label: 'Nuevo Usuario', icon: 'pi pi-fw pi-plus', to: 'alta-usuario' },
+      { label: 'Nuevo Usuario', icon: 'pi pi-fw pi-plus', to: '/alta-usuario' },
       { label: 'Nuevo Alumno', icon: 'pi pi-fw pi-plus', to: '/alta-alumno' },
-      { label: 'Nuevo Profesor', icon: 'pi pi-fw pi-plus', to: 'alta-profesor' },
-      { label: 'Nueva Asignatura', icon: 'pi pi-fw pi-plus', to: 'alta-asignatura' },
-      { label: 'Nueva Asignación', icon: 'pi pi-fw pi-plus', to: 'alta-asignatura-profesor', class: 'rotated-icon' },
-      { label: 'Nueva Matrícula', icon: 'pi pi-fw pi-plus', to: 'matricula' },
+      { label: 'Nuevo Profesor', icon: 'pi pi-fw pi-plus', to: '/alta-profesor' },
+      { label: 'Nueva Asignatura', icon: 'pi pi-fw pi-plus', to: '/alta-asignatura' },
+      { label: 'Nueva Asignación', icon: 'pi pi-fw pi-plus', to: '/alta-asignatura-profesor', class: 'rotated-icon' },
+      { label: 'Nueva Matrícula', icon: 'pi pi-fw pi-plus', to: '/matricula' },
     ]
   },
   {
     label: 'Listado',
     items: [
-      { label: 'Listado Usuarios', icon: 'pi pi-fw pi-list', to: 'listado-usuarios' },
+      { label: 'Listado Usuarios', icon: 'pi pi-fw pi-list', to: '/listado-usuarios' },
       { label: 'Listado Alumnos', icon: 'pi pi-fw pi-table', to: '/listado-alumnos' },
-      { label: 'Listado Profesores', icon: 'pi pi-fw pi-pencil', to: 'listado-profesores' },
-      { label: 'Listado Asignaturas', icon: 'pi pi-fw pi-plus', to: 'listado-asignaturas' },
-      { label: 'Listadio Asignaciones', icon: 'pi pi-fw pi-plus', to: 'listado-asignaciones', class: 'rotated-icon' },
-      { label: 'Listado Matrículas', icon: 'pi pi-fw pi-plus', to: 'listado-matriculas' },
+      { label: 'Listado Profesores', icon: 'pi pi-fw pi-pencil', to: '/listado-profesores' },
+      { label: 'Listado Asignaturas', icon: 'pi pi-fw pi-plus', to: '/listado-asignaturas' },
+      { label: 'Listadio Asignaciones', icon: 'pi pi-fw pi-plus', to: '/listado-asignaciones', class: 'rotated-icon' },
+      { label: 'Listado Matrículas', icon: 'pi pi-fw pi-plus', to: '/listado-matriculas' },
     ]
   },
   {

@@ -28,11 +28,11 @@ const props = defineProps({
 
 const isActiveMenu: Ref<boolean> = ref(false);
 const itemKey: any = ref(null);
-// 
+
 onBeforeMount(() => {
   itemKey.value = props.parentItemKey ? props.parentItemKey + '-' + props.index : String(props.index);
 
-  const activeItem: Ref<string> = ref(layoutState.activeMenuItem)
+  const activeItem: Ref<any> = ref(layoutState.activeMenuItem)
 
   isActiveMenu.value = activeItem.value === itemKey.value || activeItem ? activeItem.value.startsWith(itemKey.value + '-') : false;
 });
@@ -91,4 +91,9 @@ const checkActiveRoute = (item: any) => {
   </li>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+a.active-route {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+</style>
