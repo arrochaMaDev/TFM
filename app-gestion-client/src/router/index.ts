@@ -17,13 +17,13 @@ import ListadoUsuarios from '@/components/ListadoUsuarios.vue'
 import AltaAsignaturaProfesorVue from '@/components/AltaAsignaturaProfesor.vue'
 import ListadoAsignaturasProfesoresVue from '@/components/ListadoAsignaturasProfesores.vue'
 import AppLayout from '@/layout/AppLayout.vue'
+import LoginSakaiVue from '@/components/LoginSakai.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      // name: 'home',
       component: AppLayout,
       children: [
         {
@@ -125,7 +125,8 @@ const router = createRouter({
           path: '/login',
           name: 'login',
 
-          component: LoginUser
+          // component: LoginUser
+          component: LoginSakaiVue
         },
         {
           path: '/matricula',
@@ -150,16 +151,6 @@ const router = createRouter({
           name: 'listado-asignaciones',
 
           component: ListadoAsignaturasProfesoresVue
-        },
-        //   {
-        //     path: '/',
-        //     name: 'dashboard',
-        //     component: () => import('@/views/Dashboard.vue')
-        // },
-        {
-          path: '/uikit/formlayout',
-          name: 'formlayout',
-          component: () => import('@/views/uikit/FormLayout.vue')
         }
       ]
     }

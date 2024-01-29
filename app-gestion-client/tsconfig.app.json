@@ -1,15 +1,12 @@
 {
   "extends": "@vue/tsconfig/tsconfig.dom.json",
   "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
-  "exclude": ["src/**/__tests__/*", "node_modules"],
+  "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {
     "composite": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
-    "allowJs": true, // Esto cpermite a TypeScript procesar archivos JavaScript junto con los archivos TypeScript
-    "esModuleInterop": true,  // Facilita la interoperabilidad entre módulos CommonJS y ESM.
-    "skipLibCheck": true  // Evita la verificación de tipos en las declaraciones de archivos de bibliotecas, mejorando el rendimiento.
   }
 }

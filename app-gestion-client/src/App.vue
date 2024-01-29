@@ -7,6 +7,8 @@ import { useLoadingStore } from './stores/loading'
 import { useAdminStore } from './stores/isAdmin'
 import type { VueCookies } from 'vue-cookies'
 
+
+
 // FUNCION LOADING SPINNER
 const loadingStore = useLoadingStore() // store de Pinia para el Spinner
 let isLoading: Ref<boolean> = ref(loadingStore.isLoading) // uso la variable de estado en la store de LoadingStore de Pinia
@@ -71,7 +73,7 @@ const deleteCookie = (user: string) => {
     <div class="wrapper">
       <HelloWorld msg="You did it!" /> -->
 
-
+    
   <nav>
     <!-- <RouterLink to="/home">Home</RouterLink> -->
     <RouterLink to="/about">About</RouterLink>
@@ -80,7 +82,9 @@ const deleteCookie = (user: string) => {
     <RouterLink to="/alta-alumno" v-if="adminMode">Alta Alumno</RouterLink>
     <RouterLink to="/alta-profesor" v-if="adminMode">Alta Profesor</RouterLink>
     <RouterLink to="/alta-asignatura" v-if="adminMode">Alta Asignatura</RouterLink>
-    <RouterLink to="/alta-asignatura-profesor" v-if="adminMode">Alta Asignatura-Profesor</RouterLink>
+    <RouterLink to="/alta-asignatura-profesor" v-if="adminMode"
+      >Alta Asignatura-Profesor</RouterLink
+    >
     <RouterLink to="/matricula" v-if="adminMode">Matricula</RouterLink>
     <RouterLink to="/buscador-alumno" v-if="adminMode">Buscar Alumnos</RouterLink>
     <RouterLink to="/listado-usuarios" v-if="adminMode">Listado Usuarios</RouterLink>
@@ -103,10 +107,10 @@ const deleteCookie = (user: string) => {
 </template>
 
 <style scoped>
+
 .nav-link span {
   color: black;
 }
-
 i {
   color: black;
 }
@@ -172,7 +176,6 @@ nav a:first-of-type {
     margin-top: 1rem;
   }
 }
-
 hr {
   border: 1px solid #ccc;
   margin: 10px 0;
