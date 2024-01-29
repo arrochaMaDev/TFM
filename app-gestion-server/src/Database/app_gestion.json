@@ -1,0 +1,148 @@
+[
+{"type":"header","version":"5.2.0","comment":"Export to JSON plugin for PHPMyAdmin"},
+{"type":"database","name":"app_gestion"},
+{"type":"table","name":"alumno","database":"app_gestion","data":
+[
+{"id":"0","usuario_id":"f9794f13-7545-4974-8588-2c6fc8fc9e9c","nombre":"Miguel","apellidos":"Angel","dni":"42195928","direccion":"C\/Rectora Maria Luisa Tejedor 47-22","telefono":"667734887","email":"arrocha.ma@gmail.com","userId":"1"},
+{"id":"1","usuario_id":"b0e2aa11-15c1-4010-8eaf-31028bf67e7f","nombre":"juan","apellidos":"perez","dni":"43717436T","direccion":"C\/martin perez, 34. 38520 La Lagunaasasasasasas","telefono":"645236217","email":"juan@perez.com","userId":"1"},
+{"id":"3","usuario_id":"075defe8-6d35-4938-9495-6e86e310f4ff","nombre":"pepito","apellidos":"rodriguez","dni":"42195928J","direccion":"C\/jose perez, 24. 38320 La Lagunaasasasasasas","telefono":"654434432","email":"pepe@pepe.com","userId":"3"},
+{"id":"5","usuario_id":"0645ahdg-6d35-4938-9495-6e86e30f4ff","nombre":"prueba","apellidos":"rodriguez","dni":"42195928J","direccion":"C\/jose perez, 24. 38320 La Lagunaasasasasasas","telefono":"654434432","email":"pepe@pepe.com","userId":"2"},
+{"id":"6","usuario_id":"ae43021a-e6ea-4076-b366-0c36a282f635","nombre":"pruebaaaa","apellidos":"rodriguez","dni":"42195928J","direccion":"C\/jose perez, 24. 38320 La Lagunaasasasasasas","telefono":"654434432","email":"pepe@pepe.com","userId":"5"},
+{"id":"7","usuario_id":"138127e0-42a7-4621-b678-e7518d73f25f","nombre":"miguel","apellidos":"kajashasd","dni":"181266123","direccion":"C\/jose perez, 24. 38320 La Lagunaasasasasasas","telefono":"654434432","email":"pepe@pepe.com","userId":"2"},
+{"id":"8","usuario_id":"19423b33-ecf3-4ec5-b059-976ef6026254","nombre":"miguel","apellidos":"kajashasd","dni":"181266123","direccion":"C\/jose perez, 24. 38320 La Lagunaasasasasasas","telefono":"654434432","email":"pepe@pepe.com","userId":"0"},
+{"id":"10","usuario_id":"d8fea250-7cad-422d-8dd1-392c0ab9896d","nombre":"miguel","apellidos":"kajashasd","dni":"181266123","direccion":"C\/jose perez, 24. 38320 La Lagunaasasasasasas","telefono":"654434432","email":"pepe@pepe.com","userId":"0"},
+{"id":"11","usuario_id":"945c83e1-f7e3-421d-b02c-49d51f7823e4","nombre":"antonia","apellidos":"perez","dni":"41234563R","direccion":"C\/jose perez, 24. 38320 La Lagunaasasasasasas","telefono":"654434432","email":"pepe@pepe.com","userId":"0"},
+{"id":"12","usuario_id":"afb89c2a-68fa-47f0-a747-a5fe1be04959","nombre":"miguel","apellidos":"kajashasd","dni":"181266123","direccion":"C\/jose perez, 24. 38320 La Lagunaasasasasasas","telefono":"654434432","email":"pepe@pepe.com","userId":"0"},
+{"id":"13","usuario_id":"72329769-3747-4d2f-86da-2f971de34140","nombre":"pepe","apellidos":"kajashasd","dni":"181266123","direccion":"C\/jose perez, 24. 38320 La Lagunaasasasasasas","telefono":"654434432","email":"pepe@pepe.com","userId":"0"},
+{"id":"14","usuario_id":"491264a2-0081-4d5a-8ed3-2cd8eddf7899","nombre":"Miguel","apellidos":"Angel","dni":"43128498J","direccion":"C\/Rectora Maria Luisa Tejedor 47-22","telefono":"667734887","email":"arrocha.ma@gmail.com","userId":"0"},
+{"id":"15","usuario_id":"d94e53d9-ca1b-4528-ace4-ad943fb0d703","nombre":"jose","apellidos":"Rosrigexs","dni":"43123498J","direccion":"C\/Rectora Maria Luisa Tejedor 47-22","telefono":"667734887","email":"arrocha.ma@gmail.com","userId":"0"},
+{"id":"18","usuario_id":"e0424b4e-066d-4eb4-a0f4-30a56dcabc1a","nombre":"Manolo","apellidos":"Perez","dni":"431112334H","direccion":"C\/Juan Dionisio Perez Alvarez, 24","telefono":"619924136","email":"manolo.perez@gmail.com","userId":"1"},
+{"id":"19","usuario_id":"d31874e9-6ce7-47cb-b50f-c556e570845f","nombre":"Pepito","apellidos":"Perez","dni":"43918323H","direccion":"C\/Rectora Maria Luisa Tejedor 47-22","telefono":"667734887","email":"pepito.perez@gmail.com","userId":"0"},
+{"id":"20","usuario_id":"d740a773-6ef2-4478-89ea-1c15aeef0495","nombre":"Trini","apellidos":"Rodriguez","dni":"78976731R","direccion":"C\/Rectora Maria Luisa Tejedor 47-22","telefono":"652214432","email":"trini936@gmail.com","userId":"0"},
+{"id":"21","usuario_id":"03dd33f8-e818-42a9-97a3-0a5efccc207e","nombre":"Manuel","apellidos":"Perez","dni":"43128498J","direccion":"C\/Rectora Maria Luisa Tejedor 47-22","telefono":"667734887","email":"manuel.perez@gmail.com","userId":"0"},
+{"id":"22","usuario_id":"94096ecb-f77b-4cf6-beb4-cab049e9020d","nombre":"Maria","apellidos":"Gonzalez","dni":"43128498J","direccion":"dsasdasdas","telefono":"619924136","email":"arrocha.ma@gmail.com","userId":"0"},
+{"id":"23","usuario_id":"5aec3148-7311-492d-b813-ebbce8994e01","nombre":"miguel","apellidos":"Angel","dni":"12345678J","direccion":"C\/Rectora Maria Luisa Tejedor 47-22","telefono":"666555444","email":"arrocha.ma@gmail.com","userId":"1"},
+{"id":"24","usuario_id":"fbfb3511-0ea1-4bf8-91ba-960a581f9dcb","nombre":"Trini","apellidos":"Rodriguez","dni":"78976731R","direccion":"C\/Rectora Maria Luisa Tejedor 47-22","telefono":"652214432","email":"trini936@gmail.com","userId":"0"},
+{"id":"25","usuario_id":"ccb52664-2101-485e-bb6f-87d7d527539c","nombre":"Carlos","apellidos":"Angel","dni":"43128498J","direccion":"C\/Rectora Maria Luisa Tejedor 47-22","telefono":"667734887","email":"arrocha.ma@gmail.com","userId":"0"},
+{"id":"26","usuario_id":"ccb52664-2101-485e-bb6f-87d7d527539c","nombre":"Ateneri","apellidos":"X","dni":"X","direccion":"X","telefono":"111222333","email":"ateneri@gmail.com","userId":"0"},
+{"id":"27","usuario_id":"06ab4e5b-6546-494b-ad6b-e922b1da5378","nombre":"ernesto","apellidos":"arrocha","dni":"181266123","direccion":"C\/jose perez, 24. 38320 La Lagunaasasasasasas","telefono":"619924136","email":"pepe@pepe.com","userId":"0"},
+{"id":"28","usuario_id":"5fd2a798-1c4d-49ca-8a22-31126271edb6","nombre":"pruebaaa","apellidos":"prueba","dni":"prueba","direccion":"prueba","telefono":"111222333","email":"prueba@prueba.com","userId":"0"},
+{"id":"29","usuario_id":"91d41fff-df7b-4828-bb0e-3130e453d073","nombre":"pruebaaaaaa","apellidos":"prueba","dni":"prueba","direccion":"prueba","telefono":"123456789","email":"admin@admin.com","userId":"0"}
+]
+}
+,{"type":"table","name":"asignatura","database":"app_gestion","data":
+[
+{"id":"1","nombre":"Lenguaje musical"},
+{"id":"2","nombre":"Trompeta"},
+{"id":"3","nombre":"Trombón"},
+{"id":"4","nombre":"Flauta"},
+{"id":"5","nombre":"Clarinete"},
+{"id":"6","nombre":"Saxofón"},
+{"id":"16","nombre":"Despertar Musical"},
+{"id":"18","nombre":"Trompa"},
+{"id":"19","nombre":"Percusión"},
+{"id":"24","nombre":"Tuba"},
+{"id":"25","nombre":"Bombardino"},
+{"id":"26","nombre":"Oboe"},
+{"id":"27","nombre":"Piano"}
+]
+}
+,{"type":"table","name":"asignaturas_profesores","database":"app_gestion","data":
+[
+{"id":"10","asignatura":"5","profesor":"2"},
+{"id":"14","asignatura":"2","profesor":"1"},
+{"id":"15","asignatura":"2","profesor":"4"},
+{"id":"16","asignatura":"6","profesor":"4"},
+{"id":"17","asignatura":"5","profesor":"4"},
+{"id":"18","asignatura":"5","profesor":"3"},
+{"id":"19","asignatura":"2","profesor":"2"},
+{"id":"20","asignatura":"4","profesor":"2"},
+{"id":"21","asignatura":"4","profesor":"1"},
+{"id":"22","asignatura":"4","profesor":"18"},
+{"id":"24","asignatura":"24","profesor":"1"},
+{"id":"25","asignatura":"24","profesor":"2"},
+{"id":"26","asignatura":"24","profesor":"3"}
+]
+}
+,{"type":"table","name":"matricula","database":"app_gestion","data":
+[
+{"id":"3","alumno":"1","asignatura":"2","profesor":"4","year":"2023"},
+{"id":"4","alumno":"1","asignatura":"1","profesor":"1","year":"2023"},
+{"id":"7","alumno":"3","asignatura":"5","profesor":"3","year":"2023"},
+{"id":"8","alumno":"1","asignatura":"1","profesor":"1","year":"2023"},
+{"id":"10","alumno":"1","asignatura":"1","profesor":"1","year":"2023"},
+{"id":"11","alumno":"1","asignatura":"1","profesor":"1","year":"2023"},
+{"id":"12","alumno":"1","asignatura":"1","profesor":"1","year":"2023"},
+{"id":"14","alumno":"1","asignatura":"2","profesor":"4","year":"2023"},
+{"id":"21","alumno":"1","asignatura":"1","profesor":"1","year":"2023"},
+{"id":"22","alumno":"1","asignatura":"1","profesor":"1","year":"2023"},
+{"id":"23","alumno":"1","asignatura":"1","profesor":"1","year":"2023"},
+{"id":"24","alumno":"1","asignatura":"1","profesor":"1","year":"2023"},
+{"id":"27","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"28","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"29","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"30","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"31","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"32","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"33","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"34","alumno":"3","asignatura":"6","profesor":"4","year":"2023"},
+{"id":"35","alumno":"3","asignatura":"4","profesor":"14","year":"2023"},
+{"id":"36","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"37","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"38","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"39","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"40","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"41","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"43","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"44","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"45","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"46","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"47","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"48","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"49","alumno":"3","asignatura":"4","profesor":"2","year":"2023"},
+{"id":"52","alumno":"7","asignatura":"5","profesor":"5","year":"2023"},
+{"id":"54","alumno":"3","asignatura":"6","profesor":"8","year":"2023"},
+{"id":"55","alumno":"5","asignatura":"4","profesor":"7","year":"2023"},
+{"id":"56","alumno":"6","asignatura":"5","profesor":"6","year":"2023"},
+{"id":"57","alumno":"8","asignatura":"4","profesor":"7","year":"2023"},
+{"id":"58","alumno":"29","asignatura":"2","profesor":"24","year":"2023"},
+{"id":"59","alumno":"3","asignatura":"4","profesor":"2","year":"2024"},
+{"id":"60","alumno":"1","asignatura":"1","profesor":"1","year":"2300"},
+{"id":"61","alumno":"1","asignatura":"2","profesor":"4","year":"2023"},
+{"id":"62","alumno":"1","asignatura":"3","profesor":"4","year":"2023"}
+]
+}
+,{"type":"table","name":"profesor","database":"app_gestion","data":
+[
+{"id":"1","usuario_id":"c841841f-a90a-47bd-b83c-532696747241","nombre":"miguel","apellidos":"arrocha","email":"pepe@gmail.com","asignaturas":null,"userId":"2"},
+{"id":"2","usuario_id":"734b03a8-5a39-4fa7-bb97-70c696549b58","nombre":"miguel","apellidos":"arrocha","email":"miguelarrocha@gmail.com","asignaturas":null,"userId":"3"},
+{"id":"3","usuario_id":"8cd9285d-c418-4314-8f46-fcd46e588632","nombre":"manolo","apellidos":"arrocha","email":"pepe@gmail.com","asignaturas":null,"userId":"5"},
+{"id":"4","usuario_id":"6b414def-cd89-418b-8675-c5efbf2c9117","nombre":"pepe","apellidos":"perez","email":"pepe@gmail.com","asignaturas":null,"userId":"0"},
+{"id":"5","usuario_id":"69be0d1f-2d2b-4ee7-a279-add49812161a","nombre":"manolo","apellidos":"gonzalez","email":"juanGonzalez@gmail.com","asignaturas":null,"userId":"0"},
+{"id":"6","usuario_id":"e1ffb29c-3f8a-405a-b44b-b7a8f4228dc6","nombre":"manolo","apellidos":"arrocha","email":"pepe@gmail.com","asignaturas":null,"userId":"0"},
+{"id":"7","usuario_id":"6e86348f-0c10-4cf9-91ec-fdb5db74c31c","nombre":"Miguel","apellidos":"Angel","email":"arrocha.ma@gmail.com","asignaturas":null,"userId":"0"},
+{"id":"8","usuario_id":"45e2148b-75bb-4f7d-98e4-422096789a9e","nombre":"pepe","apellidos":"asasd","email":"arrocha.ma@gmail.com","asignaturas":null,"userId":"0"},
+{"id":"9","usuario_id":"50710c2e-b4da-429c-a83e-bbbe946a10ea","nombre":"juan","apellidos":"perez","email":"juan@gmail.com","asignaturas":null,"userId":"0"},
+{"id":"10","usuario_id":"5d85a144-f8bc-4d4a-b419-a1fdfb92f176","nombre":"juan","apellidos":"perez","email":"juanperez@gmail.com","asignaturas":null,"userId":"0"},
+{"id":"11","usuario_id":"27d9762c-f117-47f8-a534-4ca56abb5350","nombre":"Pepito","apellidos":"Perez","email":"pepitoperez@gmail.com","asignaturas":null,"userId":"0"},
+{"id":"13","usuario_id":"a832634d-32e1-4959-a56f-6d1c59e0887f","nombre":"juanito","apellidos":"gonzalez","email":"asdjashd@gmail.com","asignaturas":null,"userId":"0"},
+{"id":"14","usuario_id":"07c49ca2-8c82-4cd0-bc2b-396349301206","nombre":"maria","apellidos":"perez","email":"mariaperez@gmail.com","asignaturas":null,"userId":"0"},
+{"id":"15","usuario_id":"ef5d1b44-e759-4f07-b9df-b7f89516f24f","nombre":"antonia","apellidos":"rodriguez","email":"antoniarorriggeuz@gmail.com","asignaturas":null,"userId":"0"},
+{"id":"16","usuario_id":"46b81050-afd7-4e17-a493-f34187025875","nombre":"paco","apellidos":"rodriguez","email":"pacorguez@gmail.com","asignaturas":null,"userId":"0"},
+{"id":"18","usuario_id":"850c91f8-2b8a-4826-91e8-26862246520a","nombre":"maria","apellidos":"rodriguez","email":"aksjdasd@gmail.com","asignaturas":null,"userId":"0"},
+{"id":"23","usuario_id":"497820df-c6c6-4146-9c31-092a390dce4f","nombre":"Manolo","apellidos":"Perez","email":"manoloperez@gmail.com","asignaturas":"Lenguaje musical, Flauta","userId":"0"},
+{"id":"24","usuario_id":"59ab0f1e-ef1d-44a2-9096-7555e1551bdc","nombre":"a","apellidos":"b","email":"a@a.com","asignaturas":"Lenguaje musical","userId":"0"},
+{"id":"25","usuario_id":"24330f4c-7868-4979-9103-b136edd78a56","nombre":"b","apellidos":"c","email":"admin@admin.com","asignaturas":"Saxofón,Trompeta,Trompeta","userId":"0"}
+]
+}
+,{"type":"table","name":"usuario","database":"app_gestion","data":
+[
+{"id":"0","username":"miguel123","email":"arrocha.ma@gmail.com","pass":"$argon2id$v=19$m=65536,t=3,p=4$rvlDZInHxGZobhvBCmgBnw$kVW6yHmfy2yYzwPKA2owxlHnHndhSZWAjRgdivOxQ2A","permiso":"0"},
+{"id":"1","username":"prueba","email":"prueba@prueba.com","pass":"$argon2id$v=19$m=65536,t=3,p=4$De+z740shNxl+gse9MFXtg$BgSF6stwuuUcmug4cJ6bvg3QlzO+5aHo4lQk\/icszyY","permiso":"1"},
+{"id":"2","username":"pepe123","email":"pepe@gmail.com","pass":"$argon2id$v=19$m=65536,t=3,p=4$hUHnri84aI3NI7Xf\/eeKyQ$T2k5HJHt8FZnRnIH5Ns+0tU3Kx8xyRhc\/BhX+h1M4KY","permiso":"1"},
+{"id":"3","username":"admin","email":"admin@admin.com","pass":"$argon2id$v=19$m=65536,t=3,p=4$IBLJJtR9uybqi4ZgU8fM7w$xh4rar6qAC6fumpQdx\/DW5jgF+st1vBh0t9zT+TFh8o","permiso":"9"},
+{"id":"4","username":"alumno","email":"alumno@alumno.com","pass":"$argon2id$v=19$m=65536,t=3,p=4$SeickP562jxDbqG4RoNRfw$V8BYdOWKkAXHJ5I9gdrpoYCQx2q96RPoEzrR30YszdE","permiso":"0"},
+{"id":"5","username":"profesor","email":"profesor@profesor.com","pass":"$argon2id$v=19$m=65536,t=3,p=4$5jU8cM1BRCk4oPkOPlw9cA$vf6X96RLQu4lkevVmcamhUqhBAsNbXNUhnKbjClsa1c","permiso":"1"}
+]
+}
+]
