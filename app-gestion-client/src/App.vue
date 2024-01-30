@@ -1,20 +1,38 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import { onMounted, ref, watch, type Ref, inject } from 'vue'
+import { onMounted, ref, watch, type Ref, inject, watchEffect } from 'vue'
 import router from './router'
 import Spinner from './components/Spinner.vue'
 import { useLoadingStore } from './stores/loading'
 import { useAdminStore } from './stores/isAdmin'
 import type { VueCookies } from 'vue-cookies'
+import stateStore from "./stores/store";
+import MainHeader from "./components/Layouts/MainHeader.vue";
+import MainSidebar from "./components/Layouts/MainSidebar.vue";
+import MainFooter from "./components/Layouts/MainFooter.vue";
 
 
+const stateStoreInstance = stateStore;
+watchEffect(() => {
+  if (stateStoreInstance.open) {
+    document.body.classList.remove("sidebar-show");
+    document.body.classList.add("sidebar-hide");
+    console.log("show");
+  } else {
+    document.body.classList.remove("sidebar-hide");
+    document.body.classList.add("sidebar-show");
+
+    console.log("hide");
+  }
+});
 
 // FUNCION LOADING SPINNER
-const loadingStore = useLoadingStore() // store de Pinia para el Spinner
+const loadingStore = useLoadingStore() // store de Pinia para el ner
 let isLoading: Ref<boolean> = ref(loadingStore.isLoading) // uso la variable de estado en la store de LoadingStore de Pinia
 
 onMounted(() => {
-  // Establece la referencia reactiva para seguir el estado de carga
+  document.body.classList.add("bg-body-secondary");
+
   watch(
     () => loadingStore.isLoading,
     (value) => {
@@ -40,7 +58,6 @@ onMounted(() => {
   }
 })
 
-// userData = getUserData
 //////////
 
 //BORRAR LA COOKIE
@@ -68,12 +85,12 @@ const deleteCookie = (user: string) => {
 </script>
 
 <template>
-  <!-- <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" /> -->
-
+  <MainHeader />
+  <MainSidebar />
+  <div class="main-content d-flex flex-column transition overflow-hidden">
+    <router-view />
+    <MainFooter />
+  </div>
 
   <nav>
     <!-- <RouterLink to="/home">Home</RouterLink> -->
