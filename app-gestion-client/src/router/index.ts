@@ -17,7 +17,6 @@ import ListadoUsuarios from '@/components/ListadoUsuarios.vue'
 import AltaAsignaturaProfesorVue from '@/components/AltaAsignaturaProfesor.vue'
 import ListadoAsignaturasProfesoresVue from '@/components/ListadoAsignaturasProfesores.vue'
 import AppLayout from '@/layout/AppLayout.vue'
-import LoginSakaiVue from '@/components/LoginSakai.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,7 +26,7 @@ const router = createRouter({
       component: AppLayout,
       children: [
         {
-          path: '/home',
+          path: '/',
           name: 'home',
           component: HomeView
         },
@@ -125,8 +124,7 @@ const router = createRouter({
           path: '/login',
           name: 'login',
 
-          // component: LoginUser
-          component: LoginSakaiVue
+          component: LoginUser
         },
         {
           path: '/matricula',

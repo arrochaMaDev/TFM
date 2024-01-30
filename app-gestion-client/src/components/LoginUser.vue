@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import router from '@/router'
-import { ref, type Ref } from 'vue'
-import { useLoadingStore } from '@/stores/loading'
+import { ref, computed, type Ref } from 'vue';
+import InputText from 'primevue/inputtext';
+import Password from 'primevue/password';
+import Button from 'primevue/button';
+import Checkbox from 'primevue/checkbox';
+import router from '@/router';
+import { useLoadingStore } from '@/stores/loading';
 
 const loadingStore = useLoadingStore() // store del Spinner
 
@@ -13,7 +17,7 @@ const loginUser = async () => {
       method: 'POST',
       body: JSON.stringify({
         email: userEmailRef.value,
-        pass: userPassRef.value
+        pass: userPassRef.value,
       }),
       headers: {
         'Content-Type': 'application/json'
@@ -28,6 +32,7 @@ const loginUser = async () => {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
       localStorage.setItem('email', userEmailRef.value)
+      // getUserData()
       router.push({
         path: '/about'
       })
@@ -45,80 +50,68 @@ const loginUser = async () => {
   }
 }
 
+
 //Referencias del formulario
 let userEmailRef: Ref<string> = ref('')
 let userPassRef: Ref<string> = ref('')
+let checked: Ref<boolean> = ref(false);
 
-// para resetear los datos del formulario y poner cada ref a vacío
-function resetearDatosForm() {
-  userEmailRef.value = ''
-  userPassRef.value = ''
-}
 
-//mostrar o ocultar contraseña
-let verPass: Ref<boolean> = ref(false)
-const ToggleVerPass = () => {
-  verPass.value = !verPass.value
-}
+const logoUrl = computed(() => {
+  // return `layout/images/${layoutConfig.darkTheme.value ? 'logo-white' : 'logo-dark'}.svg`;
+  return `../utils/img/AlcaravanLOGO.svg`;
+});
+
+
 </script>
 
 <template>
-  <div class="centradoVertical">
-    <div class="formLoginUser">
-      <h1 class="green">Login</h1>
-      <form @submit.prevent="loginUser">
-        <label class="green">Email</label>
-        <input type="email" name="" id="emailInput" required v-model="userEmailRef" />
-        <label class="green">Pass</label>
-        <input
-          :type="verPass ? 'text' : 'password'"
-          name=""
-          id="passInput"
-          required
-          v-model="userPassRef"
-        />
-        <button type="button" id="buttonVerPass" @click="ToggleVerPass()">
-          <span v-if="verPass">Ocultar Pass</span>
-          <span v-else>Mostrar Pass</span>
-        </button>
-        <button type="reset" @click="resetearDatosForm()">Resetear</button>
-        <button type="submit">Enviar</button>
-      </form>
+  <div>
+    <div class="flex flex-column align-items-center justify-content-center">
+      <img :src="logoUrl" alt="Alcaraván logo" class="mb-5 w-6rem flex-shrink-0" />
+      <div style="border-radius: 56px; padding: 0.2rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
+        <div class="w-full surface-card py-8 px-5 sm:px-8" style="border-radius: 53px">
+          <div class="text-center mb-5">
+            <div class="text-900 text-3xl font-medium mb-3">Bienvenido/a!</div>
+            <span class="text-600 font-medium">Inicia sesión para continuar</span>
+          </div>
+          <div>
+            <label for="email1" class="block text-900 text-xl font-medium mb-2">Email</label>
+            <InputText id="email1" type="text" placeholder="Email address" class="w-full md:w-30rem mb-5" style="padding: 1rem" v-model="userEmailRef" />
+
+            <label for="password1" class="block text-900 font-medium text-xl mb-2">Password</label>
+            <Password id="password1" v-model="userPassRef" placeholder="Password" :feedback="false" :toggleMask="true" class="w-full mb-3" inputClass="w-full" :inputStyle="{ padding: '1rem' }">
+            </Password>
+
+            <div class="flex align-items-center justify-content-between mb-5 gap-5">
+              <div class="flex align-items-center">
+                <Checkbox id="rememberme1" binary class="mr-2" v-model="checked"></Checkbox>
+                <label for="rememberme1">Remember me</label>
+              </div>
+              <a class="font-medium no-underline ml-2 text-right cursor-pointer" style="color: var(--primary-color)">Forgot password?</a>
+            </div>
+            <Button label="Sign In" class="w-full p-3 text-xl" style="background-color: var(--primary-color); border:none" @click="loginUser()">
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.formLoginUser {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: column;
-  justify-content: center;
-  width: 300px;
-
-  & Form {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  & input {
-    height: 25px;
-    border-radius: 5px;
-  }
-
-  & button {
-    margin-top: 10px;
-    width: 100px;
-    height: 25px;
-    background-color: hsla(160, 100%, 37%, 1);
-    color: white;
-    border: 1px solid hsla(160, 100%, 37%, 1);
-    border-radius: 5px;
-  }
+.pi-eye {
+  transform: scale(1.6);
+  margin-right: 1rem;
 }
 
-#buttonVerPass {
-  cursor: pointer;
+.pi-eye-slash {
+  transform: scale(1.6);
+  margin-right: 1rem;
+}
+
+button {
+  /* background-color: var(--primary-color); */
+  /* border: none; */
 }
 </style>

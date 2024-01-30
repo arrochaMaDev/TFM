@@ -33,6 +33,6 @@ export class RegisterUserService {
     };
     console.log(userDb);
 
-    await this.userRepository.save(userDb);
+    await this.userRepository.insert(userDb);
   }
 }

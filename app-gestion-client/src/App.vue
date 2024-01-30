@@ -99,6 +99,7 @@ const deleteCookie = (user: string) => {
     </div>
   </nav>
 
+
   <!-- </div>
   </header> -->
   <RouterView />

@@ -1,132 +1,167 @@
-<!-- eslint-disable vue/no-side-effects-in-computed-properties -->
 <script setup lang="ts">
-import { ref, watch, type Ref } from 'vue'
+import Dropdown from 'primevue/dropdown';
+import InputText from 'primevue/inputtext';
+import Password from 'primevue/password';
+import { ref, type Ref } from 'vue'
+import { useToast } from "primevue/usetoast";
+import InlineMessage from 'primevue/inlinemessage';
+import Button from 'primevue/button';
+import Toast from 'primevue/toast';
 
-// FETCH PARA ENVIAR DATOS DEL USUARIO A LA BD:
-function crearUsuario() {
-  if (userPassRef.value !== userPassRefConfirmed.value) {
-    alert('las contraseñas no coinciden')
-  } else {
-    fetch('http://localhost:3000/user', {
-      method: 'POST',
-      body: JSON.stringify({
-        username: userUsernameRef.value,
-        email: userEmailRef.value,
-        pass: userPassRef.value,
-        permiso: userPermisoRef.value
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
-        } else {
-          alert('Usuario Creado')
-        }
-      })
-      .catch((error) => {
-        console.error('Error en la solicitud:', error)
-        alert('Ha ocurrido un error')
-      })
 
-    // Imprimo los datos que he enviado a la base de datos
-    const datosUsuario = [
-      userUsernameRef.value,
-      userEmailRef.value,
-      userPassRef.value,
-      userPermisoRef.value
-    ]
-    console.log(datosUsuario)
-  }
-}
+const toast = useToast(); // componente para mostrar mensajes de alerta
+
+const showError = () => {
+  toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+};
+const showSuccess = () => {
+  toast.add({ severity: 'success', summary: 'Success Message', detail: 'Usuario creado', life: 3000 });
+};
 
 //Referencias del formulario
 let userUsernameRef: Ref<string> = ref('')
 let userEmailRef: Ref<string> = ref('')
 let userPassRef: Ref<string> = ref('')
 let userPassRefConfirmed: Ref<string> = ref('')
-let selectedPermisoRef: Ref<string | null> = ref(null)
 let userPermisoRef: Ref<number | null> = ref(null)
 
-watch(selectedPermisoRef, () => {
-  if (selectedPermisoRef.value === 'Alumno') userPermisoRef.value = 0
-  else if (selectedPermisoRef.value === 'Profesor') userPermisoRef.value = 1
-  else if (selectedPermisoRef.value === 'Administrador') userPermisoRef.value = 9
-  else userPermisoRef.value = null
-})
-console.log(userPermisoRef.value)
+const permiso = ref([
+  { name: 'Alumno', code: 0 },
+  { name: 'Profesor', code: 1 },
+  { name: 'Administrador', code: 9 },
+])
 
-// para resetear los datos del formulario y poner cada ref a vacío
-function resetearDatosForm() {
-  userUsernameRef.value = ''
-  userEmailRef.value = ''
-  userPassRef.value = ''
-  userPassRefConfirmed.value = ''
-  selectedPermisoRef.value = ''
+// FUNCION PARA VALIDAR DATOS
+const usernameError: Ref<string | null> = ref(null);
+const emailError: Ref<string | null> = ref(null);
+const passError: Ref<string | null> = ref(null);
+const permisoError: Ref<string | null> = ref(null);
+
+const validarUsername = () => {
+  if (userUsernameRef.value == '') {
+    usernameError.value = 'Debe seleccionar un nombre de usuario';
+  } else {
+    usernameError.value = null;
+  }
+};
+
+const validarEmail = () => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (userEmailRef.value == '') {
+    emailError.value = 'El correo electrónico es obligatorio';
+  } else if (!emailRegex.test(userEmailRef.value)) {
+    emailError.value = 'Ingrese un correo electrónico válido';
+  } else {
+    emailError.value = null;
+  }
+};
+
+const validarPass = () => {
+  if (!userPassRef.value || !userPassRefConfirmed.value) {
+    passError.value = 'La contraseña es obligatoria';
+  } else if (userPassRef.value !== userPassRefConfirmed.value) {
+    passError.value = 'Las contraseñas no coinciden';
+  } else {
+    passError.value = null;
+  }
+};
+
+const validarPermiso = () => {
+  if (userPermisoRef.value == null) {
+    permisoError.value = 'Debe seleccionar un permiso';
+  } else {
+    permisoError.value = null;
+  }
+};
+
+// FETCH PARA ENVIAR DATOS DEL USUARIO A LA BD:
+const crearUsuario = async () => {
+  validarUsername()
+  validarEmail()
+  validarPass()
+  validarPermiso()
+  if (usernameError.value == null && passError.value == null && emailError.value == null && permisoError.value == null) {
+    try {
+      const response = await fetch('http://localhost:3000/user', {
+        method: 'POST',
+        body: JSON.stringify({
+          username: userUsernameRef.value,
+          email: userEmailRef.value,
+          pass: userPassRef.value,
+          permiso: userPermisoRef.value
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      if (!response.ok) {
+        throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+      } else {
+        console.log('Datos recibidos:', response);
+        showSuccess()
+        // Imprimo los datos por consola
+        // const datosUsuario = [
+        //   userUsernameRef.value,
+        //   userEmailRef.value,
+        //   userPassRef.value,
+        //   userPermisoRef.value
+        // ]
+        // console.log(datosUsuario)
+      }
+    } catch (error) {
+      console.error('Error en la solicitud:', error)
+      showError()
+    }
+  }
 }
 
-//mostrar o ocultar contraseña
-let verPass: Ref<boolean> = ref(false)
-const ToggleVerPass = () => {
-  verPass.value = !verPass.value
-}
+
 </script>
 
 <template>
-  <div class="centradoVertical">
-    <div class="form">
-      <h1 class="green">Alta Usuario</h1>
-      <form @submit.prevent="crearUsuario()">
-        <label class="green">Username</label>
-        <input type="text" name="" id="usernameInput" required v-model="userUsernameRef" />
-        <label class="green">Email</label>
-        <input type="email" name="" id="emailInput" required v-model="userEmailRef" />
-        <label class="green">Pass</label>
-        <input
-          :type="verPass ? 'text' : 'password'"
-          name=""
-          id="passInput"
-          required
-          v-model="userPassRef"
-        />
-        <label class="green">Repeat Pass</label>
-        <input
-          :type="verPass ? 'text' : 'password'"
-          id="passInput"
-          v-model="userPassRefConfirmed"
-          required
-        />
-        <label class="green">Permisos</label>
-        <select name="" id="permisoInput" required v-model="selectedPermisoRef">
-          <!-- <option value="" disabled>Seleccione el permiso</option> -->
-          <option :value="''" :disabled="selectedPermisoRef !== ''">Seleccione el permiso</option>
-          <option value="Alumno">Alumno</option>
-          <option value="profesor">Profesor</option>
-          <option value="Administrador">Administrador</option>
-        </select>
-        <button type="button" id="buttonVerPass" @click="ToggleVerPass()">
-          <span v-if="verPass">Ocultar Pass</span>
-          <span v-else>Mostrar Pass</span>
-        </button>
-        <button type="reset" @click="resetearDatosForm()">Resetear</button>
-        <button type="submit">Enviar</button>
-      </form>
+  <Toast class="caca" />
+  <Button label="Sign In" icon="pi pi-user" class="w-full p-3 text-xl text-center" style="background-color: var(--primary-color); border:none" @click="showError()">Enviar</Button>
+  <div class="w-7 surface-card py-8 px-5 sm:px-8 ">
+    <div class="text-center mb-5">
+      <div class="text-900 text-3xl font-medium mb-3">Nuevo Usuario</div>
     </div>
-    <div class="vistaPrevia">
-      <h2>Vista previa del usuario:</h2>
-      <p>Nombre: {{ userUsernameRef }}</p>
-      <p>Email: {{ userEmailRef }}</p>
-      <p>Pass: {{ userPassRef }}</p>
-      <p>Permisos: {{ selectedPermisoRef }}</p>
-    </div>
+
+    <label for="username" class="block text-900 font-medium text-xl mb-2">Username</label>
+    <InputText id="username" type="text" class="w-full mb-3" v-model="userUsernameRef" @input="validarUsername()">
+      > </InputText>
+    <InlineMessage v-if="usernameError" severity="error">{{ usernameError }}</InlineMessage>
+
+
+    <label for="email" class="block text-900 font-medium text-xl mb-2">Email</label>
+    <InputText id="email" type="email" class="w-full mb-3" v-model="userEmailRef" @input="validarEmail"> </InputText>
+    <InlineMessage v-if="emailError" severity="error">{{ emailError }}</InlineMessage>
+
+    <label for="password" class="block text-900 font-medium text-xl mb-2">Contraseña</label>
+    <Password id="password" required v-model="userPassRef" placeholder="Password" :feedback="false" :toggleMask="true" class="w-full mb-3" inputClass="w-full" :inputStyle="{ padding: '1rem' }"
+      @input="validarPass()">
+    </Password>
+    <InlineMessage v-if="passError" severity="error">{{ passError }}</InlineMessage>
+
+    <label for="password" class="block text-900 font-medium text-xl mb-2">Repetir contraseña</label>
+    <Password id="password" v-model="userPassRefConfirmed" placeholder="Password" :feedback="false" :toggleMask="true" class="w-full mb-3" inputClass="w-full" :inputStyle="{ padding: '1rem' }"
+      @input="validarPass()">
+    </Password>
+    <InlineMessage v-if="passError" severity="error">{{ passError }}</InlineMessage>
+
+    <label for="permiso" class="block text-900 font-medium text-xl mb-2">Permiso</label>
+    <Dropdown id="permiso" v-model="userPermisoRef" :options="permiso" optionLabel="name" optionValue="code" showClear class="mb-3" @input="validarPermiso()">
+    </Dropdown>
+    <InlineMessage v-if="permisoError" severity="error">{{ permisoError }}</InlineMessage>
+
+    <Toast />
+    <Button label="Sign In" icon="pi pi-user" class="w-full p-3 text-xl text-center" style="background-color: var(--primary-color); border:none" @click="crearUsuario()">Enviar</Button>
   </div>
 </template>
 
 <style scoped>
-.form {
+/* .form {
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
@@ -177,5 +212,5 @@ table {
     border: 1px solid #ffffff;
     border-spacing: 0;
   }
-}
+} */
 </style>
