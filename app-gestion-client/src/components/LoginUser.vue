@@ -109,9 +109,4 @@ const logoUrl = computed(() => {
   transform: scale(1.6);
   margin-right: 1rem;
 }
-
-button {
-  /* background-color: var(--primary-color); */
-  /* border: none; */
-}
 </style>
