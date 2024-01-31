@@ -1,20 +1,22 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import LightDarkSwtichBtn from "./LightDarkSwtichBtn.vue";
-import stateStore from "../../stores/store";
+import stateStore from "../../utils/store";
 
 
 const stateStoreInstance = stateStore;
 const isSticky = ref(false);
+
+// Cambiar color icono a negro el hamburguesa en light mode
 const props = defineProps<{
   darkMode: Boolean
 }>()
 
-let isDarkMode = props.darkMode
+let isDarkMode = ref(props.darkMode)
 
-watch(() => props.darkMode, (value) => {
-  isDarkMode = value
-});
+const toogleHamburgerColor = () => {
+  isDarkMode.value = !isDarkMode.value
+}
 
 onMounted(() => {
   window.addEventListener("scroll", () => {
@@ -23,7 +25,6 @@ onMounted(() => {
   });
 });
 
-// NO FUNCIONA EL WATCH
 
 </script>
 <template>
@@ -89,7 +90,7 @@ onMounted(() => {
               </ul> 
           </div> 
           </div> -->
-          <LightDarkSwtichBtn :isDarkMode="darkMode" />
+          <LightDarkSwtichBtn :isDarkMode="darkMode" @toogleHamburgerColor="toogleHamburgerColor()" />
           <!-- <div class="dropdown apps-dropdown">
             <button class="dropdown-toggle p-0 position-relative bg-transparent border-0 transition lh-1" type="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="flaticon-dashboard"></i>
@@ -274,8 +275,9 @@ onMounted(() => {
   </header>
 </template>
 <style >
-/* .light-mode-icon {
+.light-mode-icon {
   color: black;
-} */
+}
 </style>
 
+../../utils/store

@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, type Ref } from 'vue';
 
-const isDarkMode = ref(false)
+const isDarkMode: Ref<boolean> = ref(false)
+
+const emit = defineEmits(['toogleHamburgerColor']) // emit para cambiar el color el icono de la hamburguesa a negro en light mode
 
 const toggleDarkMode = () => {
   isDarkMode.value = !isDarkMode.value;
   document.body.classList.toggle("dark", isDarkMode.value);
   localStorage.setItem("dark", isDarkMode.value.toString());
+  emit('toogleHamburgerColor')
 }
 
 onMounted(() => {

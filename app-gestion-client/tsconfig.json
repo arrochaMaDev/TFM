@@ -5,6 +5,7 @@
     "src/**/*",
     // "tests/**/*.ts",
     // "tests/**/*.tsx",
+    "components.d.ts",
     "vite.config.*",
     "vitest.config.*",
     "cypress.config.*",

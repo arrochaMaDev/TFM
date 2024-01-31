@@ -6,7 +6,7 @@ import Spinner from './components/Spinner.vue'
 import { useLoadingStore } from './stores/loading'
 import { useAdminStore } from './stores/isAdmin'
 import type { VueCookies } from 'vue-cookies'
-import stateStore from "./stores/store";
+import stateStore from "./utils/store";
 import MainHeader from "./components/Layouts/MainHeader.vue";
 import MainSidebar from "./components/Layouts/MainSidebar.vue";
 import MainFooter from "./components/Layouts/MainFooter.vue";
@@ -200,3 +200,4 @@ hr {
   width: 50%;
 }
 </style>
+./utils/store

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import stateStore from "../../stores/store";
+import stateStore from "../../utils/store";
+
 
 const stateStoreInstance = stateStore;
 
@@ -20,10 +21,12 @@ const stateStoreInstance = stateStore;
       </button>
     </div>
     <div class="sidebar-menu">
+
+
       <ul class="sidebar-navbar-nav ps-0 mb-0 list-unstyled accordion" id="sidebarNavAccordion">
         <li class="sidebar-nav-item accordion-item bg-transparent border-0 rounded-0">
           <a href="#" class="accordion-button rounded-0 shadow-none bg-transparent d-block" data-bs-toggle="collapse" data-bs-target="#sidebarCollapseOne" aria-expanded="true"
-            aria-controls="sidebarCollapseOne">
+            aria-controls="sidebarCollapsOn">
             <i class="flaticon-more-1"></i>
             <span class="title">Dashboard</span>
           </a>
@@ -31,8 +34,8 @@ const stateStoreInstance = stateStore;
             <div class="accordion-body">
               <ul class="sidebar-sub-menu ps-0 mb-0 list-unstyled">
                 <li class="sidebar-sub-menu-item">
-                  <router-link to="/" class="sidebar-sub-menu-link">
-                    Ecommerce
+                  <router-link to="/alta-alumno" class="sidebar-sub-menu-link">
+                    Alta Alumno
                   </router-link>
                 </li>
                 <li class="sidebar-sub-menu-item">
