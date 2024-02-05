@@ -118,8 +118,8 @@ const deleteCookie = (user: string) => {
 
 
   <!-- </div>
-  </header> -->
-  <RouterView />
+  </header> --->
+  <!-- <RouterView /> -->
   <Spinner v-if="isLoading"></Spinner>
 </template>
 
@@ -200,4 +200,3 @@ hr {
   width: 50%;
 }
 </style>
-./utils/store

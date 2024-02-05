@@ -3,19 +3,25 @@ import Dropdown from 'primevue/dropdown';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import { ref, type Ref } from 'vue'
-import { useToast } from "primevue/usetoast";
 import InlineMessage from 'primevue/inlinemessage';
 import Button from 'primevue/button';
-import Toast from 'primevue/toast';
+import { useToast } from "vue-toastification";
+import SelectButton from 'primevue/selectbutton';
 
 
-const toast = useToast(); // componente para mostrar mensajes de alerta
+
+// COMPONENTE PARA USAR MENSAJES DE ALERTA
+const toast = useToast();
 
 const showError = () => {
-  toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
-};
+  toast.error("Ha ocurrido un error", {
+    timeout: 3000
+  });
+}
 const showSuccess = () => {
-  toast.add({ severity: 'success', summary: 'Success Message', detail: 'Usuario creado', life: 3000 });
+  toast.success("Usuario creado", {
+    timeout: 3000
+  });
 };
 
 //Referencias del formulario
@@ -121,43 +127,48 @@ const crearUsuario = async () => {
 </script>
 
 <template>
-  <Toast class="caca" />
-  <Button label="Sign In" icon="pi pi-user" class="w-full p-3 text-xl text-center" style="background-color: var(--primary-color); border:none" @click="showError()">Enviar</Button>
-  <div class="w-7 surface-card py-8 px-5 sm:px-8 ">
-    <div class="text-center mb-5">
-      <div class="text-900 text-3xl font-medium mb-3">Nuevo Usuario</div>
+  <!-- <div class="container d-flex align-items-center"> -->
+  <div class="card mb-25 border-0 rounded-0 bg-white letter-spacing w-5">
+    <div class="card-body p-15 p-sm-20 p-md-25 p-lg-30">
+
+      <div class="text-center mb-5">
+        <div class="card-title fw-bold text-3xl mb-15 mb-md-20 mb-lg-25">Nuevo Usuario</div>
+      </div>
+
+      <label for="username" class="d-flex form-label fw-semibold text-xl">Username</label>
+      <InputText id="username" type="text" class="form-control shadow-none text-black fs-md-15 fs-lg-16" v-model="userUsernameRef" @input="validarUsername()">
+        > </InputText>
+      <InlineMessage v-if="usernameError" severity="error" class="bg-transparent">{{ usernameError }}</InlineMessage>
+
+      <label for="email" class="d-flex form-label fw-semibold text-xl">Email</label>
+      <InputText id="email" type="email" class="form-control shadow-none text-black fs-md-15 fs-lg-16" v-model="userEmailRef" @input="validarEmail"> </InputText>
+      <InlineMessage v-if="emailError" severity="error" class="bg-transparent">{{ emailError }}</InlineMessage>
+
+      <label for="password" class="d-flex form-label fw-semibold text-xl">Contraseña</label>
+      <Password id="password" required v-model="userPassRef" placeholder="Password" :feedback="false" :toggleMask="true" class="w-full mb-3" input-class="form-control w-full"
+        :inputStyle="{ padding: '1rem' }" @input="validarPass()">
+      </Password>
+      <InlineMessage v-if="passError" severity="error" class="bg-transparent">{{ passError }}</InlineMessage>
+
+      <label for="password" class="d-flex form-label fw-semibold text-xl">Repetir contraseña</label>
+      <Password id="password" v-model="userPassRefConfirmed" placeholder="Password" :feedback="false" :toggleMask="true" class="w-full mb-3" input-class="form-control w-full"
+        :inputStyle="{ padding: '1rem' }" @input="validarPass()">
+      </Password>
+      <InlineMessage v-if="passError" severity="error" class="bg-transparent">{{ passError }}</InlineMessage>
+
+      <label for="permiso" class="d-flex form-label fw-semibold text-xl">Permiso</label>
+      <Dropdown id="permiso" v-model="userPermisoRef" :options="permiso" optionLabel="name" optionValue="code" showClear @input="validarPermiso()" class="form-control">
+        <!-- input-class="form-control" :input-style="{ 'width': '500px' }" -->
+
+      </Dropdown>
+      <InlineMessage v -if=" permisoError" severity="error" class="bg-transparent">{{ permisoError }}</InlineMessage>
+
+      <Toast />
+      <Button label="Sign In" icon="pi pi-user" class="btn btn-primary d-flex justify-content-center text-md p-3" style="background-color: var(--primary-color); border:none"
+        @click="crearUsuario()">Enviar</Button>
     </div>
-
-    <label for="username" class="block text-900 font-medium text-xl mb-2">Username</label>
-    <InputText id="username" type="text" class="w-full mb-3" v-model="userUsernameRef" @input="validarUsername()">
-      > </InputText>
-    <InlineMessage v-if="usernameError" severity="error">{{ usernameError }}</InlineMessage>
-
-
-    <label for="email" class="block text-900 font-medium text-xl mb-2">Email</label>
-    <InputText id="email" type="email" class="w-full mb-3" v-model="userEmailRef" @input="validarEmail"> </InputText>
-    <InlineMessage v-if="emailError" severity="error">{{ emailError }}</InlineMessage>
-
-    <label for="password" class="block text-900 font-medium text-xl mb-2">Contraseña</label>
-    <Password id="password" required v-model="userPassRef" placeholder="Password" :feedback="false" :toggleMask="true" class="w-full mb-3" inputClass="w-full" :inputStyle="{ padding: '1rem' }"
-      @input="validarPass()">
-    </Password>
-    <InlineMessage v-if="passError" severity="error">{{ passError }}</InlineMessage>
-
-    <label for="password" class="block text-900 font-medium text-xl mb-2">Repetir contraseña</label>
-    <Password id="password" v-model="userPassRefConfirmed" placeholder="Password" :feedback="false" :toggleMask="true" class="w-full mb-3" inputClass="w-full" :inputStyle="{ padding: '1rem' }"
-      @input="validarPass()">
-    </Password>
-    <InlineMessage v-if="passError" severity="error">{{ passError }}</InlineMessage>
-
-    <label for="permiso" class="block text-900 font-medium text-xl mb-2">Permiso</label>
-    <Dropdown id="permiso" v-model="userPermisoRef" :options="permiso" optionLabel="name" optionValue="code" showClear class="mb-3" @input="validarPermiso()">
-    </Dropdown>
-    <InlineMessage v-if="permisoError" severity="error">{{ permisoError }}</InlineMessage>
-
-    <Toast />
-    <Button label="Sign In" icon="pi pi-user" class="w-full p-3 text-xl text-center" style="background-color: var(--primary-color); border:none" @click="crearUsuario()">Enviar</Button>
   </div>
+  <!-- </div> -->
 </template>
 
 <style scoped>

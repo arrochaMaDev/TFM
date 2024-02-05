@@ -22,48 +22,48 @@ const stateStoreInstance = stateStore;
     </div>
     <div class="sidebar-menu">
 
-
       <ul class="sidebar-navbar-nav ps-0 mb-0 list-unstyled accordion" id="sidebarNavAccordion">
+        <!--  -->
         <li class="sidebar-nav-item accordion-item bg-transparent border-0 rounded-0">
-          <a href="#" class="accordion-button rounded-0 shadow-none bg-transparent d-block" data-bs-toggle="collapse" data-bs-target="#sidebarCollapseOne" aria-expanded="true"
-            aria-controls="sidebarCollapsOn">
-            <i class="flaticon-more-1"></i>
-            <span class="title">Dashboard</span>
-          </a>
+          <button class="accordion-button rounded-0 shadow-none bg-transparent d-block" data-bs-toggle="collapse" data-bs-target="#sidebarCollapseOne" aria-expanded="true"
+            aria-controls="sidebarCollapsOne">
+            <i class="pi pi-plus"></i>
+            <span class="title">Registrar</span>
+          </button>
           <div id="sidebarCollapseOne" class="accordion-collapse collapse show" data-bs-parent="#sidebarNavAccordion">
             <div class="accordion-body">
               <ul class="sidebar-sub-menu ps-0 mb-0 list-unstyled">
                 <li class="sidebar-sub-menu-item">
+                  <router-link to="/alta-usuario" class="sidebar-sub-menu-link">
+                    Nuevo Usuario
+                  </router-link>
+                </li>
+                <li class="sidebar-sub-menu-item">
                   <router-link to="/alta-alumno" class="sidebar-sub-menu-link">
-                    Alta Alumno
+                    Nuevo Alumno
                   </router-link>
                 </li>
                 <li class="sidebar-sub-menu-item">
-                  <router-link to="/project-management" class="sidebar-sub-menu-link">
-                    Project Management
+                  <router-link to="/alta-profesor" class="sidebar-sub-menu-link">
+                    Nuevo Profesor
                   </router-link>
                 </li>
                 <li class="sidebar-sub-menu-item">
-                  <router-link to="/support-desk" class="sidebar-sub-menu-link">
-                    Support Desk
-                    <span class="new-badge fw-medium d-inline-block">Hot</span>
+                  <router-link to="/alta-usuario" class="sidebar-sub-menu-link">
+                    Nueva Asignatura
                   </router-link>
                 </li>
                 <li class="sidebar-sub-menu-item">
-                  <router-link to="/lms-courses" class="sidebar-sub-menu-link">
-                    LMS Courses
-                  </router-link>
-                </li>
-                <li class="sidebar-sub-menu-item">
-                  <router-link to="/crm-system" class="sidebar-sub-menu-link">
-                    CRM System
-                    <span class="new-badge fw-medium d-inline-block">Hot</span>
+                  <router-link to="/alta-asignatura-profesor" class="sidebar-sub-menu-link">
+                    Nueva Asignación
                   </router-link>
                 </li>
               </ul>
             </div>
           </div>
         </li>
+
+        <!--            -->
         <li class="sidebar-nav-item">
           <router-link to="/file-manager" class="sidebar-nav-link d-block">
             <i class="flaticon-folder"></i>

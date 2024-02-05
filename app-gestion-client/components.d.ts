@@ -15,6 +15,12 @@ declare module 'vue' {
     Alumno: typeof import('./src/components/Alumno.vue')['default']
     BAccordion: typeof import('bootstrap-vue-next')['BAccordion']
     BAccordionItem: typeof import('bootstrap-vue-next')['BAccordionItem']
+    BButton: typeof import('bootstrap-vue-next')['BButton']
+    BCard: typeof import('bootstrap-vue-next')['BCard']
+    BCardBody: typeof import('bootstrap-vue-next')['BCardBody']
+    BCardHeader: typeof import('bootstrap-vue-next')['BCardHeader']
+    BCardText: typeof import('bootstrap-vue-next')['BCardText']
+    BCollapse: typeof import('bootstrap-vue-next')['BCollapse']
     BuscadorAlumno: typeof import('./src/components/BuscadorAlumno.vue')['default']
     'ElementosBorrados*****': typeof import('./src/components/ElementosBorrados*****.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
@@ -46,5 +52,8 @@ declare module 'vue' {
     TheWelcome: typeof import('./src/components/TheWelcome.vue')['default']
     Usuario: typeof import('./src/components/Usuario.vue')['default']
     WelcomeItem: typeof import('./src/components/WelcomeItem.vue')['default']
+  }
+  export interface ComponentCustomProperties {
+    vBToggle: typeof import('bootstrap-vue-next')['vBToggle']
   }
 }

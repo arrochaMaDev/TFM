@@ -78,17 +78,17 @@ const crearAlumno = async () => {
 const emit = defineEmits(['cerrarPopUp', 'obtenerAlumnos', 'resetearAlumno'])
 const props = defineProps<{
   alumnoParaEditar:
-    | {
-        id: number
-        // usuario_id: string
-        nombre: string
-        apellidos: string
-        dni: string
-        telefono: number
-        direccion: string
-        email: string
-      }
-    | undefined
+  | {
+    id: number
+    // usuario_id: string
+    nombre: string
+    apellidos: string
+    dni: string
+    telefono: number
+    direccion: string
+    email: string
+  }
+  | undefined
   isEditing: boolean
 }>()
 
@@ -183,13 +183,7 @@ const enviarDatosFormulario = () => {
           <label class="green">Dni</label>
           <input type="text" id="dniInput" required v-model="studentRef.dni.value" />
           <label class="green">Teléfono</label>
-          <input
-            type="tel"
-            pattern="^\d{9}$"
-            id="telefonoInput"
-            required
-            v-model="studentRef.telefono.value"
-          />
+          <input type="tel" pattern="^\d{9}$" id="telefonoInput" required v-model="studentRef.telefono.value" />
           <label class="green">Dirección</label>
           <input type="text" id="direcciónInput" required v-model="studentRef.direccion.value" />
           <label class="green">Email</label>
@@ -204,25 +198,14 @@ const enviarDatosFormulario = () => {
           <label class="green">Dni</label>
           <input type="text" id="dniInput" required v-model="alumnoEditado.dni" />
           <label class="green">Teléfono</label>
-          <input
-            type="tel"
-            pattern="^\d{9}$"
-            id="telefonoInput"
-            required
-            v-model="alumnoEditado.telefono"
-          />
+          <input type="tel" pattern="^\d{9}$" id="telefonoInput" required v-model="alumnoEditado.telefono" />
           <label class="green">Dirección</label>
           <input type="text" id="direcciónInput" required v-model="alumnoEditado.direccion" />
           <label class="green">Email</label>
           <input required type="email" id="emailInput" v-model="alumnoEditado.email" />
         </div>
         <button type="reset" @click="borrarDatosForm()">Borrar datos</button>
-        <button
-          type="reset"
-          class="btn btn-outline-primary"
-          v-if="popUpStyle"
-          @click="resetearValoresIniciales"
-        >
+        <button type="reset" class="btn btn-outline-primary" v-if="popUpStyle" @click="resetearValoresIniciales">
           Resetear
         </button>
         <button type="submit">{{ popUpStyle ? 'Actualizar' : 'Enviar' }}</button>
