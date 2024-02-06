@@ -7,39 +7,39 @@ import { useLoadingStore } from './stores/loading'
 import { useAdminStore } from './stores/isAdmin'
 import type { VueCookies } from 'vue-cookies'
 import stateStore from "./utils/store";
-import MainHeader from "./components/Layouts/MainHeader.vue";
 import MainSidebar from "./components/Layouts/MainSidebar.vue";
 import MainFooter from "./components/Layouts/MainFooter.vue";
+import Sidebar from './components/Layouts/Sidebar.vue'
 
 
-const stateStoreInstance = stateStore;
-watchEffect(() => {
-  if (stateStoreInstance.open) {
-    document.body.classList.remove("sidebar-show");
-    document.body.classList.add("sidebar-hide");
-    console.log("show");
-  } else {
-    document.body.classList.remove("sidebar-hide");
-    document.body.classList.add("sidebar-show");
+// const stateStoreInstance = stateStore;
+// watchEffect(() => {
+//   if (stateStoreInstance.open) {
+//     document.body.classList.remove("sidebar-show");
+//     document.body.classList.add("sidebar-hide");
+//     console.log("show");
+//   } else {
+//     document.body.classList.remove("sidebar-hide");
+//     document.body.classList.add("sidebar-show");
 
-    console.log("hide");
-  }
-});
+//     console.log("hide");
+//   }
+// });
 
 // FUNCION LOADING SPINNER
 const loadingStore = useLoadingStore() // store de Pinia para el ner
 let isLoading: Ref<boolean> = ref(loadingStore.isLoading) // uso la variable de estado en la store de LoadingStore de Pinia
 
-onMounted(() => {
-  document.body.classList.add("bg-body-secondary");
+// onMounted(() => {
+//   document.body.classList.add("bg-body-secondary");
 
-  watch(
-    () => loadingStore.isLoading,
-    (value) => {
-      isLoading.value = value
-    }
-  )
-})
+watch(
+  () => loadingStore.isLoading,
+  (value) => {
+    isLoading.value = value
+  }
+)
+// })
 
 // LEER LA COOKIE Y VER EMAIL Y PERMISOS
 // let userData: any = undefined
@@ -82,18 +82,24 @@ const cerrarSesion = async () => {
 const deleteCookie = (user: string) => {
   document.cookie = `${user}=; max-age=0` //expires=Thu, 01 Jan 1970 00:00:00 UTC`
 }
+
+
 </script>
 
 <template>
-  <MainHeader />
+  <Sidebar>
+
+  </Sidebar>
+  <!-- <MainHeader />
   <MainSidebar />
   <div class="main-content d-flex flex-column transition overflow-hidden">
-    <router-view />
+    <RouterView />
     <MainFooter />
-  </div>
+  </div> -->
+
 
   <nav>
-    <!-- <RouterLink to="/home">Home</RouterLink> -->
+    <RouterLink to="/home">Home</RouterLink>
     <RouterLink to="/about">About</RouterLink>
     <RouterLink to="/login">Login</RouterLink>
     <RouterLink to="/alta-usuario" v-if="adminMode">Nuevo Usuario</RouterLink>
@@ -109,7 +115,6 @@ const deleteCookie = (user: string) => {
     <RouterLink to="/listado-asignaciones" v-if="adminMode">Listado Asignaciones</RouterLink>
     <RouterLink to="/listado-matriculas" v-if="adminMode">Listado Matriculas</RouterLink>
     <div v-if="userEmail">
-      <!-- Si existe userEmail en localStorage, muestro un mensaje de bienvenida y un botón de logout-->
       <hr />
       <a>Bienvenido {{ userEmail }}</a>
       <a @click="cerrarSesion">LogOut</a>
@@ -117,9 +122,10 @@ const deleteCookie = (user: string) => {
   </nav>
 
 
-  <!-- </div>
-  </header> --->
-  <!-- <RouterView /> -->
+
+
+
+  <RouterView />
   <Spinner v-if="isLoading"></Spinner>
 </template>
 
@@ -131,7 +137,6 @@ const deleteCookie = (user: string) => {
 i {
   color: black;
 }
-
 
 header {
   line-height: 1.5;

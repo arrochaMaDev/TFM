@@ -6,7 +6,6 @@ import { ref, type Ref } from 'vue'
 import InlineMessage from 'primevue/inlinemessage';
 import Button from 'primevue/button';
 import { useToast } from "vue-toastification";
-import SelectButton from 'primevue/selectbutton';
 
 
 
@@ -127,7 +126,6 @@ const crearUsuario = async () => {
 </script>
 
 <template>
-  <!-- <div class="container d-flex align-items-center"> -->
   <div class="card mb-25 border-0 rounded-0 bg-white letter-spacing w-5">
     <div class="card-body p-15 p-sm-20 p-md-25 p-lg-30">
 
@@ -168,7 +166,6 @@ const crearUsuario = async () => {
         @click="crearUsuario()">Enviar</Button>
     </div>
   </div>
-  <!-- </div> -->
 </template>
 
 <style scoped>

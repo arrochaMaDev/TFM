@@ -13,19 +13,3 @@ const stateStore: StateStore = reactive({
 })
 
 export default stateStore
-
-// import { defineStore } from 'pinia'
-
-// export const useStateStore = defineStore('stateStore', {
-//   state: () => ({
-//     isOpen: false
-//   }),
-//   actions: {
-//     stateStoreTrue() {
-//       this.isOpen = true
-//     },
-//     stateStoreFalse() {
-//       this.isOpen = false
-//     }
-//   }
-// })
