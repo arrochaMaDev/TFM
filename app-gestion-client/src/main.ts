@@ -1,4 +1,5 @@
-import './assets/main.css'
+// import './assets/main.css'
+import './main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
@@ -7,17 +8,10 @@ import VueCookies from 'vue-cookies'
 import App from './App.vue'
 import router from './router'
 
-// PRIMEVUE
-import PrimeVue from 'primevue/config';
-// import 'primevue/resources/themes/lara-light-amber/theme.css';
-// import 'primevue/resources/themes/lara-dark-amber/theme.css';
-
-// import '../node_modules/primeflex/primeflex.css'
-// import 'primeflex/primeflex.scss';
-// import 'primeicons/primeicons.css'
-
-// import '@/assets/styles.scss';
-
+// Primevue
+import PrimeVue from 'primevue/config'
+// import 'primevue/resources/themes/aura-light-green/theme.css'
+import 'primeicons/primeicons.css'
 
 const app = createApp(App)
 
@@ -26,8 +20,8 @@ app.use(router)
 app.use(VueCookies, {
   expires: '1d'
 })
-app.use(PrimeVue)
 
-
+//Primevue
+app.use(PrimeVue, { ripple: true })
 
 app.mount('#app')

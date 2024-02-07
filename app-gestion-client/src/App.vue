@@ -6,6 +6,7 @@ import Spinner from './components/Spinner.vue'
 import { useLoadingStore } from './stores/loading'
 import { useAdminStore } from './stores/isAdmin'
 import type { VueCookies } from 'vue-cookies'
+import appHeader from './components/layout/appHeader.vue'
 
 
 
@@ -67,24 +68,17 @@ const deleteCookie = (user: string) => {
 </script>
 
 <template>
-  <!-- <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <appHeader></appHeader>
+  <div class="text-green-700 text-xl">Hello, from TailwindCSS!</div>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" /> -->
-
-    
   <nav>
-    <!-- <RouterLink to="/home">Home</RouterLink> -->
     <RouterLink to="/about">About</RouterLink>
     <RouterLink to="/login">Login</RouterLink>
     <RouterLink to="/alta-usuario" v-if="adminMode">Nuevo Usuario</RouterLink>
     <RouterLink to="/alta-alumno" v-if="adminMode">Alta Alumno</RouterLink>
     <RouterLink to="/alta-profesor" v-if="adminMode">Alta Profesor</RouterLink>
     <RouterLink to="/alta-asignatura" v-if="adminMode">Alta Asignatura</RouterLink>
-    <RouterLink to="/alta-asignatura-profesor" v-if="adminMode"
-      >Alta Asignatura-Profesor</RouterLink
-    >
+    <RouterLink to="/alta-asignatura-profesor" v-if="adminMode">Alta Asignatura-Profesor</RouterLink>
     <RouterLink to="/matricula" v-if="adminMode">Matricula</RouterLink>
     <RouterLink to="/buscador-alumno" v-if="adminMode">Buscar Alumnos</RouterLink>
     <RouterLink to="/listado-usuarios" v-if="adminMode">Listado Usuarios</RouterLink>
@@ -100,17 +94,16 @@ const deleteCookie = (user: string) => {
     </div>
   </nav>
 
-  <!-- </div>
-  </header> -->
+
   <RouterView />
   <Spinner v-if="isLoading"></Spinner>
 </template>
 
 <style scoped>
-
 .nav-link span {
   color: black;
 }
+
 i {
   color: black;
 }
@@ -176,6 +169,7 @@ nav a:first-of-type {
     margin-top: 1rem;
   }
 }
+
 hr {
   border: 1px solid #ccc;
   margin: 10px 0;

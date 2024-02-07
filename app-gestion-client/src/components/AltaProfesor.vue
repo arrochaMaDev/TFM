@@ -115,14 +115,14 @@ const eliminarAsignatura = (index: any) => {
 const emit = defineEmits(['cerrarPopUp', 'obtenerProfesores', 'resetearProfesor'])
 const props = defineProps<{
   profesorParaEditar:
-    | {
-        id: number
-        nombre: string
-        apellidos: string
-        email: string
-        asignaturas: string
-      }
-    | undefined
+  | {
+    id: number
+    nombre: string
+    apellidos: string
+    email: string
+    asignaturas: string
+  }
+  | undefined
   isEditing: boolean
 }>()
 
@@ -295,7 +295,8 @@ const enviarDatosFormulario = () => {
   border-radius: 10px;
   border: 1px solid white;
   display: flex;
-  flex-direction: column; /* Añadido para disponer los elementos verticalmente */
+  flex-direction: column;
+  /* Añadido para disponer los elementos verticalmente */
 
   & label {
     display: block;
@@ -325,6 +326,7 @@ const enviarDatosFormulario = () => {
     margin-top: 10px;
   }
 }
+
 .vistaPrevia {
   display: flex;
   flex-direction: column;
