@@ -34,13 +34,12 @@
     "eslint": "^8.49.0",
     "eslint-plugin-vue": "^9.17.0",
     "npm-run-all": "^4.1.5",
-    "postcss": "^8.4.34",
+    "postcss": "^8.4.35",
     "prettier": "^3.0.3",
     "sass": "^1.70.0",
     "tailwindcss": "^3.4.1",
     "typescript": "~5.1.6",
     "vite": "^4.4.9",
-    "vue-tsc": "^1.8.11",
-    "vuesax": "^3.12.2"
+    "vue-tsc": "^1.8.11"
   }
 }

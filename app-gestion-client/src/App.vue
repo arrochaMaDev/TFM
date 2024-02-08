@@ -7,6 +7,9 @@ import { useLoadingStore } from './stores/loading'
 import { useAdminStore } from './stores/isAdmin'
 import type { VueCookies } from 'vue-cookies'
 import appHeader from './components/layout/appHeader.vue'
+import appSidebar from './components/layout/appSidebar.vue'
+import appFooter from './components/layout/appFooter.vue'
+
 
 
 
@@ -68,8 +71,12 @@ const deleteCookie = (user: string) => {
 </script>
 
 <template>
-  <appHeader></appHeader>
-  <div class="text-green-700 text-xl">Hello, from TailwindCSS!</div>
+  <div id="app">
+    <appSidebar />
+    <div class="main-content">
+      <!-- Contenido principal de tu aplicación -->
+    </div>
+  </div>
 
   <nav>
     <RouterLink to="/about">About</RouterLink>
@@ -100,7 +107,13 @@ const deleteCookie = (user: string) => {
 </template>
 
 <style scoped>
-.nav-link span {
+.main-content {
+  margin-left: 200px;
+  padding: 1px 16px;
+  height: 1000px;
+}
+
+/* .nav-link span {
   color: black;
 }
 
@@ -174,5 +187,5 @@ hr {
   border: 1px solid #ccc;
   margin: 10px 0;
   width: 50%;
-}
+} */
 </style>

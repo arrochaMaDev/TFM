@@ -10,7 +10,7 @@ import Avatar from 'primevue/avatar';
 <template>
   <Toolbar style="margin: 2rem 2rem 2rem 2rem; padding: 1rem 1rem 1rem 1.5rem">
     <template #start>
-      <div class="flex align-items-center gap-2">
+      <div class="flex align-items-center gap-12 w-full bg-slate-600">
         <Button label="Files"></Button>
         <Button label="Edit" text plain></Button>
         <Button label="View" text plain></Button>
