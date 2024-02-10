@@ -71,13 +71,13 @@ const deleteCookie = (user: string) => {
 </script>
 
 <template>
-  <appSidebar />
+  <!-- <appSidebar />
   <div id="app">
 
     <div class="main-content">
-      <!-- Contenido principal de tu aplicación -->
-    </div>
-  </div>
+      Contenido principal de tu aplicación 
+    </div> 
+  </div> -->
 
   <nav>
     <RouterLink to="/about">About</RouterLink>
@@ -108,12 +108,6 @@ const deleteCookie = (user: string) => {
 </template>
 
 <style scoped>
-.main-content {
-  margin-left: 200px;
-  padding: 1px 16px;
-  height: 1000px;
-}
-
 /* .nav-link span {
   color: black;
 }

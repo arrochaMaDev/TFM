@@ -1,5 +1,5 @@
-// import './assets/main.css'
-import './style.css'
+// import './assets/main.css' // vue por defecto
+// import './style.css' // tailwind
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
