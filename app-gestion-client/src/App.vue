@@ -71,8 +71,9 @@ const deleteCookie = (user: string) => {
 </script>
 
 <template>
+  <appSidebar />
   <div id="app">
-    <appSidebar />
+
     <div class="main-content">
       <!-- Contenido principal de tu aplicación -->
     </div>

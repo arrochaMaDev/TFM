@@ -1,36 +1,85 @@
 <script setup lang="ts">
-import Dropdown from 'primevue/dropdown';
 
-
+import Menu from 'primevue/menu';
+import Button from 'primevue/button';
 
 
 import { ref } from 'vue';
-
-const isOpen = ref(false);
+const isCollapsed = ref(false);
 
 const toggleSidebar = () => {
-  isOpen.value = !isOpen.value;
+  isCollapsed.value = !isCollapsed.value;
 };
+
+
+const items = ref([
+  {
+    label: 'Documents',
+    items: [
+      {
+        label: 'New',
+        icon: 'pi pi-plus'
+      },
+      {
+        label: 'Search',
+        icon: 'pi pi-search'
+      }
+    ]
+  },
+  {
+    label: 'Profile',
+    items: [
+      {
+        label: 'Settings',
+        icon: 'pi pi-cog'
+      },
+      {
+        label: 'Logout',
+        icon: 'pi pi-sign-out'
+      }
+    ]
+  }
+]);
 </script>
 
-
 <template>
-  <div class="sidebar">
-    <div id="buttonToggle">
-      <button class="border-none bg-transparent" @click="toogleSidebar()"> <i class="pi pi-bars" style="font-size: 1.5rem; color: black;"></i>
-      </button>
+  <div class="relative">
 
+    <!-- Menú -->
+    <div class="bg-gray-800 h-screen fixed top-0 left-0 pt-20">
+
+      <Menu :model="items" class="border-r-black" id="menu"></Menu>
     </div>
-    <ul></ul>
-    <RouterLink to="/alta-usuario">Nuevo Usuario</RouterLink>
-    <a href="#contact">Contact</a>
-    <a href="#about">About</a>
   </div>
 </template>
 
 
 
 <style scoped>
+#menu {
+  border-radius: 0;
+  background-color: red;
+}
+</style>
+
+<!-- <style scoped>
+/* Estilos personalizados para el botón de hamburguesa */
+
+
+/* Estilos para el menú */
+.menu-item {
+  color: white;
+  padding: 10px 20px;
+}
+
+.menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.p-menu {
+  width: 200px;
+}
+
 .sidebar {
   margin: 0;
   padding: 0;
@@ -39,14 +88,40 @@ const toggleSidebar = () => {
   position: fixed;
   height: 100%;
   overflow: auto;
+  transition: width 0.3s ease;
+  /* Transición suave para el cambio de ancho */
 }
+
+.collapsed {
+  width: 50px;
+  /* Cuando está colapsado, establecemos el ancho a 0 */
+}
+
+.sidebar-text {
+  display: inline-block;
+  transition: with 0.3s ease;
+}
+
+.collapsed .sidebar-text {
+  /* width: 0; */
+  opacity: 0;
+}
+
+/* .sidebar-text {
+  display: inline-block;
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width 0.3s ease;
+} */
+
 
 /* Sidebar links */
 .sidebar a {
   display: block;
   color: black;
-  padding: 16px;
-  text-decoration: none;
+  /* padding: 5px;
+  text-decoration: none; */
 }
 
 /* Active/current link */
@@ -60,6 +135,8 @@ const toggleSidebar = () => {
   background-color: #555;
   color: white;
 }
+
+
 
 /* Page content. The value of the margin-left property should match the value of the sidebar's width property */
 div.content {
@@ -92,4 +169,4 @@ div.content {
     float: none;
   }
 }
-</style>
+</style> -->

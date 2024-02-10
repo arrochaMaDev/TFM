@@ -13,9 +13,8 @@ import router from './router'
 import PrimeVue from 'primevue/config'
 import 'primeicons/primeicons.css'
 
+// import '/node_modules/primeflex/primeflex.css'
 import 'primevue/resources/themes/aura-light-green/theme.css'
-
-import '/node_modules/primeflex/primeflex.css'
 
 // import 'primeflex/themes/primeone-dark.scss'
 // import 'primeflex/themes/primeone-light.scss'
