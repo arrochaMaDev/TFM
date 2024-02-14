@@ -16,10 +16,18 @@ import ListadoMatriculas from '@/components/ListadoMatriculas.vue'
 import ListadoUsuarios from '@/components/ListadoUsuarios.vue'
 import AltaAsignaturaProfesorVue from '@/components/AltaAsignaturaProfesor.vue'
 import ListadoAsignaturasProfesoresVue from '@/components/ListadoAsignaturasProfesores.vue'
+// import App from '@/App/App.vue'
+// import AppLayoutVue from '@/App/AppLayout.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    // {
+    //   path: '/',
+    //   name: '/',
+    //   // component: () => import('@/App.vue')
+    //   component: AppLayoutVue
+    // },
     {
       path: '/home',
       name: 'home',

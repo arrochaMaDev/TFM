@@ -1,4 +1,12 @@
 <script setup lang="ts">
+import InputText from 'primevue/inputtext';
+import InputNumber from 'primevue/inputnumber';
+import InlineMessage from 'primevue/inlinemessage';
+import Button from 'primevue/button';
+import Dropdown from 'primevue/dropdown'
+import Textarea from 'primevue/textarea'
+
+
 import { ref, type Ref } from 'vue'
 
 // Referencias del formulario
@@ -10,6 +18,9 @@ const studentRef = {
   telefono: ref<number | undefined>(undefined),
   email: ref<string | undefined>(undefined)
 }
+
+//
+const formSubmitted = ref(false);
 
 // Resetear los datos del formulario y poner cada ref a vacío
 const borrarDatosForm = () => {
@@ -27,6 +38,8 @@ const patronEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 // FETCH PARA ENVIAR DATOS DEL ALUMNO A LA BD:
 const crearAlumno = async () => {
+  formSubmitted.value = true;
+
   if (!studentRef.telefono.value || !patronTel.test(studentRef.telefono.value.toString())) {
     alert('El número de teléfono debe tener 9 dígitos numéricos.')
     return
@@ -78,17 +91,17 @@ const crearAlumno = async () => {
 const emit = defineEmits(['cerrarPopUp', 'obtenerAlumnos', 'resetearAlumno'])
 const props = defineProps<{
   alumnoParaEditar:
-    | {
-        id: number
-        // usuario_id: string
-        nombre: string
-        apellidos: string
-        dni: string
-        telefono: number
-        direccion: string
-        email: string
-      }
-    | undefined
+  | {
+    id: number
+    // usuario_id: string
+    nombre: string
+    apellidos: string
+    dni: string
+    telefono: number
+    direccion: string
+    email: string
+  }
+  | undefined
   isEditing: boolean
 }>()
 
@@ -166,16 +179,130 @@ const enviarDatosFormulario = () => {
     crearAlumno() // Función para crear un nuevo alumno
   }
 }
+
+// const ccaas: Ref<any> = ref([])
+// const provincias: Ref<any> = ref([])
+
+// const cargarDireccion = async () => {
+//   try {
+//     const ccaasData = await DireccionService.getCCAA();
+//     const provinciasData = await DireccionService.getProvincia();
+
+//     ccaas = ccaasData;
+//     provincias = provinciasData;
+//   } catch (error) {
+//     console.error('Error al obtener los datos del JSON:', error);
+//   }
+// }
+
+// onMounted(async () => {
+//   try {
+//     const ccaasData = await fetch('/src/utils/ccaas.json');
+//     const provinciasData = await fetch('/src/utils/provincias.json');
+//     if (!ccaasData.ok || !provinciasData.ok) {
+//       throw new Error('No se pudo obtener el archivo JSON');
+//     }
+
+//     ccaas.value = await ccaasData.json();
+//     provincias.value = await provinciasData.json();
+//     console.log(ccaas.value)
+//     console.log(provincias.value)
+//   } catch (error) {
+//     console.error('Error al obtener los datos del JSON:', error);
+//   }
+// });
 </script>
 
 <template>
+  <div class="card col-8" :class="{ altaAlumnosPopup: popUpStyle }">
+    <div class="" :class="{ 'altaAlumnosPopup-content': popUpStyle }">
+      <h1 v-if="popUpStyle" class="green">Editar alumno</h1>
+      <!-- <h1 v-else class="green">Alta alumno</h1> -->
+      <form @submit.prevent="enviarDatosFormulario()">
+        <div v-if="!popUpStyle">
+          <!--MODO CREAR -->
+          <div class="col-12">
+            <h2>Nuevo Alumno</h2>
+            <div class="p-fluid formgrid grid">
+              <div class="field col-12 md:col-6 sm:col-12">
+                <label class="">Nombre</label>
+                <InputText class="" type="text" id="nombreInput" v-model="studentRef.nombre.value" />
+                <InlineMessage v-if="!studentRef.nombre.value && formSubmitted" class="bg-transparent">El nombre es obligatorio</InlineMessage>
+              </div>
+              <div class="field col-12 md:col-6 sm:col-12">
+                <label class="green">Apellidos</label>
+                <InputText class="" type="text" id="apellidosInput" v-model="studentRef.apellidos.value" />
+                <InlineMessage v-if="!studentRef.apellidos.value && formSubmitted" class="bg-transparent">El apellido es obligatorio</InlineMessage>
+              </div>
+              <div class="field col-12 md:col-3 sm:col-12">
+                <label class="green">Dni</label>
+                <InputText class="" type="text" id="dniInput" v-model="studentRef.dni.value" />
+                <InlineMessage v-if="!studentRef.dni.value && formSubmitted" class="bg-transparent">El DNI es obligatorio</InlineMessage>
+              </div>
+              <div class="field col-12 md:col-3 sm:col-12">
+                <label class="green">Teléfono</label>
+                <InputNumber class="" type="tel" pattern="^\d{9}$" inputId="withoutgrouping" :useGrouping="false" id="telefonoInput" required v-model="studentRef.telefono.value" />
+                <InlineMessage v-if="!studentRef.telefono.value && formSubmitted" class="bg-transparent">El teléfono es obligatorio</InlineMessage>
+              </div>
+              <div class="field col-12 md:col-6 sm:col-12">
+                <label class="green">Email</label>
+                <InputText class="" type="email" id="emailInput" v-model="studentRef.email.value" />
+                <InlineMessage v-if="!studentRef.email.value && formSubmitted" class="bg-transparent">El email es obligatorio</InlineMessage>
+              </div>
+
+              <div class="field col-12 md:col-12 sm:col-12">
+                <label class="green">Dirección</label>
+                <InputText class="" type="text" id="direcciónInput" v-model="studentRef.direccion.value" />
+                <InlineMessage v-if="!studentRef.direccion.value && formSubmitted" class="bg-transparent">La dirección es obligatoria</InlineMessage>
+              </div>
+
+              <!-- <Button type="reset" class="" @click="borrarDatosForm()">Borrar datos</Button> -->
+              <!-- <button type="reset" class="btn btn-outline-primary" v-if="popUpStyle" @click="resetearValoresIniciales">
+                Resetear
+              </button> -->
+              <Button type="submit">{{ popUpStyle ? 'Actualizar' : 'Enviar' }}</Button>
+              <Button type="button" v-if="popUpStyle" @click="emit('cerrarPopUp')">Cancelar</Button>
+            </div>
+          </div>
+        </div>
+      </form>
+
+
+      <!--MODO ACTUALIZAR 
+
+        <div v-if="popUpStyle">
+          <label class="green">Nombre</label>
+          <input type="text" id="nombreInput" required v-model="alumnoEditado.nombre" />
+          <label class="green">Apellidos</label>
+          <input type="text" id="apellidosInput" required v-model="alumnoEditado.apellidos" />
+          <label class="green">Dni</label>
+          <input type="text" id="dniInput" required v-model="alumnoEditado.dni" />
+          <label class="green">Teléfono</label>
+          <input type="tel" pattern="^\d{9}$" id="telefonoInput" required v-model="alumnoEditado.telefono" />
+          <label class="green">Dirección</label>
+          <input type="text" id="direcciónInput" required v-model="alumnoEditado.direccion" />
+          <label class="green">Email</label>
+          <input required type="email" id="emailInput" v-model="alumnoEditado.email" />
+        </div>-->
+      <!-- <button type="reset" @click="borrarDatosForm()">Borrar datos</button>
+      <button type="reset" class="btn btn-outline-primary" v-if="popUpStyle" @click="resetearValoresIniciales">
+        Resetear
+      </button>
+      <button type="submit">{{ popUpStyle ? 'Actualizar' : 'Enviar' }}</button>
+      <button type="button" v-if="popUpStyle" @click="emit('cerrarPopUp')">Cancelar</button>
+      </form> -->
+    </div>
+  </div>
+</template>
+<!-- TEMPLATE ORIGINAL -->
+<!-- <template>
   <div class="container" :class="{ altaAlumnosPopup: popUpStyle }">
     <div class="form" :class="{ 'altaAlumnosPopup-content': popUpStyle }">
       <h1 v-if="popUpStyle" class="green">Editar alumno</h1>
       <h1 v-else class="green">Alta alumno</h1>
       <form @submit.prevent="enviarDatosFormulario()">
         <div v-if="!popUpStyle">
-          <!--MODO CREAR -->
+          MODO CREAR 
           <label class="green">Nombre</label>
           <input type="text" id="nombreInput" required v-model="studentRef.nombre.value" />
           <label class="green">Apellidos</label>
@@ -196,7 +323,7 @@ const enviarDatosFormulario = () => {
           <input type="email" id="emailInput" required v-model="studentRef.email.value" />
         </div>
         <div v-if="popUpStyle">
-          <!--MODO ACTUALIZAR -->
+          MODO ACTUALIZAR 
           <label class="green">Nombre</label>
           <input type="text" id="nombreInput" required v-model="alumnoEditado.nombre" />
           <label class="green">Apellidos</label>
@@ -230,9 +357,12 @@ const enviarDatosFormulario = () => {
       </form>
     </div>
   </div>
-</template>
+</template> -->
 
-<style>
+<style scoped>
+/* @import 'primeflex/primeflex.scss'; */
+
+
 /* .form {
   display: flex;
   flex-wrap: wrap;

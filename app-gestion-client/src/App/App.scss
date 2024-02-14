@@ -1,0 +1,24 @@
+
+.p-toast.p-toast-top-right {
+    z-index: 1000;
+    top: 7rem;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+div.swal2-container {
+    z-index: 2000;
+}
+
+.p-inputtext {
+    font-size: 1em;
+}
+.field > label  {
+    margin-bottom: 0.1em;
+}
+
+.p-dialog .p-dialog-content {
+    padding-bottom: 0;
+}

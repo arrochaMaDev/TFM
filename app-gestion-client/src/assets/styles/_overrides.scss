@@ -1,0 +1,35 @@
+// Suggested location to add your overrides so that migration would be easy by just updating the SASS folder in the future
+
+.layout-main {
+  padding-left: 10px;
+}
+
+/*when sidebar is hidden*/
+div.layout-static-sidebar-inactive {
+  .layout-main {
+    padding-left: 5px;
+  }
+}
+
+/*when mobile*/
+@media (max-width: 991px) {
+  .layout-main {
+    padding-left: 5px;
+  }
+}
+/*make sure menu on a left using same width icons since we mix fontawsome and pi icons*/
+div.layout-sidebar i {
+  width: 15px;
+}
+
+.p-fieldset.p-fieldset-toggleable .p-fieldset-legend a {
+  padding: 5px;
+}
+
+.p-fieldset .p-fieldset-content {
+  padding: 0px;
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  padding: 0px;
+}
