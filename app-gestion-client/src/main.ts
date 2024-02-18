@@ -1,6 +1,5 @@
 // import './assets/main.css' // vue por defecto
-// import './style.css' // tailwind
-
+// c
 import { G } from './G'
 import('@fortawesome/fontawesome-free/css/all.css')
 

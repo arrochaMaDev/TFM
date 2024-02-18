@@ -5,19 +5,6 @@ import Popup from './Popup.vue'
 import AltaAlumno from './AltaAlumno.vue'
 import { useLoadingStore } from '@/stores/loading'
 import { useEditingStore } from '@/stores/editar'
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
-import { FilterMatchMode } from 'primevue/api';
-import ConfirmDialog from 'primevue/confirmdialog';
-import { useConfirm } from "primevue/useconfirm";
-import { useToast } from "primevue/usetoast";
-import Toast from 'primevue/toast';
-
-
-const confirm = useConfirm();
-const toast = useToast();
 
 const router = useRouter() // router para ir al alumno cuando se clique en él
 const loadingStore = useLoadingStore() // store del Spinner
@@ -49,7 +36,7 @@ const getStudentsData = async () => {
       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
       loadingStore.loadingTrue()
-      // await new Promise((resolve) => setTimeout(resolve, 2000))
+      await new Promise((resolve) => setTimeout(resolve, 2000))
 
       const data = (await response.json()) as {
         id: number
@@ -119,24 +106,6 @@ onMounted(() => {
 let popupVisible: Ref<boolean> = ref(false) // ref para ocultar o mostrar el popup
 let idAlumnoSeleccionado: Ref<number | null> = ref(null) // ref del id del alumno seleccionado para borrar
 
-const confirmDelete = () => {
-  confirm.require({
-    message: '¿Seguro que quiere borrar este alumno?',
-    header: 'Borrar Alumno',
-    icon: 'pi pi-info-circle',
-    rejectLabel: 'Cancelar',
-    acceptLabel: 'Borrar',
-    rejectClass: 'p-button-secondary p-button-outlined',
-    acceptClass: 'p-button-danger',
-    accept: () => {
-      toast.add({ severity: 'success', summary: 'Borrado', detail: 'Alumno borrado', life: 3000 });
-    },
-    reject: () => {
-      toast.add({ severity: 'warn', summary: 'Rechazado', detail: 'Se ha cancelado la operación', life: 3000 });
-    }
-  });
-};
-
 const borrarAlumno = async () => {
   // funcion con async/await y try/catch en vez de fetch con .then y .catch
   try {
@@ -185,15 +154,15 @@ console.log(popUpState.value)
 
 let alumnoEditar: Ref<
   | {
-    id: number
-    usuario_id: string
-    nombre: string
-    apellidos: string
-    dni: string
-    direccion: string
-    telefono: number
-    email: string
-  }
+      id: number
+      usuario_id: string
+      nombre: string
+      apellidos: string
+      dni: string
+      direccion: string
+      telefono: number
+      email: string
+    }
   | undefined
 > = ref(undefined)
 
@@ -242,102 +211,79 @@ const goToStudent = (id: number) => {
     path: `/alumno/${id}`
   })
 }
-
-// DATOS TABLA
-const columns = [
-  { field: 'id', header: 'id' },
-  { field: 'nombre', header: 'Nombre' },
-  { field: 'apellidos', header: 'Apellidos' },
-  { field: 'dni', header: 'DNI' },
-  { field: 'direccion', header: 'Dirección' },
-  { field: 'telefono', header: 'Teléfono' },
-  { field: 'email', header: 'Email' }
-];
-
-// Filtrar datos
-const filters = ref() // variable filtro
-
-const initFilters = () => { // componente filtro en global para que busque cualquier valor
-  filters.value =
-  {
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-  }
-}
-initFilters()
-
-const clearFilter = () => { // para borrar los filtros, reinicio la función y el value = null
-  initFilters()
-}
 </script>
 <template>
-  <div class="col-8">
-    <div class="flex card w-max">
-      <DataTable v-model:filters="filters" class="" :value="studentsRefFromServer" dataKey="id" stripedRows sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" tableStyle="width: 80rem" :pt="{
-        paginator: {
-          paginatorWrapper: { class: 'col-12 flex justify-content-center' },
-          firstPageButton: { class: 'w-auto' },
-          previousPageButton: { class: 'w-auto' },
-          pageButton: { class: 'w-auto' },
-          nextPageButton: { class: 'w-auto' },
-          lastPageButton: { class: 'w-auto' },
-        },
-        table: {
-          class: 'mt-0',
-          style: { 'border': 'none' }
-        },
-        column: {
-          class: 'bg-red-100'
-        }
-
-      }">
-
-
-        <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center" style="background-color:  #f8f9fa">
-          <h5 class="m-0 text-3xl text-800 font-bold">Listado Alumnos</h5>
-          <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
-            <i class="pi pi-search"></i>
-            <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Buscar..." />
-            <Button rounded icon="pi pi-filter-slash" label="" outlined @click="clearFilter()"></Button>
-          </span>
-        </div>
-
-        <Column field="nombre" header="Nombre" sortable headerStyle="width:5%; min-width:8rem" bodyClass="pl-1 "></Column>
-        <Column field="apellidos" header="Apellidos" sortable headerStyle="width:5%; min-width:8rem" bodyClass="pl-1"></Column>
-        <Column field="dni" header="DNI" headerStyle="width:5%; min-width:8rem; height:1rem" bodyClass="pl-1"></Column>
-        <Column class="" field="direccion" header="Dirección" headerStyle="width:70%; min-width:8rem" bodyClass="pl-1"></Column>
-        <Column field="telefono" header="Teléfono" headerStyle="width:5%; min-width:8rem" bodyClass="pl-1"></Column>
-        <Column field="email" header="Email" headerStyle="width:5%; min-width:8rem" bodyClass="pl-1"></Column>
-        <!-- <Column v-for="col of columns" :key="col.field" class="" :field="col.field" :header="col.header" :pt="{
-          root: { class: '' },
-          headerContent: { class: 'text-center m-2 p-2 h-2rem text-xl font-semibold' }
-        }">
-        </Column> -->
-        <!-- :pt="{ headerContent: { style: { 'background-color': 'red' } } }" -->
-        <Column headerStyle="width:5%; min-width:8rem" bodyClass="flex p-0">
-          <template #body="slotProps">
-            <Toast :pt="{
-              container: {
-                class: 'align-items-center'
-              },
-              closeButton: {
-                class: 'border-1'
-              }
-            }"></Toast>
-            <Button icon="pi pi-pencil" outlined rounded severity="success" @click="editarAlumno(slotProps.data)"></Button>
-            <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDelete()"></Button>
-          </template>
-        </Column>
-      </DataTable>
-      <ConfirmDialog></ConfirmDialog>
+  <div class="container">
+    <div id="ordenarPor">
+      <label for="ordenarPor">Ordenar por:</label>
+      <select v-model="ordenarPor" @change="ordenarArray">
+        <option value="nombre">Nombre</option>
+        <option value="apellidos">Apellidos</option>
+        <option value="dni">DNI</option>
+        <option value="email">Email</option>
+      </select>
     </div>
+    <div>
+      <table id="tabla">
+        <th colspan="6"><h3>LISTADO DE ALUMNOS</h3></th>
+        <tr>
+          <th>
+            <h3>Nombre</h3>
+          </th>
+          <th>
+            <h3>Apellidos</h3>
+          </th>
+          <th>
+            <h3>DNI</h3>
+          </th>
+          <th>
+            <h3>Teléfono</h3>
+          </th>
+          <th>
+            <h3>Dirección</h3>
+          </th>
+          <th>
+            <h3>Email</h3>
+          </th>
+        </tr>
+        <tr id="alumno" v-for="student in studentsRefFromServer" :key="student.id">
+          <td>{{ student.nombre }}</td>
+          <td>{{ student.apellidos }}</td>
+          <td>{{ student.dni }}</td>
+          <td>{{ student.telefono }}</td>
+          <td>{{ student.direccion }}</td>
+          <td>{{ student.email }}</td>
+          <td>
+            <button type="button" @click="goToStudent(student.id)">Ver</button>
+          </td>
+          <td>
+            <button type="button" @click="editarAlumno(student), mostrarAltaAlumno()">
+              Editar
+            </button>
+          </td>
+          <td><button type="button" @click="mostrarPopup(student.id)">Borrar</button></td>
+          <!-- le paso el id del alumno que quiero borrar -->
+        </tr>
+      </table>
+    </div>
+    <Popup v-if="popupVisible" @confirmar="borrarAlumno" @cancelar="cancelarBorrar"></Popup>
+    <!-- recibo un emit de confirmar que ejecuta la funcion borrarAlumno y otro emit de cancelar que ejecuta cancelarBorrar -->
+    <AltaAlumno
+      v-if="popUpState"
+      :isEditing="popUpState"
+      @cerrarPopUp="resetearPopUpState"
+      @obtenerAlumnos="getStudentsData()"
+      @resetearAlumno="editarAlumno(alumnoEditar)"
+      :alumnoParaEditar="alumnoEditar"
+    >
+      <!-- para resetear valores, recibo un emit y vuelvo a ejecutar la funcion editarAlumnos con los parámetros recibidos del componente hijo-->
+    </AltaAlumno>
   </div>
 </template>
-
 <style scoped>
-/* #ordenarPor {
+#ordenarPor {
   margin: 0px;
 }
-
 table {
   margin-top: 0px;
   width: max-content;
@@ -346,7 +292,6 @@ table {
   & th {
     background-color: rgb(79, 90, 86);
   }
-
   & td {
     width: fit-content;
     text-align: left;
@@ -374,5 +319,5 @@ button {
   border-radius: 5px;
   margin: 1px;
   cursor: pointer;
-} */
+}
 </style>
