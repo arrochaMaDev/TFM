@@ -2,15 +2,15 @@ import { defineStore } from 'pinia'
 
 export const useEditingStore = defineStore('editar', {
   state: () => ({
-    isEditing: false
+    state: false
   }),
   actions: {
     editarTrue() {
-      this.isEditing = true
+      this.state = true
       return true
     },
     editarFalse() {
-      this.isEditing = false
+      this.state = false
       return false
     }
   }

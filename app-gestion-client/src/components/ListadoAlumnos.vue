@@ -9,11 +9,14 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
+import InputNumber from 'primevue/inputnumber'
 import { FilterMatchMode } from 'primevue/api';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
+import Dialog from 'primevue/dialog';
+
 
 
 const confirm = useConfirm();
@@ -31,7 +34,7 @@ let studentsRefFromServer: Ref<
     apellidos: string
     dni: string
     direccion: string
-    telefono: string
+    telefono: number
     email: string
   }[]
 > = ref([])
@@ -58,7 +61,7 @@ const getStudentsData = async () => {
         apellidos: string
         dni: string
         direccion: string
-        telefono: string
+        telefono: number
         email: string
       }[]
       studentsRefFromServer.value = data
@@ -67,7 +70,7 @@ const getStudentsData = async () => {
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
-    alert('Ha ocurrido un error')
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
   } finally {
     loadingStore.loadingFalse()
   }
@@ -116,10 +119,10 @@ onMounted(() => {
 })
 
 // LÓGICA BORRAR ALUMNO
-let popupVisible: Ref<boolean> = ref(false) // ref para ocultar o mostrar el popup
-let idAlumnoSeleccionado: Ref<number | null> = ref(null) // ref del id del alumno seleccionado para borrar
+// let popupVisible: Ref<boolean> = ref(false) // ref para ocultar o mostrar el popup
+// let idAlumnoSeleccionado: Ref<number | null> = ref(null) // ref del id del alumno seleccionado para borrar
 
-const confirmDelete = () => {
+const confirmDelete = (alumno: typeof studentsRefFromServer.value[0]) => { // al ser un array, le indico el valor de la casilla 0
   confirm.require({
     message: '¿Seguro que quiere borrar este alumno?',
     header: 'Borrar Alumno',
@@ -129,7 +132,7 @@ const confirmDelete = () => {
     rejectClass: 'p-button-secondary p-button-outlined',
     acceptClass: 'p-button-danger',
     accept: () => {
-      toast.add({ severity: 'success', summary: 'Borrado', detail: 'Alumno borrado', life: 3000 });
+      borrarAlumno(alumno)
     },
     reject: () => {
       toast.add({ severity: 'warn', summary: 'Rechazado', detail: 'Se ha cancelado la operación', life: 3000 });
@@ -137,10 +140,11 @@ const confirmDelete = () => {
   });
 };
 
-const borrarAlumno = async () => {
-  // funcion con async/await y try/catch en vez de fetch con .then y .catch
+const borrarAlumno = async (alumno: typeof studentsRefFromServer.value[0]) => {
+  console.table(alumno)
+  const idAlumno = alumno.id
   try {
-    const response = await fetch(`http://localhost:3000/student/${idAlumnoSeleccionado.value}`, {
+    const response = await fetch(`http://localhost:3000/student/${idAlumno}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json'
@@ -148,42 +152,31 @@ const borrarAlumno = async () => {
       credentials: 'include'
     })
     if (response.status === 204) {
-      loadingStore.loadingTrue()
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      alert('Alumno borrado con éxito')
-      popupVisible.value = false
+      toast.add({ severity: 'success', summary: 'Borrado', detail: 'Alumno borrado', life: 3000 });
+      // popupVisible.value = false
       getStudentsData()
     } else {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
-    alert('Ha ocurrido un error')
-    popupVisible.value = false
-  } finally {
-    loadingStore.loadingFalse()
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
   }
-}
-
-const cancelarBorrar = () => {
-  // si se da click en NO se cancela el borrado
-  popupVisible.value = false
-  idAlumnoSeleccionado.value = null
-}
-
-const mostrarPopup = (id: number) => {
-  // si se da click en SI, se muestra el popup y recibe el id del alumno a borrar
-  idAlumnoSeleccionado.value = id
-  popupVisible.value = true
+  // finally {
+  //   loadingStore.loadingFalse()
+  // }
 }
 
 // LÓGICA EDITAR ALUMNO
 const editingStore = useEditingStore() // store del componente editar Alumno
 
-let popUpState: Ref<boolean> = ref(editingStore.editarFalse()) // variable del estado del popUp
-console.log(popUpState.value)
+const visibleDialog: Ref<boolean> = ref(false);
 
-let alumnoEditar: Ref<
+
+// let popUpState: Ref<boolean> = ref(editingStore.editarFalse()) // variable del estado del popUp
+// console.log(popUpState.value)
+
+const alumnoEditar: Ref<
   | {
     id: number
     usuario_id: string
@@ -193,48 +186,116 @@ let alumnoEditar: Ref<
     direccion: string
     telefono: number
     email: string
+  }> = ref({
+    id: 0,
+    usuario_id: '',
+    nombre: '',
+    apellidos: '',
+    dni: '',
+    direccion: '',
+    telefono: 0,
+    email: ''
+  }); // lo inicializo para evitar problemas con null o undefined en v-model
+
+const mostrarDialog = (student: typeof studentsRefFromServer.value[0]) => {
+  visibleDialog.value = true
+  alumnoEditar.value = { ...student } // spread crea un nuevo objeto y copia superficialmente el objeto
+  console.table(alumnoEditar.value)
+}
+
+// validar datos del dialog
+const patronTel = /^\d{9}$/
+const patronEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const editarAlumno = async () => {
+  if (alumnoEditar.value.telefono && !patronTel.test(alumnoEditar.value.telefono.toString())) {
+    alert('El número de teléfono debe tener 9 dígitos numéricos.')
+    return
   }
-  | undefined
-> = ref(undefined)
-
-const editarAlumno = (student: any) => {
-  // popUpState.value = true
-  editingStore.editarTrue()
-  alumnoEditar.value = student
-  // fetch para obtener los datos del alumno
-  fetch(`http://localhost:3000/student/${alumnoEditar.value?.id}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include'
-  }).then(async (response) => {
-    const data = (await response.json()) as {
-      id: number
-      usuario_id: string
-      nombre: string
-      apellidos: string
-      dni: string
-      direccion: string
-      telefono: number
-      email: string
+  if (alumnoEditar.value.email && !patronEmail.test(alumnoEditar.value.email)) {
+    alert('Por favor, introduce un email válido.')
+  } else {
+    try {
+      const response = await fetch(`http://localhost:3000/student/${alumnoEditar.value?.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          nombre: alumnoEditar.value?.nombre,
+          apellidos: alumnoEditar.value?.apellidos,
+          dni: alumnoEditar.value?.dni,
+          direccion: alumnoEditar.value?.direccion,
+          telefono: Number(alumnoEditar.value?.telefono),
+          email: alumnoEditar.value?.email
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      if (!response.ok) {
+        throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+      } else {
+        alert('Alumno Editado')
+        //   // Imprimo los datos que he introducido
+        //   const alumnoActualizado = [
+        //     alumnoEditado.value?.nombre,
+        //     alumnoEditado.value?.apellidos,
+        //     alumnoEditado.value?.dni,
+        //     alumnoEditado.value?.direccion,
+        //     alumnoEditado.value?.telefono,
+        //     alumnoEditado.value?.email
+        //   ]
+        //   console.table(alumnoActualizado)
+        //   popUpStyle.value = false
+      }
+    } catch (error) {
+      console.error('Error en la solicitud:', error)
+      alert('Ha ocurrido un error')
     }
-    alumnoEditar.value = data
-    console.table(data)
-  })
+    // finally {
+    //   emit('cerrarPopUp')
+    //   emit('obtenerAlumnos')
+    // }
+  }
 }
 
-const mostrarAltaAlumno = () => {
-  // popUpState.value = true
-  popUpState.value = editingStore.editarTrue()
-  console.log(popUpState.value)
-}
+// const editarAlumno = () => {
+//   // popUpState.value = true
+//   // editingStore.editarTrue()
+//   // alumnoEditar.value = student
+//   // fetch para obtener los datos del alumno
+//   fetch(`http://localhost:3000/student/${alumnoEditar.value?.id}`, {
+//     method: 'GET',
+//     headers: {
+//       'Content-Type': 'application/json'
+//     },
+//     credentials: 'include'
+//   }).then(async (response) => {
+//     const data = (await response.json()) as {
+//       id: number
+//       usuario_id: string
+//       nombre: string
+//       apellidos: string
+//       dni: string
+//       direccion: string
+//       telefono: number
+//       email: string
+//     }
+//     alumnoEditar.value = data
+//     console.table(data)
+//   })
+// }
 
-const resetearPopUpState = () => {
-  // popUpState.value = false
-  popUpState.value = editingStore.editarFalse()
-  console.log(popUpState.value)
-}
+// const mostrarAltaAlumno = () => {
+//   // popUpState.value = true
+//   popUpState.value = editingStore.editarTrue()
+//   console.log(popUpState.value)
+// }
+
+// const resetearPopUpState = () => {
+//   // popUpState.value = false
+//   popUpState.value = editingStore.editarFalse()
+//   console.log(popUpState.value)
+// }
 
 // Ir a la página idividual del alumno
 const goToStudent = (id: number) => {
@@ -270,8 +331,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
 }
 </script>
 <template>
-  <div class="col-8">
-    <div class="flex card w-max">
+  <div class="col-12">
+    <div class="card w-max">
       <DataTable v-model:filters="filters" class="" :value="studentsRefFromServer" dataKey="id" stripedRows sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" tableStyle="width: 80rem" :pt="{
         paginator: {
           paginatorWrapper: { class: 'col-12 flex justify-content-center' },
@@ -288,11 +349,9 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
         column: {
           class: 'bg-red-100'
         }
-
       }">
 
-
-        <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center" style="background-color:  #f8f9fa">
+        <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem" style="background-color:  #f8f9fa">
           <h5 class="m-0 text-3xl text-800 font-bold">Listado Alumnos</h5>
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
@@ -301,7 +360,11 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           </span>
         </div>
 
-        <Column field="nombre" header="Nombre" sortable headerStyle="width:5%; min-width:8rem" bodyClass="pl-1 "></Column>
+        <Column field="nombre" header="Nombre" sortable headerStyle="width:5%; min-width:8rem" bodyClass="pl-1 ">
+          <template #body="slotProps">
+            {{ slotProps.data.nombre }}
+          </template>
+        </Column>
         <Column field="apellidos" header="Apellidos" sortable headerStyle="width:5%; min-width:8rem" bodyClass="pl-1"></Column>
         <Column field="dni" header="DNI" headerStyle="width:5%; min-width:8rem; height:1rem" bodyClass="pl-1"></Column>
         <Column class="" field="direccion" header="Dirección" headerStyle="width:70%; min-width:8rem" bodyClass="pl-1"></Column>
@@ -315,20 +378,59 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
         <!-- :pt="{ headerContent: { style: { 'background-color': 'red' } } }" -->
         <Column headerStyle="width:5%; min-width:8rem" bodyClass="flex p-0">
           <template #body="slotProps">
-            <Toast :pt="{
-              container: {
-                class: 'align-items-center'
-              },
-              closeButton: {
-                class: 'border-1'
-              }
-            }"></Toast>
-            <Button icon="pi pi-pencil" outlined rounded severity="success" @click="editarAlumno(slotProps.data)"></Button>
-            <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDelete()"></Button>
+            <Button icon="pi pi-pencil" outlined rounded severity="success" @click="mostrarDialog(slotProps.data)"></Button>
+            <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDelete(slotProps.data)"></Button>
           </template>
         </Column>
       </DataTable>
+
+      <Toast :pt="{
+        container: {
+          class: 'align-items-center'
+        },
+        closeButton: {
+          class: 'border-1'
+        }
+      }"></Toast>
       <ConfirmDialog></ConfirmDialog>
+
+      <Dialog v-model:visible="visibleDialog" modal header="Editar Alumno" class="w-4" :pt="{
+        header: { class: 'flex align-items-baseline h-5rem' },
+        title: { class: '' },
+        closeButtonIcon: { class: '' }
+      }">
+
+        <span class="p-text-secondary flex mb-5">Actualizar información</span>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="nombre" class="font-semibold w-6rem">Nombre</label>
+          <InputText id="nombre" class="w-7" v-model="alumnoEditar.nombre" />
+        </div>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="apellidos" class="font-semibold w-6rem">Apellidos</label>
+          <InputText id="apellidos" class="w-7" v-model="alumnoEditar.apellidos" />
+        </div>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="dni" class="font-semibold w-6rem">DNI</label>
+          <InputText id="dni" class="w-3" v-model="alumnoEditar.dni" />
+        </div>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="direccion" class="font-semibold w-6rem">Dirección</label>
+          <InputText id="direccion" class="flex-auto" v-model="alumnoEditar.direccion" />
+        </div>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="telefono" class="font-semibold w-6rem">Teléfono</label>
+          <InputNumber id="telefono" inputId="withoutgrouping" :useGrouping="false" class="w-3" v-model="alumnoEditar.telefono" />
+        </div>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="email" class="font-semibold w-6rem">Email</label>
+          <InputText id="email" class="w-5" v-model="alumnoEditar.email" />
+        </div>
+        <div class="flex justify-content-center mb-3">
+          <Button type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialog = false"></Button>
+          <Button type="button" rounded label="Actualizar" @click="visibleDialog = false"></Button>
+        </div>
+      </Dialog>
+
     </div>
   </div>
 </template>
