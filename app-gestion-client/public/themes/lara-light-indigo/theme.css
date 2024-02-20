@@ -5572,6 +5572,7 @@
 .p-toast .p-toast-message.p-toast-message-info .p-toast-message-icon,
 .p-toast .p-toast-message.p-toast-message-info .p-toast-icon-close {
   color: #696cff;
+  border-color: #696cff;
 }
 .p-toast .p-toast-message.p-toast-message-success {
   background: #e4f8f0;

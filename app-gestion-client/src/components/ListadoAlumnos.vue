@@ -135,7 +135,7 @@ const confirmDelete = (alumno: typeof studentsRefFromServer.value[0]) => { // al
       borrarAlumno(alumno)
     },
     reject: () => {
-      toast.add({ severity: 'warn', summary: 'Rechazado', detail: 'Se ha cancelado la operación', life: 3000 });
+      toast.add({ severity: 'info', summary: 'Cancelado', detail: 'Se ha cancelado la operación', life: 3000 });
     }
   });
 };
@@ -160,7 +160,7 @@ const borrarAlumno = async (alumno: typeof studentsRefFromServer.value[0]) => {
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
-    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
   }
   // finally {
   //   loadingStore.loadingFalse()
@@ -207,14 +207,22 @@ const mostrarDialog = (student: typeof studentsRefFromServer.value[0]) => {
 const patronTel = /^\d{9}$/
 const patronEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+
 const editarAlumno = async () => {
+  let isValid = true
   if (alumnoEditar.value.telefono && !patronTel.test(alumnoEditar.value.telefono.toString())) {
-    alert('El número de teléfono debe tener 9 dígitos numéricos.')
-    return
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'El número de teléfono debe tener 9 dígitos numéricos', life: 3000 });
+    isValid = false
   }
-  if (alumnoEditar.value.email && !patronEmail.test(alumnoEditar.value.email)) {
-    alert('Por favor, introduce un email válido.')
-  } else {
+  if (!patronEmail.test(alumnoEditar.value.email)) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
+    isValid = false
+  }
+  if (!alumnoEditar.value.nombre || !alumnoEditar.value.apellidos || !alumnoEditar.value.dni || !alumnoEditar.value.direccion || !alumnoEditar.value.telefono || !alumnoEditar.value.email) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
+    isValid = false
+  }
+  if (isValid) {
     try {
       const response = await fetch(`http://localhost:3000/student/${alumnoEditar.value?.id}`, {
         method: 'PUT',
@@ -234,27 +242,24 @@ const editarAlumno = async () => {
       if (!response.ok) {
         throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
       } else {
-        alert('Alumno Editado')
-        //   // Imprimo los datos que he introducido
-        //   const alumnoActualizado = [
-        //     alumnoEditado.value?.nombre,
-        //     alumnoEditado.value?.apellidos,
-        //     alumnoEditado.value?.dni,
-        //     alumnoEditado.value?.direccion,
-        //     alumnoEditado.value?.telefono,
-        //     alumnoEditado.value?.email
-        //   ]
-        //   console.table(alumnoActualizado)
-        //   popUpStyle.value = false
+        toast.add({ severity: 'success', summary: 'Editado', detail: 'Alumno editado', life: 3000 });
+        const alumnoActualizado = [
+          alumnoEditar.value?.nombre,
+          alumnoEditar.value?.apellidos,
+          alumnoEditar.value?.dni,
+          alumnoEditar.value?.direccion,
+          alumnoEditar.value?.telefono,
+          alumnoEditar.value?.email
+        ]
+        console.table(alumnoActualizado)
       }
     } catch (error) {
       console.error('Error en la solicitud:', error)
-      alert('Ha ocurrido un error')
+      toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    } finally {
+      visibleDialog.value = false
+      getStudentsData()
     }
-    // finally {
-    //   emit('cerrarPopUp')
-    //   emit('obtenerAlumnos')
-    // }
   }
 }
 
@@ -329,6 +334,7 @@ initFilters()
 const clearFilter = () => { // para borrar los filtros, reinicio la función y el value = null
   initFilters()
 }
+
 </script>
 <template>
   <div class="col-12">
@@ -352,7 +358,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       }">
 
         <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem" style="background-color:  #f8f9fa">
-          <h5 class="m-0 text-3xl text-800 font-bold">Listado Alumnos</h5>
+          <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Alumnos</h5>
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
             <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Buscar..." />
@@ -360,16 +366,12 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           </span>
         </div>
 
-        <Column field="nombre" header="Nombre" sortable headerStyle="width:5%; min-width:8rem" bodyClass="pl-1 ">
-          <template #body="slotProps">
-            {{ slotProps.data.nombre }}
-          </template>
-        </Column>
-        <Column field="apellidos" header="Apellidos" sortable headerStyle="width:5%; min-width:8rem" bodyClass="pl-1"></Column>
-        <Column field="dni" header="DNI" headerStyle="width:5%; min-width:8rem; height:1rem" bodyClass="pl-1"></Column>
-        <Column class="" field="direccion" header="Dirección" headerStyle="width:70%; min-width:8rem" bodyClass="pl-1"></Column>
-        <Column field="telefono" header="Teléfono" headerStyle="width:5%; min-width:8rem" bodyClass="pl-1"></Column>
-        <Column field="email" header="Email" headerStyle="width:5%; min-width:8rem" bodyClass="pl-1"></Column>
+        <Column field="nombre" header="Nombre" sortable headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="pl-1"> </Column>
+        <Column field="apellidos" header="Apellidos" sortable headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="pl-1"></Column>
+        <Column field="dni" header="DNI" headerStyle="width:5%; min-width:8rem; height:1rem" headerClass="h-2rem pl-1" bodyClass="pl-1"></Column>
+        <Column class="" field="direccion" header="Dirección" headerStyle="width:70%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="pl-1"></Column>
+        <Column field="telefono" header="Teléfono" headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="pl-1"></Column>
+        <Column field="email" header="Email" headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="pl-1"></Column>
         <!-- <Column v-for="col of columns" :key="col.field" class="" :field="col.field" :header="col.header" :pt="{
           root: { class: '' },
           headerContent: { class: 'text-center m-2 p-2 h-2rem text-xl font-semibold' }
@@ -392,7 +394,10 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           class: 'border-1'
         }
       }"></Toast>
-      <ConfirmDialog></ConfirmDialog>
+      <ConfirmDialog :pt="{
+        header: { class: 'pb-0 pt-2' },
+        content: { class: 'pb-3 pt-1' }
+      }"></ConfirmDialog>
 
       <Dialog v-model:visible="visibleDialog" modal header="Editar Alumno" class="w-4" :pt="{
         header: { class: 'flex align-items-baseline h-5rem' },
@@ -403,32 +408,33 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
         <span class="p-text-secondary flex mb-5">Actualizar información</span>
         <div class="flex align-items-center gap-3 mb-3">
           <label for="nombre" class="font-semibold w-6rem">Nombre</label>
-          <InputText id="nombre" class="w-7" v-model="alumnoEditar.nombre" />
+          <InputText id="nombre" class="w-7" v-model="alumnoEditar.nombre" :class="{ 'p-invalid': !alumnoEditar.nombre }" />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
           <label for="apellidos" class="font-semibold w-6rem">Apellidos</label>
-          <InputText id="apellidos" class="w-7" v-model="alumnoEditar.apellidos" />
+          <InputText id="apellidos" class="w-7" v-model="alumnoEditar.apellidos" :class="{ 'p-invalid': !alumnoEditar.apellidos }" />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
           <label for="dni" class="font-semibold w-6rem">DNI</label>
-          <InputText id="dni" class="w-3" v-model="alumnoEditar.dni" />
+          <InputText id="dni" class="w-3" v-model="alumnoEditar.dni" :class="{ 'p-invalid': !alumnoEditar.dni }" />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
           <label for="direccion" class="font-semibold w-6rem">Dirección</label>
-          <InputText id="direccion" class="flex-auto" v-model="alumnoEditar.direccion" />
+          <InputText id="direccion" class="flex-auto" v-model="alumnoEditar.direccion" :class="{ 'p-invalid': !alumnoEditar.direccion }" />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
           <label for="telefono" class="font-semibold w-6rem">Teléfono</label>
-          <InputNumber id="telefono" inputId="withoutgrouping" :useGrouping="false" class="w-3" v-model="alumnoEditar.telefono" />
+          <InputNumber id="telefono" inputId="withoutgrouping" :useGrouping="false" class="w-3" v-model="alumnoEditar.telefono" :class="{ 'p-invalid': !alumnoEditar.telefono }" />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
           <label for="email" class="font-semibold w-6rem">Email</label>
-          <InputText id="email" class="w-5" v-model="alumnoEditar.email" />
+          <InputText id="email" class="w-5" v-model="alumnoEditar.email" :class="{ 'p-invalid': !alumnoEditar.email }" />
         </div>
-        <div class="flex justify-content-center mb-3">
+        <div class="flex justify-content-center mb-3 pt-2">
           <Button type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialog = false"></Button>
-          <Button type="button" rounded label="Actualizar" @click="visibleDialog = false"></Button>
+          <Button type="button" rounded label="Actualizar" @click="editarAlumno()"></Button>
         </div>
+        <Toast></Toast>
       </Dialog>
 
     </div>
