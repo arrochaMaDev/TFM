@@ -1,7 +1,13 @@
 export default class DireccionService {
-  static async getCCAA(): Promise<any> {
+  static async getCCAAS(): Promise<any> {
     try {
-      const response = await fetch('/utils/ccaa.json')
+      const response = await fetch('/src/utils/ccaas.json', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
       if (!response.ok) {
         throw new Error('No se pudo obtener el archivo JSON')
       }
@@ -12,9 +18,15 @@ export default class DireccionService {
       throw error
     }
   }
-  static async getProvincia(): Promise<any> {
+  static async getProvincias(): Promise<any> {
     try {
-      const response = await fetch('/utils/provincias.json')
+      const response = await fetch('/src/utils/provincias.json', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
       if (!response.ok) {
         throw new Error('No se pudo obtener el archivo JSON')
       }

@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { type Ref, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import Popup from './Popup.vue'
-import AltaAlumno from './AltaAlumno.vue'
 import { useLoadingStore } from '@/stores/loading'
 import { useEditingStore } from '@/stores/editar'
 import DataTable from 'primevue/datatable';
@@ -16,7 +14,6 @@ import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
-
 
 
 const confirm = useConfirm();
@@ -52,7 +49,6 @@ const getStudentsData = async () => {
       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
       loadingStore.loadingTrue()
-      // await new Promise((resolve) => setTimeout(resolve, 2000))
 
       const data = (await response.json()) as {
         id: number
@@ -76,51 +72,8 @@ const getStudentsData = async () => {
   }
 }
 
-// ORDENAR RESULTADOS POR VALOR QUE SE INDIQUE
-// let arrayOrdenado: Ref<
-//   {
-//     id: number
-//     usuario_id: string
-//     nombre: string
-//     apellidos: string
-//     dni: string
-//     direccion: string
-//     telefono: string
-//     email: string
-//   }[]
-// > = ref([]) // Nuevo array Ref para ordenar la lsta según se indique
-
-let ordenarPor: Ref<'id' | 'nombre' | 'apellidos' | 'dni' | 'email'> = ref('id')
-
-const ordenarArray = () => {
-  // arrayOrdenado.value = [...studentsRefFromServer.value]
-  const valor = ordenarPor.value
-
-  studentsRefFromServer.value.sort((a, b) => {
-    if (valor === 'id') {
-      return a[valor] - b[valor]
-    } else {
-      const valorA = a[valor].toLowerCase()
-      const valorB = b[valor].toLowerCase()
-      if (valorA < valorB) {
-        return -1
-      }
-      if (valorA > valorB) {
-        return 1
-      }
-      return 0
-    }
-  })
-}
-
-onMounted(() => {
-  ordenarArray()
-  getStudentsData()
-})
 
 // LÓGICA BORRAR ALUMNO
-// let popupVisible: Ref<boolean> = ref(false) // ref para ocultar o mostrar el popup
-// let idAlumnoSeleccionado: Ref<number | null> = ref(null) // ref del id del alumno seleccionado para borrar
 
 const confirmDelete = (alumno: typeof studentsRefFromServer.value[0]) => { // al ser un array, le indico el valor de la casilla 0
   confirm.require({
@@ -162,9 +115,9 @@ const borrarAlumno = async (alumno: typeof studentsRefFromServer.value[0]) => {
     console.error('Error en la solicitud:', error)
     toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
   }
-  // finally {
-  //   loadingStore.loadingFalse()
-  // }
+  finally {
+    getStudentsData()
+  }
 }
 
 // LÓGICA EDITAR ALUMNO
@@ -173,8 +126,7 @@ const editingStore = useEditingStore() // store del componente editar Alumno
 const visibleDialog: Ref<boolean> = ref(false);
 
 
-// let popUpState: Ref<boolean> = ref(editingStore.editarFalse()) // variable del estado del popUp
-// console.log(popUpState.value)
+
 
 const alumnoEditar: Ref<
   | {
@@ -263,44 +215,6 @@ const editarAlumno = async () => {
   }
 }
 
-// const editarAlumno = () => {
-//   // popUpState.value = true
-//   // editingStore.editarTrue()
-//   // alumnoEditar.value = student
-//   // fetch para obtener los datos del alumno
-//   fetch(`http://localhost:3000/student/${alumnoEditar.value?.id}`, {
-//     method: 'GET',
-//     headers: {
-//       'Content-Type': 'application/json'
-//     },
-//     credentials: 'include'
-//   }).then(async (response) => {
-//     const data = (await response.json()) as {
-//       id: number
-//       usuario_id: string
-//       nombre: string
-//       apellidos: string
-//       dni: string
-//       direccion: string
-//       telefono: number
-//       email: string
-//     }
-//     alumnoEditar.value = data
-//     console.table(data)
-//   })
-// }
-
-// const mostrarAltaAlumno = () => {
-//   // popUpState.value = true
-//   popUpState.value = editingStore.editarTrue()
-//   console.log(popUpState.value)
-// }
-
-// const resetearPopUpState = () => {
-//   // popUpState.value = false
-//   popUpState.value = editingStore.editarFalse()
-//   console.log(popUpState.value)
-// }
 
 // Ir a la página idividual del alumno
 const goToStudent = (id: number) => {
@@ -335,10 +249,15 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
   initFilters()
 }
 
+// ON MOUNTED
+onMounted(() => {
+  getStudentsData()
+})
+
 </script>
 <template>
-  <div class="col-12">
-    <div class="card w-max">
+  <div class="flex justify-content-start pt-2">
+    <div class="card flex justify-content-center">
       <DataTable v-model:filters="filters" class="" :value="studentsRefFromServer" dataKey="id" stripedRows sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" tableStyle="width: 80rem" :pt="{
         paginator: {
           paginatorWrapper: { class: 'col-12 flex justify-content-center' },
@@ -351,13 +270,10 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
         table: {
           class: 'mt-0',
           style: { 'border': 'none' }
-        },
-        column: {
-          class: 'bg-red-100'
         }
       }">
 
-        <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem" style="background-color:  #f8f9fa">
+        <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
           <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Alumnos</h5>
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
@@ -366,22 +282,23 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           </span>
         </div>
 
-        <Column field="nombre" header="Nombre" sortable headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="pl-1"> </Column>
-        <Column field="apellidos" header="Apellidos" sortable headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="pl-1"></Column>
-        <Column field="dni" header="DNI" headerStyle="width:5%; min-width:8rem; height:1rem" headerClass="h-2rem pl-1" bodyClass="pl-1"></Column>
-        <Column class="" field="direccion" header="Dirección" headerStyle="width:70%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="pl-1"></Column>
-        <Column field="telefono" header="Teléfono" headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="pl-1"></Column>
-        <Column field="email" header="Email" headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="pl-1"></Column>
+        <Column field="nombre" header="Nombre" sortable headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"> </Column>
+        <Column field="apellidos" header="Apellidos" sortable headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+        <Column field="dni" header="DNI" headerStyle="width:5%; min-width:8rem; height:1rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+        <Column field="direccion" header="Dirección" headerStyle="width:70%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+        <Column field="telefono" header="Teléfono" headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+        <Column field="email" header="Email" headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
         <!-- <Column v-for="col of columns" :key="col.field" class="" :field="col.field" :header="col.header" :pt="{
           root: { class: '' },
           headerContent: { class: 'text-center m-2 p-2 h-2rem text-xl font-semibold' }
         }">
         </Column> -->
         <!-- :pt="{ headerContent: { style: { 'background-color': 'red' } } }" -->
-        <Column headerStyle="width:5%; min-width:8rem" bodyClass="flex p-0">
+        <Column headerStyle="width:5%; min-width:8rem" bodyClass="flex p-1 pl-1">
           <template #body="slotProps">
-            <Button icon="pi pi-pencil" outlined rounded severity="success" @click="mostrarDialog(slotProps.data)"></Button>
-            <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDelete(slotProps.data)"></Button>
+            <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" @click="goToStudent(slotProps.data.id)"></Button>
+            <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" @click="mostrarDialog(slotProps.data)"></Button>
+            <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" @click="confirmDelete(slotProps.data)"></Button>
           </template>
         </Column>
       </DataTable>
@@ -441,46 +358,4 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
   </div>
 </template>
 
-<style scoped>
-/* #ordenarPor {
-  margin: 0px;
-}
-
-table {
-  margin-top: 0px;
-  width: max-content;
-  border: none;
-
-  & th {
-    background-color: rgb(79, 90, 86);
-  }
-
-  & td {
-    width: fit-content;
-    text-align: left;
-    vertical-align: top;
-    border: none;
-    border-spacing: 0;
-  }
-}
-
-table tr:hover td {
-  transition: background-color 0.5s;
-  background-color: rgb(106, 98, 53);
-}
-
-table tr:hover td:nth-last-child(-n + 3) {
-  background-color: initial;
-}
-
-button {
-  width: 50px;
-  height: 25px;
-  background-color: hsla(160, 100%, 37%, 1);
-  color: white;
-  border: 1px solid hsla(160, 100%, 37%, 1);
-  border-radius: 5px;
-  margin: 1px;
-  cursor: pointer;
-} */
-</style>
+<style scoped></style>

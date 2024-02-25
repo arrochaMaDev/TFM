@@ -1,9 +1,17 @@
 <script setup lang="ts">
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
+import Dropdown from 'primevue/dropdown';
 import InlineMessage from 'primevue/inlinemessage';
 import Button from 'primevue/button';
-import { ref, type Ref } from 'vue'
+import { onMounted, ref, watch, type Ref } from 'vue'
+import { useToast } from "primevue/usetoast";
+import Toast from 'primevue/toast';
+import DireccionService from '@/utils/direccion.service';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+
+const toast = useToast();
 
 // Referencias del formulario
 const studentRef = {
@@ -11,12 +19,15 @@ const studentRef = {
   apellidos: ref<string | undefined>(undefined),
   dni: ref<string | undefined>(undefined),
   direccion: ref<string | undefined>(undefined),
+  codigoPostal: ref<number | undefined>(undefined),
+  ciudad: ref<string | undefined>(undefined),
+  provincia: ref<string | undefined>(undefined),
   telefono: ref<number | undefined>(undefined),
-  email: ref<string | undefined>(undefined)
+  email: ref<string | undefined>(undefined),
+  userId: ref<number | undefined>(undefined)
 }
 
-//
-const formSubmitted = ref(false);
+const formSubmitted = ref(false); // variable para avisos con InlineText
 
 // Resetear los datos del formulario y poner cada ref a vacío
 const borrarDatosForm = () => {
@@ -24,9 +35,119 @@ const borrarDatosForm = () => {
   studentRef.apellidos.value = undefined
   studentRef.dni.value = undefined
   studentRef.direccion.value = undefined
+  studentRef.codigoPostal.value = undefined
+  studentRef.ciudad.value = undefined
+  studentRef.provincia.value = undefined
   studentRef.telefono.value = undefined
   studentRef.email.value = undefined
 }
+
+//OBTENER USUARIOS
+const usersRefFromServer: Ref<{
+  id: number,
+  username: string,
+  email: string,
+  // pass: string,
+  permiso: number
+}[]> = ref([])
+
+const getUsersData = async () => {
+  try {
+    const response = await fetch('http://localhost:3000/usuarios', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      const data = await response.json() as {
+        id: number
+        username: string
+        email: string
+        permiso: number
+      }[]
+      usersRefFromServer.value = data
+      console.table(usersRefFromServer.value)
+      console.log(data)
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+  }
+}
+
+//OBTENER USUARIO PARA MOSTRAR
+const selectedUserId: Ref<number | undefined> = ref(undefined)
+const user: Ref<{
+  id: number | null;
+  username: string;
+  email: string;
+  // pass: string;
+  permiso: number | null;
+}> = ref({
+  id: null,
+  username: '',
+  email: '',
+  // pass: '',
+  permiso: null
+});
+const permisoString: Ref<string> = ref("")
+
+const getUser = async () => {
+  console.log("obteniendo usuario")
+  try {
+    const response = await fetch(`http://localhost:3000/usuario/${selectedUserId.value}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      const data = await response.json() as {
+        id: number
+        username: string
+        email: string
+        permiso: number
+      }
+      user.value = data
+      console.table(user.value)
+
+      // PERMISO A STRING
+      switch (user.value.permiso) {
+        case 0:
+          permisoString.value = 'Alumno'
+          break;
+        case 1:
+          permisoString.value = 'Profesor'
+          break;
+        case 9:
+          permisoString.value = 'Aministrador'
+          break;
+        case null:
+          permisoString.value = '';
+          break;
+        default:
+          permisoString.value = ''
+      }
+    }
+  }
+  catch (error) {
+    console.error('Error en la solicitud:', error)
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+  }
+}
+
+watch(selectedUserId, () => {
+  if (selectedUserId.value) {
+    getUser()
+  }
+})
 
 // VALIDAR DATOS DEL FORMULARIO
 const patronTel = /^\d{9}$/
@@ -35,15 +156,21 @@ const patronEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 // FETCH PARA ENVIAR DATOS DEL ALUMNO A LA BD:
 const crearAlumno = async () => {
   formSubmitted.value = true;
+  let isValid = true
 
-  if (!studentRef.telefono.value || !patronTel.test(studentRef.telefono.value.toString())) {
-    alert('El número de teléfono debe tener 9 dígitos numéricos.')
-    return
+  if (studentRef.telefono.value && !patronTel.test(studentRef.telefono.value.toString())) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'El número de teléfono debe tener 9 dígitos numéricos', life: 3000 });
+    isValid = false
   }
-  if (!studentRef.email.value || !patronEmail.test(studentRef.email.value)) {
-    alert('Por favor, introduce un email válido.')
-    return
-  } else {
+  if (studentRef.email.value && !patronEmail.test(studentRef.email.value)) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
+    isValid = false
+  }
+  if (!studentRef.nombre.value || !studentRef.apellidos.value || !studentRef.dni.value || !studentRef.direccion.value || !studentRef.telefono.value || !studentRef.email.value) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
+    isValid = false
+  }
+  if (isValid) {
     try {
       const response = await fetch('http://localhost:3000/student', {
         method: 'POST',
@@ -52,8 +179,9 @@ const crearAlumno = async () => {
           apellidos: studentRef.apellidos.value,
           dni: studentRef.dni.value,
           direccion: studentRef.direccion.value,
-          telefono: Number(studentRef.telefono.value),
-          email: studentRef.email.value
+          telefono: studentRef.telefono.value,
+          email: studentRef.email.value,
+          userId: studentRef.userId.value
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -63,7 +191,7 @@ const crearAlumno = async () => {
       if (!response.ok) {
         throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
       } else {
-        alert('Alumno Creado')
+        toast.add({ severity: 'success', summary: 'Creado', detail: 'Alumno creado', life: 3000 });
         // Imprimo los datos que he introducido
         const datosAlumno = [
           studentRef.nombre.value,
@@ -78,367 +206,148 @@ const crearAlumno = async () => {
       }
     } catch (error) {
       console.error('Error en la solicitud:', error)
-      alert('Ha ocurrido un error')
+      toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
     }
   }
 }
 
-// COMPONENTE COMO POPUP PARA EDITAR
-const emit = defineEmits(['cerrarPopUp', 'obtenerAlumnos', 'resetearAlumno'])
-const props = defineProps<{
-  alumnoParaEditar:
-  | {
-    id: number
-    // usuario_id: string
-    nombre: string
-    apellidos: string
-    dni: string
-    telefono: number
-    direccion: string
-    email: string
-  }
-  | undefined
-  isEditing: boolean
-}>()
+const ccaas: Ref<any> = ref([])
+const provincias: Ref<{
+  parent_code: string,
+  code: string,
+  label: string
+}[]> = ref([])
 
-let alumnoEditado = ref({ ...props.alumnoParaEditar })
+onMounted(async () => {
 
-let popUpStyle: Ref<boolean> = ref(props.isEditing) // variable para activar el estilo popUp
+  try {
+    getUsersData()
 
-// FETCH PARA ACTUALIZAR DATOS DEL ALUMNO:
-const actualizarAlumno = async () => {
-  if (alumnoEditado.value.telefono && !patronTel.test(alumnoEditado.value.telefono.toString())) {
-    alert('El número de teléfono debe tener 9 dígitos numéricos.')
-    return
-  }
-  if (alumnoEditado.value.email && !patronEmail.test(alumnoEditado.value.email)) {
-    alert('Por favor, introduce un email válido.')
-  } else {
-    try {
-      const response = await fetch(`http://localhost:3000/student/${alumnoEditado.value?.id}`, {
-        method: 'PUT',
-        body: JSON.stringify({
-          nombre: alumnoEditado.value?.nombre,
-          apellidos: alumnoEditado.value?.apellidos,
-          dni: alumnoEditado.value?.dni,
-          direccion: alumnoEditado.value?.direccion,
-          telefono: Number(alumnoEditado.value?.telefono),
-          email: alumnoEditado.value?.email
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      })
-      if (!response.ok) {
-        throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
-      } else {
-        alert('Alumno Editado')
-        // Imprimo los datos que he introducido
-        const alumnoActualizado = [
-          alumnoEditado.value?.nombre,
-          alumnoEditado.value?.apellidos,
-          alumnoEditado.value?.dni,
-          alumnoEditado.value?.direccion,
-          alumnoEditado.value?.telefono,
-          alumnoEditado.value?.email
-        ]
-        console.table(alumnoActualizado)
-        popUpStyle.value = false
-      }
-    } catch (error) {
-      console.error('Error en la solicitud:', error)
-      alert('Ha ocurrido un error')
-    } finally {
-      emit('cerrarPopUp')
-      emit('obtenerAlumnos')
+    // const ccaasData = await fetch('/src/utils/ccaas.json', {
+    //   method: 'GET',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   credentials: 'include'
+    // });
+    // const provinciasData = await fetch('/src/utils/provincias.json', {
+    //   method: 'GET',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   credentials: 'include'
+    // });
+
+    const ccaasData = DireccionService.getCCAAS()
+    const provinciasData = DireccionService.getProvincias()
+
+    // if (!ccaasData.ok || !provinciasData.ok) {
+    //   throw new Error('No se pudo obtener el archivo JSON');
+    // }
+    if (!ccaasData || !provinciasData) {
+      throw new Error('No se pudo obtener el archivo JSON');
     }
+
+    // ccaas.value = await ccaasData.json();
+    // provincias.value = await provinciasData.json();
+    ccaas.value = await ccaasData;
+    provincias.value = await provinciasData;
+    console.log(ccaas.value)
+    console.log(provincias.value)
+  } catch (error) {
+    console.error('Error al obtener los datos del JSON:', error);
   }
-}
-// para resetear los valores como están actualmente en la BD
-const resetearValoresIniciales = () => {
-  console.log('resetear valores iniciales')
-  alumnoEditado.value.nombre = props.alumnoParaEditar?.nombre
-  alumnoEditado.value.apellidos = props.alumnoParaEditar?.apellidos
-  alumnoEditado.value.dni = props.alumnoParaEditar?.dni
-  alumnoEditado.value.telefono = props.alumnoParaEditar?.telefono
-  alumnoEditado.value.direccion = props.alumnoParaEditar?.direccion
-  alumnoEditado.value.email = props.alumnoParaEditar?.email
-  emit('resetearAlumno', alumnoEditado) // hago el emit y paso además el alumnoEditado según el valor de solo lectura de las props recibidas
-}
+});
 
-// FUNCION PARA ENVIAR DATOS DEL FORMULARIO
-const enviarDatosFormulario = () => {
-  if (popUpStyle.value) {
-    actualizarAlumno() // Función para actualizar alumno en modo edición
-  } else {
-    crearAlumno() // Función para crear un nuevo alumno
-  }
-}
-
-// const ccaas: Ref<any> = ref([])
-// const provincias: Ref<any> = ref([])
-
-// const cargarDireccion = async () => {
-//   try {
-//     const ccaasData = await DireccionService.getCCAA();
-//     const provinciasData = await DireccionService.getProvincia();
-
-//     ccaas = ccaasData;
-//     provincias = provinciasData;
-//   } catch (error) {
-//     console.error('Error al obtener los datos del JSON:', error);
-//   }
-// }
-
-// onMounted(async () => {
-//   try {
-//     const ccaasData = await fetch('/src/utils/ccaas.json');
-//     const provinciasData = await fetch('/src/utils/provincias.json');
-//     if (!ccaasData.ok || !provinciasData.ok) {
-//       throw new Error('No se pudo obtener el archivo JSON');
-//     }
-
-//     ccaas.value = await ccaasData.json();
-//     provincias.value = await provinciasData.json();
-//     console.log(ccaas.value)
-//     console.log(provincias.value)
-//   } catch (error) {
-//     console.error('Error al obtener los datos del JSON:', error);
-//   }
-// });
 </script>
 
 <template>
-  <div class="card col-8" :class="{ altaAlumnosPopup: popUpStyle }">
-    <div class="" :class="{ 'altaAlumnosPopup-content': popUpStyle }">
-      <h1 v-if="popUpStyle" class="green">Editar alumno</h1>
-      <!-- <h1 v-else class="green">Alta alumno</h1> -->
-      <form @submit.prevent="enviarDatosFormulario()">
-        <div v-if="!popUpStyle">
-          <!--MODO CREAR -->
-          <div class="col-12">
-            <h2>Nuevo Alumno</h2>
-            <div class="p-fluid formgrid grid">
-              <div class="field col-12 md:col-6 sm:col-12">
-                <label class="">Nombre</label>
-                <InputText class="" type="text" id="nombreInput" v-model="studentRef.nombre.value" />
-                <InlineMessage v-if="!studentRef.nombre.value && formSubmitted" class="bg-transparent justify-content-start">El nombre es obligatorio</InlineMessage>
-              </div>
-              <div class="field col-12 md:col-6 sm:col-12">
-                <label class="green">Apellidos</label>
-                <InputText class="" type="text" id="apellidosInput" v-model="studentRef.apellidos.value" />
-                <InlineMessage v-if="!studentRef.apellidos.value && formSubmitted" class="bg-transparent justify-content-start">El apellido es obligatorio</InlineMessage>
-              </div>
-              <div class="field col-12 md:col-3 sm:col-12">
-                <label class="green">Dni</label>
-                <InputText class="" type="text" id="dniInput" v-model="studentRef.dni.value" />
-                <InlineMessage v-if="!studentRef.dni.value && formSubmitted" class="bg-transparent justify-content-start">El DNI es obligatorio</InlineMessage>
-              </div>
-              <div class="field col-12 md:col-4 sm:col-12">
-                <label class="green">Teléfono</label>
-                <InputNumber class="" type="tel" pattern="^\d{9}$" inputId="withoutgrouping" :useGrouping="false" id="telefonoInput" required v-model="studentRef.telefono.value" />
-                <InlineMessage v-if="!studentRef.telefono.value && formSubmitted" class="bg-transparent justify-content-start">El teléfono es obligatorio</InlineMessage>
-              </div>
-              <div class="field col-12 md:col-5 sm:col-12">
-                <label class="green">Email</label>
-                <InputText class="" type="email" id="emailInput" v-model="studentRef.email.value" />
-                <InlineMessage v-if="!studentRef.email.value && formSubmitted" class="bg-transparent justify-content-start">El email es obligatorio</InlineMessage>
-              </div>
-
-              <div class="field col-12 md:col-12 sm:col-12">
-                <label class="green">Dirección</label>
-                <InputText class="" type="text" id="direcciónInput" v-model="studentRef.direccion.value" />
-                <InlineMessage v-if="!studentRef.direccion.value && formSubmitted" class="bg-transparent justify-content-start">La dirección es obligatoria</InlineMessage>
-              </div>
-
-              <!-- <Button type="reset" class="" @click="borrarDatosForm()">Borrar datos</Button> -->
-              <!-- <button type="reset" class="btn btn-outline-primary" v-if="popUpStyle" @click="resetearValoresIniciales">
-                Resetear
-              </button> -->
-              <Button class="justify-content-center w-auto h-auto" icon="pi pi-check" iconPos="right" type="submit" :label="popUpStyle ? 'Actualizar' : 'Enviar'"></Button>
-              <Button type="button" v-if="popUpStyle" @click="emit('cerrarPopUp')">Cancelar</Button>
-            </div>
+  <div class="card col-12 lg:col-9 md:col-12 sm:col-12">
+    <form @submit.prevent="crearAlumno()">
+      <h2>Nuevo Alumno</h2>
+      <div class="p-fluid formgrid grid">
+        <div class="field col-12 lg:col-6 md:col-12 sm:col-12">
+          <label class="">Nombre</label>
+          <InputText class="" id="nombreInput" v-model="studentRef.nombre.value" />
+          <InlineMessage v-if="!studentRef.nombre.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El nombre es obligatorio</InlineMessage>
+        </div>
+        <div class="field col-12 lg:col-6 md:col-12 sm:col-12">
+          <label class="">Apellidos</label>
+          <InputText class="" id="apellidosInput" v-model="studentRef.apellidos.value" />
+          <InlineMessage v-if="!studentRef.apellidos.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El apellido es obligatorio</InlineMessage>
+        </div>
+        <div class="field col-12 lg:col-4 md:col-4 sm:col-12">
+          <label class="">Dni</label>
+          <InputText class="" id="dniInput" v-model="studentRef.dni.value" />
+          <InlineMessage v-if="!studentRef.dni.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El DNI es obligatorio</InlineMessage>
+        </div>
+        <div class="field col-12 lg:col-4 md:col-4 sm:col-12">
+          <label class="">Teléfono</label>
+          <InputNumber class="" id="telefonoInput" :useGrouping="false" required v-model="studentRef.telefono.value" />
+          <InlineMessage v-if="!studentRef.telefono.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El teléfono es obligatorio</InlineMessage>
+        </div>
+        <div class="field col-12 lg:col-4 md:col-4 sm:col-12">
+          <label class="">Email</label>
+          <InputText class="" id="emailInput" v-model="studentRef.email.value" />
+          <InlineMessage v-if="!studentRef.email.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El email es obligatorio</InlineMessage>
+        </div>
+        <div class="field col-12 lg:col-12 md:col-12 sm:col-12">
+          <label class="">Dirección</label>
+          <InputText class="" id="direcciónInput" v-model="studentRef.direccion.value" />
+          <InlineMessage v-if="!studentRef.direccion.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La dirección es obligatoria</InlineMessage>
+        </div>
+        <div class="field col-12 lg:col-3 md:col-12 sm:col-12">
+          <label class="">Código Postal</label>
+          <InputNumber class="" id="CPInput" :useGrouping="false" v-model="studentRef.codigoPostal.value" />
+          <InlineMessage v-if="!studentRef.codigoPostal.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El CP es obligatorio</InlineMessage>
+        </div>
+        <div class="field col-12 lg:col-5 md:col-12 sm:col-12">
+          <label class="">Ciudad</label>
+          <InputText class="" id="ciudadInput" v-model="studentRef.ciudad.value" />
+          <InlineMessage v-if="!studentRef.ciudad.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La ciudad es obligatoria</InlineMessage>
+        </div>
+        <div class="field col-12 lg:col-4 md:col-12 sm:col-12">
+          <label class="">Provincia</label>
+          <Dropdown class="" :options="provincias" optionLabel="label" optionValue="label" checkmark :highlightOnSelect="false" showClear id="provinciaInput" placeholder="Selecciona una provincia"
+            v-model="studentRef.provincia.value" />
+          <InlineMessage v-if="!studentRef.provincia.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La provincia es obligatoria</InlineMessage>
+        </div>
+        <div class="field col-12 mt-2 pl-0 mb-0 ">
+          <div class="field col-12 lg:col-4 md:col-12 sm:col-12 ">
+            <label class="">Seleccionar usuario</label>
+            <Dropdown class="" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput"
+              placeholder="Selecciona un usuario" v-model="selectedUserId" />
+            <InlineMessage v-if="!studentRef.userId.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El usuario es obligatorio</InlineMessage>
+          </div>
+          <div v-if="selectedUserId" class="ml-1">
+            <DataTable :value="[user]" class="pl-1" tableStyle="width: 30rem" :pt="{
+              table: {
+                class: 'mt-0',
+                style: { 'border': 'none' }
+              }
+            }">
+              <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+              <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+              <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem">
+                <template #body="">
+                  {{ permisoString }}
+                </template>
+              </Column>
+            </DataTable>
           </div>
         </div>
-      </form>
-
-
-      <!--MODO ACTUALIZAR 
-
-        <div v-if="popUpStyle">
-          <label class="green">Nombre</label>
-          <input type="text" id="nombreInput" required v-model="alumnoEditado.nombre" />
-          <label class="green">Apellidos</label>
-          <input type="text" id="apellidosInput" required v-model="alumnoEditado.apellidos" />
-          <label class="green">Dni</label>
-          <input type="text" id="dniInput" required v-model="alumnoEditado.dni" />
-          <label class="green">Teléfono</label>
-          <input type="tel" pattern="^\d{9}$" id="telefonoInput" required v-model="alumnoEditado.telefono" />
-          <label class="green">Dirección</label>
-          <input type="text" id="direcciónInput" required v-model="alumnoEditado.direccion" />
-          <label class="green">Email</label>
-          <input required type="email" id="emailInput" v-model="alumnoEditado.email" />
-        </div>-->
-      <!-- <button type="reset" @click="borrarDatosForm()">Borrar datos</button>
-      <button type="reset" class="btn btn-outline-primary" v-if="popUpStyle" @click="resetearValoresIniciales">
-        Resetear
-      </button>
-      <button type="submit">{{ popUpStyle ? 'Actualizar' : 'Enviar' }}</button>
-      <button type="button" v-if="popUpStyle" @click="emit('cerrarPopUp')">Cancelar</button>
-      </form> -->
-    </div>
+        <Button class="justify-content-center w-auto h-auto" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
+      </div>
+    </form>
   </div>
+  <Toast :pt="{
+    container: {
+      class: 'align-items-center'
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }"></Toast>
 </template>
-<!-- TEMPLATE ORIGINAL -->
-<!-- <template>
-  <div class="container" :class="{ altaAlumnosPopup: popUpStyle }">
-    <div class="form" :class="{ 'altaAlumnosPopup-content': popUpStyle }">
-      <h1 v-if="popUpStyle" class="green">Editar alumno</h1>
-      <h1 v-else class="green">Alta alumno</h1>
-      <form @submit.prevent="enviarDatosFormulario()">
-        <div v-if="!popUpStyle">
-          MODO CREAR 
-          <label class="green">Nombre</label>
-          <input type="text" id="nombreInput" required v-model="studentRef.nombre.value" />
-          <label class="green">Apellidos</label>
-          <input type="text" id="apellidosInput" required v-model="studentRef.apellidos.value" />
-          <label class="green">Dni</label>
-          <input type="text" id="dniInput" required v-model="studentRef.dni.value" />
-          <label class="green">Teléfono</label>
-          <input
-            type="tel"
-            pattern="^\d{9}$"
-            id="telefonoInput"
-            required
-            v-model="studentRef.telefono.value"
-          />
-          <label class="green">Dirección</label>
-          <input type="text" id="direcciónInput" required v-model="studentRef.direccion.value" />
-          <label class="green">Email</label>
-          <input type="email" id="emailInput" required v-model="studentRef.email.value" />
-        </div>
-        <div v-if="popUpStyle">
-          MODO ACTUALIZAR 
-          <label class="green">Nombre</label>
-          <input type="text" id="nombreInput" required v-model="alumnoEditado.nombre" />
-          <label class="green">Apellidos</label>
-          <input type="text" id="apellidosInput" required v-model="alumnoEditado.apellidos" />
-          <label class="green">Dni</label>
-          <input type="text" id="dniInput" required v-model="alumnoEditado.dni" />
-          <label class="green">Teléfono</label>
-          <input
-            type="tel"
-            pattern="^\d{9}$"
-            id="telefonoInput"
-            required
-            v-model="alumnoEditado.telefono"
-          />
-          <label class="green">Dirección</label>
-          <input type="text" id="direcciónInput" required v-model="alumnoEditado.direccion" />
-          <label class="green">Email</label>
-          <input required type="email" id="emailInput" v-model="alumnoEditado.email" />
-        </div>
-        <button type="reset" @click="borrarDatosForm()">Borrar datos</button>
-        <button
-          type="reset"
-          class="btn btn-outline-primary"
-          v-if="popUpStyle"
-          @click="resetearValoresIniciales"
-        >
-          Resetear
-        </button>
-        <button type="submit">{{ popUpStyle ? 'Actualizar' : 'Enviar' }}</button>
-        <button type="button" v-if="popUpStyle" @click="emit('cerrarPopUp')">Cancelar</button>
-      </form>
-    </div>
-  </div>
-</template> -->
 
-<style scoped>
-/* @import 'primeflex/primeflex.scss'; */
-
-
-/* .form {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: column;
-  justify-content: center;
-  width: 300px;
-
-  & Form {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: column;
-    justify-content: center;
-  }
-  div label {
-    display: block;
-  }
-
-  div input {
-    height: 25px;
-    border-radius: 5px;
-  }
-
-  button {
-    margin-top: 10px;
-    width: 100px;
-    height: 25px;
-    background-color: hsla(160, 100%, 37%, 1);
-    color: white;
-    border: 1px solid hsla(160, 100%, 37%, 1);
-    border-radius: 5px;
-    cursor: pointer;
-  }
-}
-.container.altaAlumnosPopup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.altaAlumnosPopup-content {
-  background: #000000;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid white;
-  display: flex;
-  flex-direction: column; 
-
-  & label {
-    display: block;
-    margin-bottom: 5px;
-  }
-
-  & input {
-    height: 25px;
-    width: 100%;
-    margin-bottom: 10px;
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-  }
-
-  & button {
-    margin-top: 10px;
-    width: 100px;
-    height: 30px;
-    background-color: hsla(160, 100%, 37%, 1);
-    color: white;
-    border: 1px solid hsla(160, 100%, 37%, 1);
-    border-radius: 5px;
-    cursor: pointer;
-    margin: auto;
-    margin-top: 10px;
-  }
-} */
-</style>
+<style scoped></style>
