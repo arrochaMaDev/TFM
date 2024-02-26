@@ -42,6 +42,7 @@ const borrarDatosForm = () => {
   studentRef.telefono.value = undefined
   studentRef.email.value = undefined
   selectedUserId.value = undefined
+  formSubmitted.value = false;
 }
 
 //OBTENER USUARIOS

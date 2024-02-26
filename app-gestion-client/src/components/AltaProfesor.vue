@@ -1,61 +1,34 @@
 <script setup lang="ts">
-import { ref, type Ref } from 'vue'
+import { ref, watch, type Ref } from 'vue'
+import InputText from 'primevue/inputtext';
+import MultiSelect from 'primevue/multiselect';
+import Dropdown from 'primevue/dropdown';
+import InlineMessage from 'primevue/inlinemessage';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Button from 'primevue/button';
+import { useToast } from "primevue/usetoast";
+import Toast from 'primevue/toast';
 
-//Referencias del formulario
+const toast = useToast();
+
+// Referencias del formulario
 const teacherRef = {
   nombre: ref<string | undefined>(undefined),
   apellidos: ref<string | undefined>(undefined),
   email: ref<string | undefined>(undefined),
   asignaturas: ref<string[]>([])
 }
-const asignaturaSelected: Ref<string> = ref('')
+const formSubmitted = ref(false); // variable para avisos con InlineText
 
 // para resetear los datos del formulario y poner cada ref a vacío
-function resetearDatosForm() {
+const borrarDatosForm = () => {
   teacherRef.nombre.value = undefined
   teacherRef.apellidos.value = undefined
   teacherRef.email.value = undefined
   teacherRef.asignaturas.value = []
-}
-
-// FETCH PARA ENVIAR DATOS DEL PROFESOR A LA BD:
-const crearProfesor = async () => {
-  try {
-    const response = await fetch('http://localhost:3000/teacher', {
-      method: 'POST',
-      body: JSON.stringify({
-        nombre: teacherRef.nombre.value,
-        apellidos: teacherRef.apellidos.value,
-        email: teacherRef.email.value,
-        asignaturas: teacherRef.asignaturas.value.toString()
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    })
-    if (!response.ok) {
-      throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
-    } else {
-      alert('Profesor creado')
-      // Imprimo los datos que he introducido
-      const datosProfesor = [
-        teacherRef.nombre.value,
-        teacherRef.apellidos.value,
-        teacherRef.email.value,
-        teacherRef.asignaturas.value
-      ]
-      console.log(datosProfesor)
-      // Vacío el formulario después de enviar los datos:
-      teacherRef.nombre.value = undefined
-      teacherRef.apellidos.value = undefined
-      teacherRef.email.value = undefined
-      teacherRef.asignaturas.value = []
-    }
-  } catch (error) {
-    console.error('Error en la solicitud:', error)
-    alert('Ha ocurrido un error')
-  }
+  selectedUserId.value = undefined
+  formSubmitted.value = false;
 }
 
 // OBTENER ASIGNATURAS DE LA BD
@@ -87,293 +60,236 @@ const getSubjectsData = async () => {
     }
   } catch (error) {
     alert('Hay un error' + error)
-    console.log('hay un error', error)
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error obteniendo las asignaturas', life: 3000 });
   }
 }
 getSubjectsData()
 
-function agregarAsignatura() {
-  if (asignaturaSelected.value === '') {
-    // si quieren insertar un valor vacío salta una alerta
-    alert('Tienes que selecionar alguna asignatura')
-  } else {
-    teacherRef.asignaturas.value.push(asignaturaSelected.value)
-    const teacherAsignaturasToString = teacherRef.asignaturas.value
-      .map((elemento) => ' ' + elemento) // recorro el array añadiendo un espacio a cada elemento
-      .toString() // lo convierto en string
-      .trimStart() // elimino el espacio al principio
-    asignaturaSelected.value = ''
-    console.log(teacherAsignaturasToString)
-  }
-}
+//OBTENER USUARIOS
+const usersRefFromServer: Ref<{
+  id: number,
+  username: string,
+  email: string,
+  permiso: number
+}[]> = ref([])
 
-const eliminarAsignatura = (index: any) => {
-  teacherRef.asignaturas.value.splice(index, 1)
-}
-
-// COMPONENTE COMO POPUP PARA EDITAR
-const emit = defineEmits(['cerrarPopUp', 'obtenerProfesores', 'resetearProfesor'])
-const props = defineProps<{
-  profesorParaEditar:
-  | {
-    id: number
-    nombre: string
-    apellidos: string
-    email: string
-    asignaturas: string
-  }
-  | undefined
-  isEditing: boolean
-}>()
-
-let profesorEditado = ref({ ...props.profesorParaEditar })
-
-let popUpStyle: Ref<boolean> = ref(props.isEditing) // variable para activar el estilo popUp
-
-// FETCH PARA ACTUALIZAR DATOS DEL PROFESOR:
-const actualizarProfesor = async () => {
+const getUsersData = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/teacher/${profesorEditado.value?.id}`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        nombre: profesorEditado.value?.nombre,
-        apellidos: profesorEditado.value?.apellidos,
-        email: profesorEditado.value?.email,
-        asignaturas: profesorEditado.value?.asignaturas?.toString()
-      }),
+    const response = await fetch('http://localhost:3000/usuarios', {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json'
       },
       credentials: 'include'
     })
     if (!response.ok) {
-      throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
-      alert('Profesor Editado')
-      // Imprimo los datos que he introducido
-      const profesorActualizado = [
-        profesorEditado.value?.nombre,
-        profesorEditado.value?.apellidos,
-        profesorEditado.value?.email,
-        profesorEditado.value?.asignaturas
-      ]
-      console.table(profesorActualizado)
-      popUpStyle.value = false
+      const data = await response.json() as {
+        id: number
+        username: string
+        email: string
+        permiso: number
+      }[]
+      usersRefFromServer.value = data
+      // console.table(usersRefFromServer.value)
+      // console.log(data)
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
-    alert('Ha ocurrido un error')
-  } finally {
-    emit('cerrarPopUp')
-    emit('obtenerProfesores')
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+  }
+}
+getUsersData()
+
+//OBTENER USUARIO PARA MOSTRAR
+const selectedUserId: Ref<number | undefined> = ref(undefined)
+const user: Ref<{
+  id: number | null;
+  username: string;
+  email: string;
+  permiso: number | null;
+} | undefined> = ref(undefined);
+
+const permisoString: Ref<string> = ref("")
+
+const getUser = async () => {
+  console.log("obteniendo usuario")
+  try {
+    const response = await fetch(`http://localhost:3000/usuario/${selectedUserId.value}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      const data = await response.json() as {
+        id: number
+        username: string
+        email: string
+        permiso: number
+      }
+      user.value = data
+      // console.table(user.value)
+
+      // PERMISO A STRING
+      switch (user.value.permiso) {
+        case 0:
+          permisoString.value = 'Alumno'
+          break;
+        case 1:
+          permisoString.value = 'Profesor'
+          break;
+        case 9:
+          permisoString.value = 'Aministrador'
+          break;
+        case null:
+          permisoString.value = '';
+          break;
+        default:
+          permisoString.value = ''
+      }
+    }
+  }
+  catch (error) {
+    console.error('Error en la solicitud:', error)
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
   }
 }
 
-// para resetear los valores como están actualmente en la BD
-const resetearValoresIniciales = () => {
-  console.log('resetear valores iniciales')
-  profesorEditado.value.nombre = props.profesorParaEditar?.nombre
-  profesorEditado.value.apellidos = props.profesorParaEditar?.apellidos
-  profesorEditado.value.email = props.profesorParaEditar?.email
-  profesorEditado.value.asignaturas = props.profesorParaEditar?.asignaturas
-  emit('resetearProfesor', profesorEditado) // hago el emit y paso además el ProfesorEditado según el valor de solo lectura de las props recibidas
-}
-// FUNCION PARA ENVIAR DATOS DEL FORMULARIO
-const enviarDatosFormulario = () => {
-  if (popUpStyle.value) {
-    actualizarProfesor() // Función para actualizar Profesor en modo edición
-  } else {
-    crearProfesor() // Función para crear un nuevo Profesor
+watch(selectedUserId, () => {
+  if (selectedUserId.value) {
+    getUser()
+  }
+})
+
+// VALIDAR DATOS DEL FORMULARIO
+const patronEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+// FETCH PARA ENVIAR DATOS DEL PROFESOR A LA BD:
+const crearProfesor = async () => {
+  formSubmitted.value = true;
+  let isValid = true
+  if (teacherRef.email.value && !patronEmail.test(teacherRef.email.value)) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
+    isValid = false
+  }
+  if (!teacherRef.nombre.value || !teacherRef.apellidos.value || !teacherRef.email.value || teacherRef.asignaturas.value.length == 0) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
+    isValid = false
+  }
+  if (isValid) {
+    try {
+      const response = await fetch('http://localhost:3000/teacher', {
+        method: 'POST',
+        body: JSON.stringify({
+          nombre: teacherRef.nombre.value,
+          apellidos: teacherRef.apellidos.value,
+          email: teacherRef.email.value,
+          asignaturas: teacherRef.asignaturas.value.toString(),
+          userId: user.value?.id
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      if (!response.ok) {
+        throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+      } else {
+        toast.add({ severity: 'success', summary: 'Creado', detail: 'Profesor creado', life: 3000 });
+
+        const datosProfesor = [
+          teacherRef.nombre.value,
+          teacherRef.apellidos.value,
+          teacherRef.email.value,
+          teacherRef.asignaturas.value
+        ]
+        console.table(datosProfesor)
+
+        borrarDatosForm()
+        formSubmitted.value = false;
+      }
+    } catch (error) {
+      console.error('Error en la solicitud:', error)
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    }
   }
 }
+
 </script>
 
 <template>
-  <div class="container" :class="{ altaProfesorPopup: popUpStyle }">
-    <div class="form" :class="{ 'altaProfesorPopup-content': popUpStyle }">
-      <h1 v-if="popUpStyle" class="green">Editar profesor</h1>
-      <h1 v-else class="green">Alta profesor</h1>
-      <form @submit.prevent="enviarDatosFormulario()">
-        <div v-if="!popUpStyle">
-          <!--MODO CREAR -->
-          <label class="green">Nombre</label>
-          <input required type="text" id="nombreInput" v-model="teacherRef.nombre.value" />
-          <label class="green">Apellidos</label>
-          <input required type="text" id="apellidosInput" v-model="teacherRef.apellidos.value" />
-          <label class="green">Email</label>
-          <input required type="email" id="emailInput" v-model="teacherRef.email.value" />
-          <label class="green">Asignaturas</label>
-          <select id="asignaturasInput" v-model="asignaturaSelected">
-            <option selected disabled>Seleccione la asignatura</option>
-            <option v-for="asignatura in asignaturas" :key="asignatura.id">
-              {{ asignatura.nombre }}
-            </option>
-          </select>
-          <button type="button" @click="agregarAsignatura()">Agregar</button>
+  <div class="card col-12 xl:col-6 lg:col-12 md:col-12 sm:col-12">
+    <form @submit.prevent="crearProfesor()">
+      <h2>Nuevo Profesor</h2>
+      <div class="p-fluid formgrid grid">
+        <div class="field col-12 lg:col-4 md:col-12 sm:col-12">
+          <label class="">Nombre</label>
+          <InputText class="" id="nombreInput" v-model="teacherRef.nombre.value" />
+          <InlineMessage v-if="!teacherRef.nombre.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El nombre es obligatorio</InlineMessage>
         </div>
-        <div v-if="popUpStyle">
-          <!--MODO ACTUALIZAR -->
-          <label class="green">Nombre</label>
-          <input type="text" id="nombreInput" required v-model="profesorEditado.nombre" />
-          <label class="green">Apellidos</label>
-          <input type="text" id="apellidosInput" required v-model="profesorEditado.apellidos" />
-          <label class="green">Email</label>
-          <input required type="email" id="emailInput" v-model="profesorEditado.email" />
+        <div class="field col-12 lg:col-4 md:col-12 sm:col-12">
+          <label class="">Apellidos</label>
+          <InputText class="" id="apellidosInput" v-model="teacherRef.apellidos.value" />
+          <InlineMessage v-if="!teacherRef.apellidos.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El apellido es obligatorio</InlineMessage>
         </div>
-        <button type="reset" @click="resetearDatosForm()">Borrar datos</button>
-        <button type="reset" v-if="popUpStyle" @click="resetearValoresIniciales">Resetear</button>
-        <button type="submit">{{ popUpStyle ? 'Actualizar' : 'Enviar' }}</button>
-        <button type="button" v-if="popUpStyle" @click="emit('cerrarPopUp')">Cancelar</button>
-      </form>
-    </div>
-    <div v-if="!popUpStyle" class="vistaPrevia">
-      <table id="asignaturasSeleccionadas">
-        <th colspan="2">Asignaturas seleccionadas:</th>
-        <tr v-for="(asignatura, index) in teacherRef.asignaturas.value" :key="index">
-          {{
-            asignatura
-          }}
-          <td><button type="submit" @click="eliminarAsignatura">Eliminar</button></td>
-        </tr>
-      </table>
-    </div>
+        <div class="field col-12 lg:col-4 md:col-12 sm:col-12">
+          <label class="">Email</label>
+          <InputText class="" id="emailInput" v-model="teacherRef.email.value" />
+          <InlineMessage v-if="!teacherRef.email.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El email es obligatorio</InlineMessage>
+        </div>
+        <div class="field col-12">
+          <label class="">Seleccionar asignaturas</label>
+
+          <MultiSelect id="asignaturas" class="w-max" :style="{ 'max-width': '100%' }" :options="asignaturas" display="chip" filter optionLabel="nombre" placeholder="Seleccionar asignaturas"
+            v-model="teacherRef.asignaturas.value">
+          </MultiSelect>
+          <InlineMessage v-if="teacherRef.asignaturas.value.length == 0 && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">Las asignaturas son obligatorias</InlineMessage>
+        </div>
+        <div class="field col-12 mt-2 pl-0 mb-0 ">
+          <div class="field col-12 lg:col-4 md:col-12 sm:col-12 ">
+            <label class="">Seleccionar usuario</label>
+            <Dropdown class="" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput"
+              placeholder="Selecciona un usuario" v-model="selectedUserId" />
+            <InlineMessage v-if="!user && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El usuario es obligatorio</InlineMessage>
+          </div>
+          <div v-if="selectedUserId" class="ml-1">
+            <DataTable :value="[user]" class="pl-1" tableStyle="width: 30rem" :pt="{
+              table: {
+                class: 'mt-0',
+                style: { 'border': 'none' }
+              }
+            }">
+              <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+              <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+              <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem">
+                <template #body="">
+                  {{ permisoString }}
+                </template>
+              </Column>
+            </DataTable>
+          </div>
+        </div>
+        <div class="field col-12">
+          <Button class="justify-content-center w-auto h-auto" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
+          <Button class="justify-content-center w-auto h-auto" severity="secondary" icon="pi pi-trash" iconPos="left" label="Borrar" @click="borrarDatosForm()"></Button>
+        </div>
+      </div>
+    </form>
   </div>
+  <Toast :pt="{
+    container: {
+      class: 'align-items-center'
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }">
+  </Toast>
 </template>
 
-<style scoped>
-.form {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: column;
-  justify-content: center;
-  width: 300px;
-
-  & Form {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  div label {
-    display: block;
-  }
-
-  div input {
-    height: 25px;
-    border-radius: 5px;
-  }
-
-  button {
-    margin-top: 10px;
-    width: 100px;
-    height: 25px;
-    background-color: hsla(160, 100%, 37%, 1);
-    color: white;
-    border: 1px solid hsla(160, 100%, 37%, 1);
-    border-radius: 5px;
-    cursor: pointer;
-  }
-}
-
-.container.altaProfesorPopup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.altaProfesorPopup-content {
-  background: #000000;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid white;
-  display: flex;
-  flex-direction: column;
-  /* Añadido para disponer los elementos verticalmente */
-
-  & label {
-    display: block;
-    margin-bottom: 5px;
-  }
-
-  & input {
-    height: 25px;
-    width: 100%;
-    margin-bottom: 10px;
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-  }
-
-  & button {
-    margin-top: 10px;
-    width: 100px;
-    height: 30px;
-    background-color: hsla(160, 100%, 37%, 1);
-    color: white;
-    border: 1px solid hsla(160, 100%, 37%, 1);
-    border-radius: 5px;
-    cursor: pointer;
-    margin: auto;
-    margin-top: 10px;
-  }
-}
-
-.vistaPrevia {
-  display: flex;
-  flex-direction: column;
-  width: 1000px;
-}
-
-table {
-  /* width: 1000px; */
-  border: 1px solid #ffffff;
-
-  /* & th {
-    background-color: rgb(79, 90, 86);
-  } */
-
-  & td {
-    width: fit-content;
-    text-align: left;
-    vertical-align: top;
-    border: 1px solid #ffffff;
-    border-spacing: 0;
-  }
-
-  & #tdAsignaturas {
-    width: 500px;
-  }
-}
-
-#asignaturasSeleccionadas {
-  /* display: flex;
-  flex-wrap: wrap; */
-  width: fit-content;
-  border: none;
-
-  & td {
-    text-align: center;
-    vertical-align: text-bottom;
-    border: none;
-  }
-
-  & button {
-    width: 100px;
-    height: 25px;
-    background-color: hsla(160, 100%, 37%, 1);
-    color: white;
-    border: 1px solid hsla(160, 100%, 37%, 1);
-    border-radius: 5px;
-    cursor: pointer;
-  }
-}
-</style>
+<style scoped></style>

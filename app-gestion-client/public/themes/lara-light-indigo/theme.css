@@ -724,7 +724,7 @@
 }
 .p-checkbox .p-checkbox-box {
   border: 2px solid #ced4da;
-  background: #ffffff;
+  /* background: #ffffff; */ /* Fondo borrado porque no se veía por defecto */
   width: 22px;
   height: 22px;
   color: #495057;
@@ -737,6 +737,8 @@
 }
 .p-checkbox .p-checkbox-box .p-checkbox-icon {
   transition-duration: 0.2s;
+  border-color: #6366f1;
+  background: #6366f1;
   color: #ffffff;
   font-size: 14px;
 }
