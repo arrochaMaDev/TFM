@@ -1,120 +1,147 @@
 <script setup lang="ts">
 import { ref, watch, type Ref } from 'vue'
+import Password from 'primevue/password';
+import InputText from 'primevue/inputtext';
+import Dropdown from 'primevue/dropdown';
+import InlineMessage from 'primevue/inlinemessage';
+import Button from 'primevue/button';
+import { useToast } from "primevue/usetoast";
+import Toast from 'primevue/toast';
 
-//Referencias del formulario
+const toast = useToast();
+
+// REFERENCIAS DEL FORMULARIO
 const userRef = {
-  username: ref<string>(''),
-  email: ref<string>(''),
-  pass: ref<string>(''),
-  passRepeated: ref<string>(''),
-  permisoSelected: ref<string | null>(null),
-  permiso: ref<number | null>(null)
+  username: ref<string | undefined>(undefined),
+  email: ref<string | undefined>(undefined),
+  pass: ref<string | undefined>(undefined),
+  permiso: ref<number | undefined>(undefined)
 }
+const userPassRefConfirmed: Ref<string | undefined> = ref(undefined)
+const formSubmitted = ref(false); // variable para avisos con InlineText
 
+// VALIDAR DATOS DEL FORMULARIO
+const patronEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 // FETCH PARA ENVIAR DATOS DEL USUARIO A LA BD:
-function crearUsuario() {
-  if (userPassRef.value !== userPassRefConfirmed.value) {
-    alert('las contraseñas no coinciden')
-  } else {
-    fetch('http://localhost:3000/user', {
-      method: 'POST',
-      body: JSON.stringify({
-        username: userUsernameRef.value,
-        email: userEmailRef.value,
-        pass: userPassRef.value,
-        permiso: userPermisoRef.value
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
-        } else {
-          alert('Usuario Creado')
-        }
-      })
-      .catch((error) => {
-        console.error('Error en la solicitud:', error)
-        alert('Ha ocurrido un error')
-      })
+const crearUsuario = async () => {
+  console.log(userRef.permiso.value)
+  formSubmitted.value = true;
+  let isValid = true
 
-    // Imprimo los datos que he enviado a la base de datos
-    const datosUsuario = [
-      userUsernameRef.value,
-      userEmailRef.value,
-      userPassRef.value,
-      userPermisoRef.value
-    ]
-    console.log(datosUsuario)
+  if (userRef.pass.value !== userPassRefConfirmed.value) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Las contraseñas no coinciden', life: 3000 });
+    isValid = false
+  }
+  if (userRef.email.value && !patronEmail.test(userRef.email.value)) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
+    isValid = false
+  }
+  if (!userRef.username.value || !userRef.email.value || !userRef.pass.value || userRef.permiso.value == undefined) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
+    isValid = false
+  }
+  if (isValid) {
+    try {
+      const response = await fetch('http://localhost:3000/user', {
+        method: 'POST',
+        body: JSON.stringify({
+          username: userRef.username.value,
+          email: userRef.email.value,
+          pass: userRef.pass.value,
+          permiso: Number(userRef.permiso.value)
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      if (!response.ok) {
+        throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+      } else {
+        toast.add({ severity: 'success', summary: 'Creado', detail: 'Usuario creado', life: 3000 });
+
+        const datosUsuario = [
+          userRef.username.value,
+          userRef.email.value,
+          userRef.pass.value,
+          userRef.permiso.value
+        ]
+        console.table(datosUsuario)
+      }
+    } catch (error) {
+      console.error('Error en la solicitud:', error)
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    }
   }
 }
 
+// Verificar contraseñas coinciden
+const passValid = ref(true)
 
-
-watch(selectedPermisoRef, () => {
-  if (selectedPermisoRef.value === 'Alumno') userPermisoRef.value = 0
-  else if (selectedPermisoRef.value === 'Profesor') userPermisoRef.value = 1
-  else if (selectedPermisoRef.value === 'Administrador') userPermisoRef.value = 9
-  else userPermisoRef.value = null
+watch(userPassRefConfirmed, () => {
+  if (userPassRefConfirmed.value !== userRef.pass.value) {
+    passValid.value = false
+  }
+  else {
+    passValid.value = true
+  }
 })
-console.log(userPermisoRef.value)
 
-// para resetear los datos del formulario y poner cada ref a vacío
-function resetearDatosForm() {
-  userUsernameRef.value = ''
-  userEmailRef.value = ''
-  userPassRef.value = ''
-  userPassRefConfirmed.value = ''
-  selectedPermisoRef.value = ''
+
+// Dropdown permisos 
+const permisos = ref([
+  { name: 'Alumno', code: 0 },
+  { name: 'Profesor', code: 1 },
+  { name: 'Administrador', code: 9 },
+]);
+
+// borrar datos del form y valores por defecto
+const borrarDatosForm = () => {
+  userRef.username.value = undefined
+  userRef.email.value = undefined
+  userRef.pass.value = undefined
+  userRef.permiso.value = undefined
+  userPassRefConfirmed.value = undefined
+  formSubmitted.value = false
 }
 
-//mostrar o ocultar contraseña
-let verPass: Ref<boolean> = ref(false)
-const ToggleVerPass = () => {
-  verPass.value = !verPass.value
-}
 </script>
 
-
-
 <template>
-  <div class="card col-12 lg:col-9 md:col-12 sm:col-12">
+  <div class="card col-12 xl:col-9 lg:col-12 md:col-12 sm:col-12">
     <form @submit.prevent="crearUsuario()">
-      <h2>Nuevo <Ul></Ul>suario</h2>
+      <h2>Nuevo Usuario</h2>
       <div class="p-fluid formgrid grid">
         <div class="field col-12 lg:col-6 md:col-12 sm:col-12">
-          <label class="">Nombre</label>
-          <InputText class="" id="username" v-model="studentRef.nombre.value" />
-          <InlineMessage v-if="!studentRef.nombre.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El nombre es obligatorio</InlineMessage>
-        </div>
-        <div class="field col-12 lg:col-4 md:col-4 sm:col-12">
-          <label class="">Email</label>
-          <InputText class="" id="emailInput" v-model="studentRef.email.value" />
-          <InlineMessage v-if="!studentRef.email.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El email es obligatorio</InlineMessage>
+          <label class="">Username</label>
+          <InputText class="" id="username" v-model="userRef.username.value" />
+          <InlineMessage v-if="!userRef.username.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El username es obligatorio</InlineMessage>
         </div>
         <div class="field col-12 lg:col-6 md:col-12 sm:col-12">
-          <label class="">Contraseña</label>
-          <InputText class="" id="email" v-model="studentRef.apellidos.value" />
-          <InlineMessage v-if="!studentRef.apellidos.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El apellido es obligatorio</InlineMessage>
+          <label class="">Email</label>
+          <InputText class="" id="email" v-model="userRef.email.value" />
+          <InlineMessage v-if="!userRef.email.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El email es obligatorio</InlineMessage>
         </div>
         <div class="field col-12 lg:col-4 md:col-4 sm:col-12">
-          <label class="">Repetir contraseña</label>
-          <InputText class="" id="dniInput" v-model="studentRef.dni.value" />
-          <InlineMessage v-if="!studentRef.dni.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El DNI es obligatorio</InlineMessage>
+          <label class="">Pass</label>
+          <Password id="pass" toggleMask :feedback="false" v-model="userRef.pass.value" />
+          <InlineMessage v-if="!userRef.pass.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El password es obligatorio</InlineMessage>
         </div>
-        <div class="field col-12 lg:col-4 md:col-12 sm:col-12">
-          <label class="">Permiso</label>
-          <Dropdown class="" :options="provincias" optionLabel="label" checkmark :highlightOnSelect="false" showClear id="provinciaInput" placeholder="Selecciona una provincia"
-            v-model="studentRef.provincia.value" />
-          <InlineMessage v-if="!studentRef.provincia.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La provincia es obligatoria</InlineMessage>
+        <div class="field col-12 lg:col-4 md:col-4 sm:col-12">
+          <label class="">Repeat Pass</label>
+          <Password class="" id="passConfirmed" toggleMask :feedback="false" v-model="userPassRefConfirmed" />
+          <InlineMessage v-if="!userPassRefConfirmed && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">Debe repetir la contraseña</InlineMessage>
+          <InlineMessage v-if="!passValid" class="bg-transparent justify-content-start p-0 pt-1">Las contraseñas no coindiden</InlineMessage>
         </div>
-        <div class="field col-12 mt-2 pl-1 mb-0">
-          <Button class="justify-content-center w-auto h-auto" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
+        <div class="field col-12 lg:col-4 md:col-4 sm:col-12 ">
+          <label class="">Seleccionar permiso</label>
+          <Dropdown class="" id="permisos" :options="permisos" optionLabel="name" optionValue="code" checkmark :highlightOnSelect="false" showClear placeholder="Selecciona un permiso"
+            v-model="userRef.permiso.value" />
+          <InlineMessage v-if="userRef.permiso.value == undefined && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El permiso es obligatorio</InlineMessage>
         </div>
+        <Button class="justify-content-center w-auto h-auto" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
+        <Button class="justify-content-center w-auto h-auto" severity="secondary" icon="pi pi-trash" iconPos="left" label="Borrar" @click="borrarDatosForm()"></Button>
       </div>
     </form>
   </div>

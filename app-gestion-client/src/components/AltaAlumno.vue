@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
+import InputMask from 'primevue/inputmask';
 import Dropdown from 'primevue/dropdown';
 import InlineMessage from 'primevue/inlinemessage';
 import Button from 'primevue/button';
@@ -19,10 +20,10 @@ const studentRef = {
   apellidos: ref<string | undefined>(undefined),
   dni: ref<string | undefined>(undefined),
   direccion: ref<string | undefined>(undefined),
-  codigoPostal: ref<number | undefined>(undefined),
+  codigoPostal: ref<string | undefined>(undefined),
   ciudad: ref<string | undefined>(undefined),
   provincia: ref<string | undefined>(undefined),
-  telefono: ref<number | undefined>(undefined),
+  telefono: ref<string | undefined>(undefined),
   email: ref<string | undefined>(undefined),
   userId: ref<number | undefined>(undefined)
 }
@@ -40,6 +41,7 @@ const borrarDatosForm = () => {
   studentRef.provincia.value = undefined
   studentRef.telefono.value = undefined
   studentRef.email.value = undefined
+  selectedUserId.value = undefined
 }
 
 //OBTENER USUARIOS
@@ -47,7 +49,6 @@ const usersRefFromServer: Ref<{
   id: number,
   username: string,
   email: string,
-  // pass: string,
   permiso: number
 }[]> = ref([])
 
@@ -70,8 +71,8 @@ const getUsersData = async () => {
         permiso: number
       }[]
       usersRefFromServer.value = data
-      console.table(usersRefFromServer.value)
-      console.log(data)
+      // console.table(usersRefFromServer.value)
+      // console.log(data)
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
@@ -85,15 +86,9 @@ const user: Ref<{
   id: number | null;
   username: string;
   email: string;
-  // pass: string;
   permiso: number | null;
-}> = ref({
-  id: null,
-  username: '',
-  email: '',
-  // pass: '',
-  permiso: null
-});
+} | undefined> = ref(undefined);
+
 const permisoString: Ref<string> = ref("")
 
 const getUser = async () => {
@@ -116,7 +111,7 @@ const getUser = async () => {
         permiso: number
       }
       user.value = data
-      console.table(user.value)
+      // console.table(user.value)
 
       // PERMISO A STRING
       switch (user.value.permiso) {
@@ -158,7 +153,7 @@ const crearAlumno = async () => {
   formSubmitted.value = true;
   let isValid = true
 
-  if (studentRef.telefono.value && !patronTel.test(studentRef.telefono.value.toString())) {
+  if (studentRef.telefono.value && !patronTel.test(studentRef.telefono.value)) {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'El número de teléfono debe tener 9 dígitos numéricos', life: 3000 });
     isValid = false
   }
@@ -170,6 +165,10 @@ const crearAlumno = async () => {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
     isValid = false
   }
+  if (!user.value) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Debe seleccionar un usuario', life: 3000 });
+    isValid = false
+  }
   if (isValid) {
     try {
       const response = await fetch('http://localhost:3000/student', {
@@ -179,9 +178,9 @@ const crearAlumno = async () => {
           apellidos: studentRef.apellidos.value,
           dni: studentRef.dni.value,
           direccion: studentRef.direccion.value,
-          telefono: studentRef.telefono.value,
+          telefono: Number(studentRef.telefono.value),
           email: studentRef.email.value,
-          userId: studentRef.userId.value
+          userId: user.value?.id
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -203,6 +202,7 @@ const crearAlumno = async () => {
         ]
         console.table(datosAlumno)
         borrarDatosForm()
+        formSubmitted.value = false;
       }
     } catch (error) {
       console.error('Error en la solicitud:', error)
@@ -211,6 +211,7 @@ const crearAlumno = async () => {
   }
 }
 
+//OBTENER CCAAS Y PROVINCIAS
 const ccaas: Ref<any> = ref([])
 const provincias: Ref<{
   parent_code: string,
@@ -219,7 +220,6 @@ const provincias: Ref<{
 }[]> = ref([])
 
 onMounted(async () => {
-
   try {
     getUsersData()
 
@@ -262,7 +262,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="card col-12 lg:col-9 md:col-12 sm:col-12">
+  <div class="card col-12 xl:col-9 lg:col-12 md:col-12 sm:col-12">
     <form @submit.prevent="crearAlumno()">
       <h2>Nuevo Alumno</h2>
       <div class="p-fluid formgrid grid">
@@ -283,7 +283,8 @@ onMounted(async () => {
         </div>
         <div class="field col-12 lg:col-4 md:col-4 sm:col-12">
           <label class="">Teléfono</label>
-          <InputNumber class="" id="telefonoInput" :useGrouping="false" required v-model="studentRef.telefono.value" />
+          <!-- <InputNumber class="" id="telefonoInput" :useGrouping="false" required v-model="studentRef.telefono.value" /> -->
+          <InputMask class="" id="telefonoInput" mask="999999999" slotChar="" v-model="studentRef.telefono.value" />
           <InlineMessage v-if="!studentRef.telefono.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El teléfono es obligatorio</InlineMessage>
         </div>
         <div class="field col-12 lg:col-4 md:col-4 sm:col-12">
@@ -298,7 +299,8 @@ onMounted(async () => {
         </div>
         <div class="field col-12 lg:col-3 md:col-12 sm:col-12">
           <label class="">Código Postal</label>
-          <InputNumber class="" id="CPInput" :useGrouping="false" v-model="studentRef.codigoPostal.value" />
+          <!-- <InputNumber class="" id="CPInput" :useGrouping="false" v-model="studentRef.codigoPostal.value" /> -->
+          <InputMask class="" id="CPInput" mask="99999" slotChar="" v-model="studentRef.codigoPostal.value" />
           <InlineMessage v-if="!studentRef.codigoPostal.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El CP es obligatorio</InlineMessage>
         </div>
         <div class="field col-12 lg:col-5 md:col-12 sm:col-12">
@@ -317,7 +319,7 @@ onMounted(async () => {
             <label class="">Seleccionar usuario</label>
             <Dropdown class="" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput"
               placeholder="Selecciona un usuario" v-model="selectedUserId" />
-            <InlineMessage v-if="!studentRef.userId.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El usuario es obligatorio</InlineMessage>
+            <InlineMessage v-if="!user && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El usuario es obligatorio</InlineMessage>
           </div>
           <div v-if="selectedUserId" class="ml-1">
             <DataTable :value="[user]" class="pl-1" tableStyle="width: 30rem" :pt="{
@@ -337,6 +339,7 @@ onMounted(async () => {
           </div>
         </div>
         <Button class="justify-content-center w-auto h-auto" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
+        <Button class="justify-content-center w-auto h-auto" severity="secondary" icon="pi pi-trash" iconPos="left" label="Borrar" @click="borrarDatosForm()"></Button>
       </div>
     </form>
   </div>
