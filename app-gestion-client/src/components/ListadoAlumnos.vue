@@ -106,7 +106,6 @@ const borrarAlumno = async (alumno: typeof studentsRefFromServer.value[0]) => {
     })
     if (response.status === 204) {
       toast.add({ severity: 'success', summary: 'Borrado', detail: 'Alumno borrado', life: 3000 });
-      // popupVisible.value = false
       getStudentsData()
     } else {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
@@ -124,8 +123,6 @@ const borrarAlumno = async (alumno: typeof studentsRefFromServer.value[0]) => {
 const editingStore = useEditingStore() // store del componente editar Alumno
 
 const visibleDialog: Ref<boolean> = ref(false);
-
-
 
 
 const alumnoEditar: Ref<
@@ -195,14 +192,14 @@ const editarAlumno = async () => {
         throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
       } else {
         toast.add({ severity: 'success', summary: 'Editado', detail: 'Alumno editado', life: 3000 });
-        const alumnoActualizado = [
-          alumnoEditar.value?.nombre,
-          alumnoEditar.value?.apellidos,
-          alumnoEditar.value?.dni,
-          alumnoEditar.value?.direccion,
-          alumnoEditar.value?.telefono,
-          alumnoEditar.value?.email
-        ]
+        const alumnoActualizado = {
+          nombre: alumnoEditar.value?.nombre,
+          apellidos: alumnoEditar.value?.apellidos,
+          dni: alumnoEditar.value?.dni,
+          direccion: alumnoEditar.value?.direccion,
+          telefono: alumnoEditar.value?.telefono,
+          email: alumnoEditar.value?.email
+        };
         console.table(alumnoActualizado)
       }
     } catch (error) {

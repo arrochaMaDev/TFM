@@ -1,63 +1,19 @@
-<!-- eslint-disable vue/no-side-effects-in-computed-properties -->
 <script setup lang="ts">
 import { computed, ref, type Ref } from 'vue'
-import Popup from './Popup.vue'
+import InputText from 'primevue/inputtext';
+import InlineMessage from 'primevue/inlinemessage';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Button from 'primevue/button';
+import { useToast } from "primevue/usetoast";
+import Toast from 'primevue/toast';
 
-// FETCH PARA ENVIAR DATOS DE LA ASIGNATURA A LA BD:
+const toast = useToast();
 
-const buscarAsignatura = (): boolean => {
-  for (const asignatura of asignaturasRefFromServer.value) {
-    if (asignatura.nombre.toLowerCase() === asignaturaRef.value.toLowerCase()) {
-      return true // Si se encuentra la asignatura, devuelve true
-    }
-  }
-  return false // Si no se encuentra la asignatura, devuelve false
-}
-
-function crearAsignatura() {
-  // Buscar si ya está en el array
-  let repetido: boolean = buscarAsignatura()
-  if (!repetido) {
-    fetch('http://localhost:3000/asignaturas', {
-      method: 'POST',
-      body: JSON.stringify({
-        nombre: asignaturaRef.value
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
-        } else {
-          alert('Asignatura creada')
-        }
-      })
-      .catch((error) => {
-        console.error('Error en la solicitud:', error)
-        alert('Ha ocurrido un error')
-      })
-  } else {
-    alert('La asignatura ya existe')
-  }
-
-  // Imprimo los datos que he enviado a la base de datos
-  const asignatura = asignaturaRef.value
-  console.log(asignatura)
-  resetearDatosForm()
-}
 
 //Referencias del formulario
-let asignaturaRef: Ref<string> = ref('')
-
-console.log(asignaturaRef.value)
-
-// para resetear los datos del formulario y poner cada ref a vacío
-function resetearDatosForm() {
-  asignaturaRef.value = ''
-}
+const asignaturaRef: Ref<string | undefined> = ref(undefined)
+const formSubmitted = ref(false); // variable para avisos con InlineText
 
 // OBTENER LA LISTA DE ASIGNATURAS DEL SERVIDOR:
 let asignaturasRefFromServer: Ref<
@@ -67,94 +23,61 @@ let asignaturasRefFromServer: Ref<
   }[]
 > = ref([])
 
-function getAsignaturasData() {
-  fetch('http://localhost:3000/asignaturas', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include'
-  })
-    .then(async (response) => {
-      if (!response.ok) {
-        throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
-      } else {
-        //   loadingStore.loadingTrue()
-        //   await new Promise((resolve) => setTimeout(resolve, 2000))
-        const data = (await response.json()) as {
-          id: number
-          nombre: string
-        }[]
-        asignaturasRefFromServer.value = data
-        console.log(data)
-      }
+const getAsignaturasData = async () => {
+  try {
+    const response = await fetch('http://localhost:3000/asignaturas', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
     })
-    .catch((error) => {
-      console.error('Error en la solicitud:', error)
-      alert('Ha ocurrido un error')
-    })
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      const data = (await response.json()) as {
+        id: number
+        nombre: string
+      }[]
+      asignaturasRefFromServer.value = data
+      console.table(data)
+    }
+  }
+  catch (error) {
+    console.error('Error en la solicitud:', error)
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+  }
 }
 getAsignaturasData()
 
-// BORRAR ASIGNATURA
-let popupVisible: Ref<boolean> = ref(false) // ref para ocultar o mostrar el popup
-let idAsingaturaSeleccionada: Ref<number | null> = ref(null)
-
-const borrarAsignatura = async () => {
-  // funcion con async/await y try/catch en vez de fetch con .then y .catch
-  try {
-    const response = await fetch(
-      `http://localhost:3000/asignaturas/${idAsingaturaSeleccionada.value}`,
-      {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      }
-    )
-    if (response.status === 204) {
-      alert('Asignatura borrada con éxito')
-      popupVisible.value = false
-      getAsignaturasData()
-    } else {
-      throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+// FETCH PARA ENVIAR DATOS DE LA ASIGNATURA A LA BD:
+const buscarAsignatura = (): boolean => {
+  for (const asignatura of asignaturasRefFromServer.value) {
+    if (asignatura.nombre.toLowerCase() === asignaturaRef.value?.toLowerCase()) {
+      return true // Si se encuentra la asignatura, devuelve true
     }
-  } catch (error) {
-    console.error('Error en la solicitud:', error)
-    alert('Ha ocurrido un error')
-    popupVisible.value = false
   }
+  return false // Si no se encuentra la asignatura, devuelve false
 }
 
-const cancelarBorrar = () => {
-  // si se da click en no se cancela el borrado
-  popupVisible.value = false
-  idAsingaturaSeleccionada.value = null
-}
+const crearAsignatura = async () => {
+  formSubmitted.value = true;
+  let isValid = true
+  let repetido: boolean = buscarAsignatura()
 
-// Confirmación borrar asignatura
-const mostrarPopup = (id: number) => {
-  // si se da click en si, se muestra el popup y recibe el id del alumno a borrar
-  idAsingaturaSeleccionada.value = id
-  popupVisible.value = true
-}
-let modoEditar: Ref<boolean> = ref(false)
-let asignaturaEditarId: Ref<number | null> = ref(null)
+  if (repetido) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'La asignatura ya está en la base de datos', life: 3000 });
+    isValid = false
+  }
+  if (!asignaturaRef.value || asignaturaRef.value === '') {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
+    isValid = false
+  }
 
-const editando = (asignatura: any) => {
-  asignaturaRef.value = asignatura.nombre
-  modoEditar.value = true
-  console.log(asignatura.id)
-  asignaturaEditarId.value = asignatura.id
-}
-
-const editarAsignatura = async () => {
-  const repetido: boolean = buscarAsignatura()
-  if (!repetido) {
+  if (!repetido && isValid) {
     try {
-      const response = await fetch(`http://localhost:3000/asignatura/${asignaturaEditarId.value}`, {
-        method: 'PUT',
+      const response = await fetch('http://localhost:3000/asignaturas', {
+        method: 'POST',
         body: JSON.stringify({
           nombre: asignaturaRef.value
         }),
@@ -163,166 +86,61 @@ const editarAsignatura = async () => {
         },
         credentials: 'include'
       })
-      if (response.ok) {
-        alert('Asignatura Editada')
-      } else {
+      if (!response.ok) {
         throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+      } else {
+        toast.add({ severity: 'success', summary: 'Creado', detail: 'Asignatura creada', life: 3000 });
+
+        const asignatura = asignaturaRef.value
+        console.log(asignatura)
+        borrarDatosForm()
+        formSubmitted.value = false;
+        getAsignaturasData()
       }
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error en la solicitud:', error)
-      alert('Ha ocurrido un error')
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
     }
   }
-  if (repetido) {
-    alert('Ya existe una asignatura con ese nombre')
-  }
-  modoEditar.value = false
-  resetearDatosForm()
-  getAsignaturasData()
 }
 
-// ORDENAR EL ARRAY DE ASIGNATURAS PARA MOSTRARLAS POR NOMBRE
-// FUNCION ELIMINAR TILDES
-function eliminarTildes(str: string): string {
-  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+// para resetear los datos del formulario y poner cada ref a vacío
+function borrarDatosForm() {
+  formSubmitted.value = false;
+  asignaturaRef.value = ''
 }
-const asignaturasRefFromServerOrdenadas = computed(() =>
-  asignaturasRefFromServer.value.slice().sort((a, b) => {
-    const nombreA = eliminarTildes(a.nombre.toLowerCase())
-    const nombreB = eliminarTildes(b.nombre.toLowerCase())
-    if (nombreA < nombreB) {
-      return -1
-    }
-    if (nombreA > nombreB) {
-      return 1
-    }
-    return 0
-  })
-)
+
+
 </script>
 
 <template>
-  <div class="centradoVertical">
-    <div class="form">
-      <h1 class="green">Alta Asignatura</h1>
-      <form @submit.prevent="crearAsignatura(), getAsignaturasData()">
-        <label class="green">Asignatura</label>
-        <input type="text" name="" id="AsignaturaInput" required v-model="asignaturaRef" />
-        <button type="reset" @click="resetearDatosForm()">Resetear</button>
-        <button type="submit" v-if="!modoEditar">Enviar</button>
-        <button type="button" v-if="modoEditar" @click="editarAsignatura()">Actualizar</button>
-      </form>
-    </div>
-    <div>
-      <table>
-        <tr>
-          <th colspan="3">LISTADO DE ASIGNATURAS</th>
-        </tr>
-        <tr
-          id="asignatura"
-          v-for="asignatura in asignaturasRefFromServerOrdenadas"
-          :key="asignatura.id"
-        >
-          {{
-            asignatura.nombre
-          }}
-          <td>
-            <button type="button" @click="editando(asignatura)">Editar</button>
-          </td>
-          <td><button type="button" @click="mostrarPopup(asignatura.id)">Borrar</button></td>
-        </tr>
-      </table>
-      <Popup v-if="popupVisible" @confirmar="borrarAsignatura" @cancelar="cancelarBorrar"></Popup>
-    </div>
+  <div class="card col-12 xl:col-6 lg:col-12 md:col-12 sm:col-12">
+    <form @submit.prevent="crearAsignatura()">
+      <h2>Nueva Asignatura</h2>
+      <div class="p-fluid formgrid grid">
+        <div class="field col-12 lg:col-9 md:col-9 sm:col-9">
+          <label class="">Nombre</label>
+          <InputText class="" id="nombreInput" v-model="asignaturaRef" />
+          <InlineMessage v-if="!asignaturaRef && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La asignatura es obligatoria</InlineMessage>
+        </div>
+        <div class="field col-12">
+          <Button class="justify-content-center w-auto h-auto" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
+          <Button class="justify-content-center w-auto h-auto" severity="secondary" icon="pi pi-trash" iconPos="left" label="Borrar" @click="borrarDatosForm()"></Button>
+        </div>
+      </div>
+    </form>
   </div>
+
+  <Toast :pt="{
+    container: {
+      class: 'align-items-center'
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }">
+  </Toast>
 </template>
 
-<style scoped>
-.form {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: column;
-  justify-content: center;
-  width: 300px;
-
-  & Form {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  & input {
-    height: 25px;
-    border-radius: 5px;
-  }
-
-  & button {
-    margin-top: 10px;
-    width: 100px;
-    height: 25px;
-    background-color: hsla(160, 100%, 37%, 1);
-    color: white;
-    border: 1px solid hsla(160, 100%, 37%, 1);
-    border-radius: 5px;
-  }
-}
-
-.vistaPrevia {
-  display: flex;
-  flex-direction: column;
-  width: 1000px;
-}
-
-table {
-  width: 1000px;
-  border: 1px solid #ffffff;
-
-  & th {
-    background-color: rgb(79, 90, 86);
-  }
-
-  & td {
-    width: fit-content;
-    text-align: left;
-    vertical-align: top;
-    border: 1px solid #ffffff;
-    border-spacing: 0;
-  }
-}
-table {
-  margin-top: 0px;
-  width: max-content;
-  border: none;
-
-  & th {
-    background-color: rgb(79, 90, 86);
-  }
-  & td {
-    width: fit-content;
-    text-align: left;
-    vertical-align: top;
-    border: none;
-    border-spacing: 0;
-  }
-}
-
-table tr:hover td {
-  transition: background-color 0.5s;
-  background-color: rgb(106, 98, 53);
-}
-
-table tr:hover td:nth-last-child(-n + 3) {
-  background-color: initial;
-}
-
-button {
-  width: 50px;
-  height: 25px;
-  background-color: hsla(160, 100%, 37%, 1);
-  color: white;
-  border: 1px solid hsla(160, 100%, 37%, 1);
-  border-radius: 5px;
-  margin: 1px;
-  cursor: pointer;
-}
-</style>
+<style scoped></style>

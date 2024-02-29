@@ -39,7 +39,8 @@ let menuArray: MenuItem[] = [
                 label: 'Listado Usuarios', icon: 'pi pi-list', to: '/listado-usuarios'
             },
             { label: 'Listado Alumnos', icon: 'pi pi-list', to: '/listado-alumnos' },
-            { label: 'Listado Profesores', icon: 'pi pi-list', to: '/istado-profesores' }
+            { label: 'Listado Profesores', icon: 'pi pi-list', to: '/listado-profesores' },
+            { label: 'Listado Asignaturas', icon: 'pi pi-list', to: '/listado-asignaturas' }
         ]
     },
     {
