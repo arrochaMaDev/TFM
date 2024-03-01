@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import { type Ref, ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useLoadingStore } from '@/stores/loading'
-import { useEditingStore } from '@/stores/editar'
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
-import InputNumber from 'primevue/inputnumber'
 import { FilterMatchMode } from 'primevue/api';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from "primevue/useconfirm";
@@ -18,8 +14,6 @@ import Dialog from 'primevue/dialog';
 
 const confirm = useConfirm();
 const toast = useToast();
-
-const router = useRouter() // router para ir al alumno cuando se clique en él
 
 // OBTENER LA LISTA DE ASIGNATURAS DEL SERVIDOR:
 let asignaturasRefFromServer: Ref<
@@ -77,10 +71,10 @@ const confirmDelete = (asignatura: typeof asignaturasRefFromServer.value[0]) => 
 
 const borrarAsignatura = async (asignatura: typeof asignaturasRefFromServer.value[0]) => {
   console.table(asignatura)
-  const idAsignatura = asignatura.id
+  // const idAsignatura = asignatura.id
   try {
     const response = await fetch(
-      `http://localhost:3000/asignaturas/${idAsignatura}`,
+      `http://localhost:3000/asignatura/${asignatura.id}`,
       {
         method: 'DELETE',
         headers: {
@@ -104,7 +98,6 @@ const borrarAsignatura = async (asignatura: typeof asignaturasRefFromServer.valu
 }
 
 // LÓGICA EDITAR ALUMNO
-const editingStore = useEditingStore() // store del componente editar Alumno
 
 const visibleDialog: Ref<boolean> = ref(false);
 
@@ -143,7 +136,7 @@ const editarAsignatura = async () => {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
     isValid = false
   }
-  if (!repetido) {
+  if (!repetido && isValid) {
     try {
       const response = await fetch(`http://localhost:3000/asignatura/${asignaturaEditar.value.id}`, {
         method: 'PUT',
@@ -176,150 +169,11 @@ const editarAsignatura = async () => {
   }
 }
 
-
-
-let modoEditar: Ref<boolean> = ref(false)
-let asignaturaEditarId: Ref<number | null> = ref(null)
-
-// const editando = (asignatura: any) => {
-//   asignaturaRef.value = asignatura.nombre
-//   modoEditar.value = true
-//   console.log(asignatura.id)
-//   asignaturaEditarId.value = asignatura.id
-// }
-
-
-
-// // ORDENAR EL ARRAY DE ASIGNATURAS PARA MOSTRARLAS POR NOMBRE
-// // FUNCION ELIMINAR TILDES
-// function eliminarTildes(str: string): string {
-//   return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-// }
-// const asignaturasRefFromServerOrdenadas = computed(() =>
-//   asignaturasRefFromServer.value.slice().sort((a, b) => {
-//     const nombreA = eliminarTildes(a.nombre.toLowerCase())
-//     const nombreB = eliminarTildes(b.nombre.toLowerCase())
-//     if (nombreA < nombreB) {
-//       return -1
-//     }
-//     if (nombreA > nombreB) {
-//       return 1
-//     }
-//     return 0
-//   })
-// )
-
-
-
-
-/////////////////////////
-/////////////////////////
-/////////////////////////
-/////////////////////////
-/////////////////////////
-
-
-
-
-
-// LÓGICA EDITAR ALUMNO
-// const editingStore = useEditingStore() // store del componente editar Alumno
-
-// const visibleDialog: Ref<boolean> = ref(false);
-
-// const alumnoEditar: Ref<
-//   | {
-//     id: number
-//     usuario_id: string
-//     nombre: string
-//     apellidos: string
-//     dni: string
-//     direccion: string
-//     telefono: number
-//     email: string
-//   }> = ref({
-//     id: 0,
-//     usuario_id: '',
-//     nombre: '',
-//     apellidos: '',
-//     dni: '',
-//     direccion: '',
-//     telefono: 0,
-//     email: ''
-//   }); // lo inicializo para evitar problemas con null o undefined en v-model
-
-// // const mostrarDialog = (student: typeof studentsRefFromServer.value[0]) => {
-// //   visibleDialog.value = true
-// //   alumnoEditar.value = { ...student } // spread crea un nuevo objeto y copia superficialmente el objeto
-// //   console.table(alumnoEditar.value)
-// // }
-
-// // validar datos del dialog
-// const patronTel = /^\d{9}$/
-// const patronEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-
-// const editarAlumno = async () => {
-//   let isValid = true
-//   if (alumnoEditar.value.telefono && !patronTel.test(alumnoEditar.value.telefono.toString())) {
-//     toast.add({ severity: 'warn', summary: 'Error', detail: 'El número de teléfono debe tener 9 dígitos numéricos', life: 3000 });
-//     isValid = false
-//   }
-//   if (!patronEmail.test(alumnoEditar.value.email)) {
-//     toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
-//     isValid = false
-//   }
-//   if (!alumnoEditar.value.nombre || !alumnoEditar.value.apellidos || !alumnoEditar.value.dni || !alumnoEditar.value.direccion || !alumnoEditar.value.telefono || !alumnoEditar.value.email) {
-//     toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
-//     isValid = false
-//   }
-//   if (isValid) {
-//     try {
-//       const response = await fetch(`http://localhost:3000/student/${alumnoEditar.value?.id}`, {
-//         method: 'PUT',
-//         body: JSON.stringify({
-//           nombre: alumnoEditar.value?.nombre,
-//           apellidos: alumnoEditar.value?.apellidos,
-//           dni: alumnoEditar.value?.dni,
-//           direccion: alumnoEditar.value?.direccion,
-//           telefono: Number(alumnoEditar.value?.telefono),
-//           email: alumnoEditar.value?.email
-//         }),
-//         headers: {
-//           'Content-Type': 'application/json'
-//         },
-//         credentials: 'include'
-//       })
-//       if (!response.ok) {
-//         throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
-//       } else {
-//         toast.add({ severity: 'success', summary: 'Editado', detail: 'Alumno editado', life: 3000 });
-//         const alumnoActualizado = [
-//           alumnoEditar.value?.nombre,
-//           alumnoEditar.value?.apellidos,
-//           alumnoEditar.value?.dni,
-//           alumnoEditar.value?.direccion,
-//           alumnoEditar.value?.telefono,
-//           alumnoEditar.value?.email
-//         ]
-//         console.table(alumnoActualizado)
-//       }
-//     } catch (error) {
-//       console.error('Error en la solicitud:', error)
-//       toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
-//     } finally {
-//       visibleDialog.value = false
-//       // getStudentsData()
-//     }
-//   }
-// }
-
-
 // DATOS TABLA
-const columns = [
-  { field: 'id', header: 'id' },
-  { field: 'nombre', header: 'Nombre' },
-];
+// const columns = [
+//   { field: 'id', header: 'id' },
+//   { field: 'nombre', header: 'Nombre' },
+// ];
 
 // Filtrar datos
 const filters = ref() // variable filtro

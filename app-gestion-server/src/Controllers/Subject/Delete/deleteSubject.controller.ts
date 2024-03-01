@@ -2,7 +2,7 @@ import { Controller, Delete, Param, Res } from '@nestjs/common';
 import { DeleteSubjectService } from './deleteSubject.service';
 import { Response } from 'express';
 
-@Controller('asignaturas')
+@Controller('asignatura')
 export class DeleteSubjectController {
   constructor(private readonly deleteSubjectService: DeleteSubjectService) {}
 
@@ -11,7 +11,7 @@ export class DeleteSubjectController {
     try {
       await this.deleteSubjectService.deleteSubject(Number(id));
       response.status(204).send(); // Asignatura eliminada con éxito
-      console.log('Asignarura eliminada');
+      console.log('Asignatura eliminada');
     } catch (error) {
       response.status(400).json({ error: error.message });
     }

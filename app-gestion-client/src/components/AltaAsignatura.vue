@@ -115,11 +115,11 @@ function borrarDatosForm() {
 </script>
 
 <template>
-  <div class="card col-12 xl:col-6 lg:col-12 md:col-12 sm:col-12">
+  <div class="card col-12 xl:col-4 lg:col-6 md:col-12 sm:col-12">
     <form @submit.prevent="crearAsignatura()">
       <h2>Nueva Asignatura</h2>
       <div class="p-fluid formgrid grid">
-        <div class="field col-12 lg:col-9 md:col-9 sm:col-9">
+        <div class="field col-12 xl:col-12 lg:col-12 md:col-9 sm:col-9">
           <label class="">Nombre</label>
           <InputText class="" id="nombreInput" v-model="asignaturaRef" />
           <InlineMessage v-if="!asignaturaRef && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La asignatura es obligatoria</InlineMessage>

@@ -1,5 +1,4 @@
 // import './assets/main.css' // vue por defecto
-// c
 import { G } from './G'
 import('@fortawesome/fontawesome-free/css/all.css')
 

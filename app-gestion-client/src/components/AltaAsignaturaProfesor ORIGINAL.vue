@@ -1,15 +1,6 @@
 <script setup lang="ts">
 import { useLoadingStore } from '@/stores/loading'
 import { type Ref, ref } from 'vue'
-import Dropdown from 'primevue/dropdown';
-import InlineMessage from 'primevue/inlinemessage';
-import Button from 'primevue/button';
-import { useToast } from "primevue/usetoast";
-import Toast from 'primevue/toast';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-
-const toast = useToast();
 
 const loadingStore = useLoadingStore() // store del Spinner
 
@@ -184,19 +175,19 @@ const fetchSubjectTeacher = async (subjectId: number, teacherId: number) => {
 const emit = defineEmits(['cerrarPopUp', 'obtenerSubjectsTeachers', 'resetearSubjectTeacher'])
 const props = defineProps<{
   subjectTeacherParaEditar:
-  | {
-    id: number
-    subject: {
-      id: number
-      nombre: string
-    }
-    teacher: {
-      id: number
-      nombre: string
-      apellidos: string
-    }
-  }
-  | undefined
+    | {
+        id: number
+        subject: {
+          id: number
+          nombre: string
+        }
+        teacher: {
+          id: number
+          nombre: string
+          apellidos: string
+        }
+      }
+    | undefined
   isEditing: boolean
 }>()
 
@@ -299,26 +290,171 @@ const handleSubjectTeacher = () => {
 </script>
 
 <template>
-  <div class="card col-12 xl:col-9 lg:col-12 md:col-12 sm:col-12">
-    <form @submit.prevent="">
-      <h2>Nuevo Alumno</h2>
-      <div class="p-fluid formgrid grid">
-        <div class="field col-12 lg:col-4 md:col-12 sm:col-12 ">
-          <label class="">Seleccionar profesor</label>
-          <Dropdown class="" :options="teachersRefFromServer" checkmark :highlightOnSelect="false" showClear placeholder="Selecciona un profesor" v-model="teacherSelected">
-            <template #option="slotProps">
-              <div>
-                {{ slotProps.option.nombre }}
-                {{ slotProps.option.apellidos }} |
-                {{ slotProps.option.email }}
-              </div>
-            </template>
-
-          </Dropdown>
-          <!-- <InlineMessage v-if="!user && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El usuario es obligatorio</InlineMessage> -->
+  <div class="container" :class="{ matriculaPopup: popUpStyle }">
+    <div class="form" :class="{ 'matriculaPopup-content': popUpStyle }">
+      <h1>Relación de asignaturas</h1>
+      <form @submit.prevent="handleSubjectTeacher()">
+        <div v-if="!popUpStyle">
+          <!--MODO CREAR -->
+          <table>
+            <tr>
+              <th>
+                <label for="profesor">Selecciona el profesor</label>
+              </th>
+              <th>
+                <label for="asignatura">Selecciona la asignatura</label>
+              </th>
+            </tr>
+            <tr>
+              <td>
+                <select name="profesor" id="" v-model="teacherSelected">
+                  <option
+                    v-for="teacher in teachersRefFromServer"
+                    :key="teacher.id"
+                    :value="teacher"
+                  >
+                    {{ teacher.nombre }} {{ teacher.apellidos }}
+                  </option>
+                </select>
+              </td>
+              <td>
+                <select name="asignatura" id="" v-model="subjectSelected">
+                  <option
+                    v-for="subject in subjectsRefFromServer"
+                    :key="subject.id"
+                    :value="subject"
+                  >
+                    {{ subject.nombre }}
+                  </option>
+                </select>
+              </td>
+              <td>
+                <button type="button" @click="agregarAsignatura()">Agregar</button>
+              </td>
+            </tr>
+            <tr v-for="subject in selectedSubjects" :key="subject.id">
+              <td>{{ subject.nombre }}</td>
+              <td><button type="button" @click="borrarAsignatura(subject.id)">Borrar</button></td>
+            </tr>
+          </table>
         </div>
-      </div>
-    </form>
+
+        <div v-if="popUpStyle">
+          <!--MODO ACTUALIZAR -->
+          <label for="profesor">Selecciona el profesor</label>
+          <select name="profesor" id="" v-model="subjectTeacherEditada.teacher">
+            <option v-for="teacher in teachersRefFromServer" :key="teacher.id" :value="teacher">
+              {{ teacher.nombre }} {{ teacher.apellidos }}
+            </option>
+          </select>
+          <label for="asignatura">Selecciona la asignatura</label>
+          <select name="asignatura" id="" v-model="subjectTeacherEditada.subject">
+            <option v-for="subject in subjectsRefFromServer" :key="subject.id" :value="subject">
+              {{ subject.nombre }}
+            </option>
+          </select>
+        </div>
+        <button type="submit">{{ popUpStyle ? 'Actualizar' : 'Enviar' }}</button>
+        <button type="button" v-if="popUpStyle" @click="emit('cerrarPopUp')">Cancelar</button>
+      </form>
+    </div>
   </div>
 </template>
-<style scoped></style>
+<style scoped>
+table {
+  margin-top: 0px;
+  width: max-content;
+  border: none;
+
+  & td {
+    width: fit-content;
+    text-align: left;
+    vertical-align: top;
+    border: none;
+    border-spacing: 0;
+    text-align: center;
+  }
+}
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: center;
+  width: 300px;
+
+  & Form {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: center;
+  }
+  div label {
+    display: block;
+  }
+
+  div input {
+    height: 25px;
+    border-radius: 5px;
+  }
+
+  button {
+    margin-top: 10px;
+    width: 100px;
+    height: 25px;
+    background-color: hsla(160, 100%, 37%, 1);
+    color: white;
+    border: 1px solid hsla(160, 100%, 37%, 1);
+    border-radius: 5px;
+    cursor: pointer;
+  }
+}
+.container.matriculaPopup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.matriculaPopup-content {
+  background: #000000;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid white;
+  display: flex;
+  flex-direction: column;
+
+  & label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  & input {
+    height: 25px;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+
+  & button {
+    margin-top: 10px;
+    width: 100px;
+    height: 30px;
+    background-color: hsla(160, 100%, 37%, 1);
+    color: white;
+    border: 1px solid hsla(160, 100%, 37%, 1);
+    border-radius: 5px;
+    cursor: pointer;
+    margin: auto;
+    margin-top: 10px;
+  }
+}
+</style>

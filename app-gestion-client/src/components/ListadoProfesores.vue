@@ -1,10 +1,21 @@
 <script setup lang="ts">
 import { type Ref, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import Popup from './Popup.vue'
-import AltaProfesor from './AltaProfesor.vue'
 import { useLoadingStore } from '@/stores/loading'
-import { useEditingStore } from '@/stores/editar'
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import { FilterMatchMode } from 'primevue/api';
+import ConfirmDialog from 'primevue/confirmdialog';
+import { useConfirm } from "primevue/useconfirm";
+import { useToast } from "primevue/usetoast";
+import Toast from 'primevue/toast';
+import Dialog from 'primevue/dialog';
+
+
+const confirm = useConfirm();
+const toast = useToast();
 
 const router = useRouter() // router para ir al alumno cuando se clique en él
 const loadingStore = useLoadingStore() // store del Spinner
@@ -33,7 +44,6 @@ const getTeachersData = async () => {
       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
       loadingStore.loadingTrue()
-      await new Promise((resolve) => setTimeout(resolve, 2000))
 
       const data = (await response.json()) as {
         id: number
@@ -48,59 +58,39 @@ const getTeachersData = async () => {
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
-    alert('Ha ocurrido un error')
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
   } finally {
     loadingStore.loadingFalse()
   }
 }
 
-// ORDENAR RESULTADOS POR VALOR QUE SE INDIQUE
-// let arrayOrdenado: Ref<
-//   {
-//     id: number
-//     usuario_id: string
-//     nombre: string
-//     apellidos: string
-//     email: string
-//   }[]
-// > = ref([]) // Nuevo array Ref para ordenar la lsta según se indique
 
-let ordenarPor: Ref<'id' | 'nombre' | 'apellidos' | 'email'> = ref('id')
+// LÓGICA BORRAR ALUMNO
 
-const ordenarArray = () => {
-  // arrayOrdenado.value = [...teachersRefFromServer.value]
-  const valor = ordenarPor.value
-
-  teachersRefFromServer.value.sort((a, b) => {
-    if (valor === 'id') {
-      return a[valor] - b[valor]
-    } else {
-      const valorA = a[valor].toLowerCase()
-      const valorB = b[valor].toLowerCase()
-      if (valorA < valorB) {
-        return -1
-      }
-      if (valorA > valorB) {
-        return 1
-      }
-      return 0
+const confirmDelete = (profesor: typeof teachersRefFromServer.value[0]) => {
+  console.table(profesor) // al ser un array, le indico el valor de la casilla 0
+  confirm.require({
+    message: '¿Seguro que quiere borrar este profesor?',
+    header: 'Borrar Profesor',
+    icon: 'pi pi-info-circle',
+    rejectLabel: 'Cancelar',
+    acceptLabel: 'Borrar',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-danger',
+    accept: () => {
+      borrarProfesor(profesor)
+    },
+    reject: () => {
+      toast.add({ severity: 'info', summary: 'Cancelado', detail: 'Se ha cancelado la operación', life: 3000 });
     }
-  })
-}
+  });
+};
 
-onMounted(() => {
-  ordenarArray()
-  getTeachersData()
-})
-
-// LÓGICA BORRAR PROFESOR
-let popupVisible: Ref<boolean> = ref(false) // ref para ocultar o mostrar el popup
-let idProfesorSeleccionado: Ref<number | null> = ref(null) // ref del id del alumno a borrar
-
-const borrarProfesor = async () => {
-  // funcion con async/await y try/catch en vez de fetch con .then y .catch
+const borrarProfesor = async (profesor: typeof teachersRefFromServer.value[0]) => {
+  console.table(profesor)
+  const idProfesor = profesor.id
   try {
-    const response = await fetch(`http://localhost:3000/teacher/${idProfesorSeleccionado.value}`, {
+    const response = await fetch(`http://localhost:3000/teacher/${idProfesor}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json'
@@ -108,185 +98,218 @@ const borrarProfesor = async () => {
       credentials: 'include'
     })
     if (response.status === 204) {
-      loadingStore.loadingTrue()
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      alert('Profesor borrado con éxito')
-      popupVisible.value = false
+      toast.add({ severity: 'success', summary: 'Borrado', detail: 'Profesor borrado', life: 3000 });
       getTeachersData()
     } else {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
-    alert('Ha ocurrido un error')
-    popupVisible.value = false
-  } finally {
-    loadingStore.loadingFalse()
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+  }
+  finally {
+    getTeachersData()
   }
 }
 
-const cancelarBorrar = () => {
-  // si se da click en no se cancela el borrado
-  popupVisible.value = false
-  idProfesorSeleccionado.value = null
-}
-
-const mostrarPopup = (id: number) => {
-  // si se da click en si, se muestra el popup y recibe el id del alumnoi a borrar
-  idProfesorSeleccionado.value = id
-  popupVisible.value = true
-}
-
 // LÓGICA EDITAR PROFESOR
-const editingStore = useEditingStore() // store del componente editar Profesor
 
-let popUpState: Ref<boolean> = ref(editingStore.editarFalse()) // variable del estado del popUp
-console.log(popUpState.value)
+const visibleDialog: Ref<boolean> = ref(false);
 
-let profesorEditar: Ref<
+
+const profesorEditar: Ref<
   | {
-      id: number
-      nombre: string
-      apellidos: string
-      email: string
-      asignaturas: string
+    id: number
+    nombre: string
+    apellidos: string
+    email: string
+  }> = ref({
+    id: 0,
+    nombre: '',
+    apellidos: '',
+    email: ''
+  }); // lo inicializo para evitar problemas con null o undefined en v-model
+
+const mostrarDialog = (teacher: typeof teachersRefFromServer.value[0]) => {
+  visibleDialog.value = true
+  profesorEditar.value = { ...teacher } // spread crea un nuevo objeto y copia superficialmente el objeto
+  console.table(profesorEditar.value)
+}
+
+// validar datos del dialog
+const patronEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+
+const editarProfesor = async () => {
+  let isValid = true
+  if (!patronEmail.test(profesorEditar.value.email)) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
+    isValid = false
+  }
+  if (!profesorEditar.value.nombre || !profesorEditar.value.apellidos || !profesorEditar.value.email) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
+    isValid = false
+  }
+  if (isValid) {
+    try {
+      const response = await fetch(`http://localhost:3000/teacher/${profesorEditar.value?.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          nombre: profesorEditar.value?.nombre,
+          apellidos: profesorEditar.value?.apellidos,
+          email: profesorEditar.value?.email
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      if (!response.ok) {
+        throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+      } else {
+        toast.add({ severity: 'success', summary: 'Editado', detail: 'Profesor editado', life: 3000 });
+        const profesorActualizado = {
+          nombre: profesorEditar.value?.nombre,
+          apellidos: profesorEditar.value?.apellidos,
+          email: profesorEditar.value?.email
+        };
+        console.table(profesorActualizado)
+      }
+    } catch (error) {
+      console.error('Error en la solicitud:', error)
+      toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    } finally {
+      visibleDialog.value = false
+      getTeachersData()
     }
-  | undefined
-> = ref(undefined)
-
-const editarProfesor = (teacher: any) => {
-  // popUpState.value = true
-  editingStore.editarTrue()
-  profesorEditar.value = teacher
-  // fetch para obtener los datos del alumno
-  fetch(`http://localhost:3000/teacher/${profesorEditar.value?.id}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include'
-  }).then(async (response) => {
-    const data = (await response.json()) as {
-      id: number
-      nombre: string
-      apellidos: string
-      email: string
-      asignaturas: string
-    }
-    profesorEditar.value = data
-    console.table(data)
-  })
-}
-const mostrarAltaProfesor = () => {
-  // popUpState.value = true
-  popUpState.value = editingStore.editarTrue()
-  console.log(popUpState.value)
+  }
 }
 
-const resetearPopUpState = () => {
-  // popUpState.value = false
-  popUpState.value = editingStore.editarFalse()
-  console.log(popUpState.value)
-}
 
-// Ir a la página idividual del alumno
+// Ir a la página idividual del profesor
 const goToTeacher = (id: number) => {
   router.push({
     path: `/profesor/${id}`
   })
 }
+
+// DATOS TABLA
+// const columns = [
+//   { field: 'id', header: 'id' },
+//   { field: 'nombre', header: 'Nombre' },
+//   { field: 'apellidos', header: 'Apellidos' },
+//   { field: 'email', header: 'Email' }
+// ];
+
+// Filtrar datos
+const filters = ref() // variable filtro
+
+const initFilters = () => { // componente filtro en global para que busque cualquier valor
+  filters.value =
+  {
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  }
+}
+initFilters()
+
+const clearFilter = () => { // para borrar los filtros, reinicio la función y el value = null
+  initFilters()
+}
+
+// ON MOUNTED
+onMounted(() => {
+  getTeachersData()
+})
+
 </script>
 <template>
-  <div class="container">
-    <div id="ordenarPor">
-      <label for="ordenarPor">Ordenar por:</label>
-      <select v-model="ordenarPor" @change="ordenarArray">
-        <option value="nombre">Nombre</option>
-        <option value="apellidos">Apellidos</option>
-        <option value="email">Email</option>
-      </select>
+  <div class="flex justify-content-start pt-2">
+    <div class="card flex justify-content-center">
+      <DataTable v-model:filters="filters" class="" :value="teachersRefFromServer" dataKey="id" stripedRows sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" tableStyle="width: 40rem" :pt="{
+        paginator: {
+          paginatorWrapper: { class: 'col-12 flex justify-content-center' },
+          firstPageButton: { class: 'w-auto' },
+          previousPageButton: { class: 'w-auto' },
+          pageButton: { class: 'w-auto' },
+          nextPageButton: { class: 'w-auto' },
+          lastPageButton: { class: 'w-auto' },
+        },
+        table: {
+          class: 'mt-0',
+          style: { 'border': 'none' }
+        }
+      }">
+
+        <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
+          <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Profesores</h5>
+          <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+            <i class="pi pi-search"></i>
+            <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Buscar..." />
+            <Button rounded icon="pi pi-filter-slash" label="" outlined @click="clearFilter()"></Button>
+          </span>
+        </div>
+
+        <Column field="nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"> </Column>
+        <Column field="apellidos" header="Apellidos" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+        <Column field="email" header="Email" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+        <!-- <Column v-for="col of columns" :key="col.field" class="" :field="col.field" :header="col.header" :pt="{
+          root: { class: '' },
+          headerContent: { class: 'text-center m-2 p-2 h-2rem text-xl font-semibold' }
+        }">
+        </Column> -->
+        <!-- :pt="{ headerContent: { style: { 'background-color': 'red' } } }" -->
+        <Column headerStyle="width:20%; min-width:8rem" bodyClass="flex p-1 pl-1">
+          <template #body="slotProps">
+            <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" @click="goToTeacher(slotProps.data.id)"></Button>
+            <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" @click="mostrarDialog(slotProps.data)"></Button>
+            <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" @click="confirmDelete(slotProps.data)"></Button>
+          </template>
+        </Column>
+      </DataTable>
+
+      <Toast :pt="{
+        container: {
+          class: 'align-items-center'
+        },
+        closeButton: {
+          class: 'border-1'
+        }
+      }"></Toast>
+      <ConfirmDialog :pt="{
+        header: { class: 'pb-0 pt-2' },
+        content: { class: 'pb-3 pt-1' }
+      }"></ConfirmDialog>
+
+      <Dialog v-model:visible="visibleDialog" modal header="Editar Profesor" class="w-3" :pt="{
+        header: { class: 'flex align-items-baseline h-5rem' },
+        title: { class: '' },
+        closeButtonIcon: { class: '' },
+        mask: {
+          style: 'backdrop-filter: blur(3px)'
+        }
+      }">
+
+        <span class="p-text-secondary flex mb-5">Actualizar información</span>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="nombre" class="font-semibold w-6rem">Nombre</label>
+          <InputText id="nombre" class="w-7" v-model="profesorEditar.nombre" :class="{ 'p-invalid': !profesorEditar.nombre }" />
+        </div>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="apellidos" class="font-semibold w-6rem">Apellidos</label>
+          <InputText id="apellidos" class="w-7" v-model="profesorEditar.apellidos" :class="{ 'p-invalid': !profesorEditar.apellidos }" />
+        </div>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="email" class="font-semibold w-6rem">Email</label>
+          <InputText id="email" class="w-7" v-model="profesorEditar.email" :class="{ 'p-invalid': !profesorEditar.email }" />
+        </div>
+        <div class="flex justify-content-center mb-3 pt-2">
+          <Button type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialog = false"></Button>
+          <Button type="button" rounded label="Actualizar" @click="editarProfesor()"></Button>
+        </div>
+        <Toast></Toast>
+      </Dialog>
+
     </div>
-    <div>
-      <table id="tabla">
-        <th colspan="3"><h3>LISTADO DE PROFESORES</h3></th>
-        <tr>
-          <th>
-            <h3>Nombre</h3>
-          </th>
-          <th>
-            <h3>Apellidos</h3>
-          </th>
-          <th>
-            <h3>Email</h3>
-          </th>
-        </tr>
-        <tr id="alumno" v-for="teacher in teachersRefFromServer" :key="teacher.id">
-          <td>{{ teacher.nombre }}</td>
-          <td>{{ teacher.apellidos }}</td>
-          <td>{{ teacher.email }}</td>
-          <td>
-            <button type="button" @click="goToTeacher(teacher.id)">Ver</button>
-          </td>
-          <td>
-            <button type="button" @click="editarProfesor(teacher), mostrarAltaProfesor()">
-              Editar
-            </button>
-          </td>
-          <td><button type="button" @click="mostrarPopup(teacher.id)">Borrar</button></td>
-          <!-- le paso el id que quiero borrar -->
-        </tr>
-      </table>
-    </div>
-    <Popup v-if="popupVisible" @confirmar="borrarProfesor" @cancelar="cancelarBorrar"></Popup>
-    <!-- recibo un emit de confirmar que ejecuta la funcion borrarAlumno y otro emit de cancelar que ejecuta cancelarBorrar -->
-    <AltaProfesor
-      v-if="popUpState"
-      :isEditing="popUpState"
-      @cerrarPopUp="resetearPopUpState"
-      @obtenerProfesores="getTeachersData()"
-      @resetearProfesor="editarProfesor(profesorEditar)"
-      :profesorParaEditar="profesorEditar"
-    ></AltaProfesor>
   </div>
 </template>
-<style scoped>
-#ordenarPor {
-  margin: 0px;
-}
-table {
-  margin-top: 0px;
-  width: max-content;
-  border: none;
-
-  & th {
-    background-color: rgb(79, 90, 86);
-  }
-  & td {
-    width: fit-content;
-    text-align: left;
-    vertical-align: top;
-    border: none;
-    border-spacing: 0;
-  }
-}
-
-table tr:hover td {
-  transition: background-color 0.5s;
-  background-color: rgb(106, 98, 53);
-}
-
-table tr:hover td:nth-last-child(-n + 2) {
-  background-color: initial;
-}
-
-button {
-  width: 50px;
-  height: 25px;
-  background-color: hsla(160, 100%, 37%, 1);
-  color: white;
-  border: 1px solid hsla(160, 100%, 37%, 1);
-  border-radius: 5px;
-  margin: 1px;
-  cursor: pointer;
-}
-</style>
+<style scoped></style>

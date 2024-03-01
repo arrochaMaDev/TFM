@@ -95,9 +95,9 @@ const confirmDelete = (alumno: typeof studentsRefFromServer.value[0]) => { // al
 
 const borrarAlumno = async (alumno: typeof studentsRefFromServer.value[0]) => {
   console.table(alumno)
-  const idAlumno = alumno.id
+  // const idAlumno = alumno.id
   try {
-    const response = await fetch(`http://localhost:3000/student/${idAlumno}`, {
+    const response = await fetch(`http://localhost:3000/student/${alumno.id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json'
