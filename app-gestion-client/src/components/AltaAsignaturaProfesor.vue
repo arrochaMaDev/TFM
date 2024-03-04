@@ -301,7 +301,7 @@ const handleSubjectTeacher = () => {
 <template>
   <div class="card col-12 xl:col-9 lg:col-12 md:col-12 sm:col-12">
     <form @submit.prevent="">
-      <h2>Nuevo Alumno</h2>
+      <h2>Nueva Asignación</h2>
       <div class="p-fluid formgrid grid">
         <div class="field col-12 lg:col-4 md:col-12 sm:col-12 ">
           <label class="">Seleccionar profesor</label>
@@ -313,9 +313,18 @@ const handleSubjectTeacher = () => {
                 {{ slotProps.option.email }}
               </div>
             </template>
-
+            <template #value="slotProps">
+              <div v-if="slotProps.value">
+                {{ slotProps.value.nombre }}
+                {{ slotProps.value.apellidos }} |
+                {{ slotProps.value.email }}
+              </div>
+            </template>
           </Dropdown>
           <!-- <InlineMessage v-if="!user && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El usuario es obligatorio</InlineMessage> -->
+        </div>
+        <div>
+
         </div>
       </div>
     </form>

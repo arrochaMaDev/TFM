@@ -40,7 +40,8 @@ let menuArray: MenuItem[] = [
             },
             { label: 'Listado Alumnos', icon: 'pi pi-list', to: '/listado-alumnos' },
             { label: 'Listado Profesores', icon: 'pi pi-list', to: '/listado-profesores' },
-            { label: 'Listado Asignaturas', icon: 'pi pi-list', to: '/listado-asignaturas' }
+            { label: 'Listado Asignaturas', icon: 'pi pi-list', to: '/listado-asignaturas' },
+            { label: 'Listado Asignaciones', icon: 'pi pi-list', to: '/listado-asignaciones' }
         ]
     },
     {
