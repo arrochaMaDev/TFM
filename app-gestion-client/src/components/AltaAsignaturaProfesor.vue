@@ -2,6 +2,7 @@
 import { useLoadingStore } from '@/stores/loading'
 import { type Ref, ref } from 'vue'
 import Dropdown from 'primevue/dropdown';
+import MultiSelect from 'primevue/multiselect';
 import InlineMessage from 'primevue/inlinemessage';
 import Button from 'primevue/button';
 import { useToast } from "primevue/usetoast";
@@ -12,6 +13,7 @@ import Column from 'primevue/column';
 const toast = useToast();
 
 const loadingStore = useLoadingStore() // store del Spinner
+
 
 // OBTENER DATOS DE TODAS LAS ASIGNATURAS
 let subjectsRefFromServer: Ref<
@@ -43,9 +45,7 @@ const getSubjectsData = async () => {
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
-    alert('Ha ocurrido un error')
-  } finally {
-    loadingStore.loadingFalse()
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
   }
 }
 
@@ -83,21 +83,20 @@ const getTeachersData = async () => {
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
-    alert('Ha ocurrido un error')
-  } finally {
-    loadingStore.loadingFalse()
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    ('Ha ocurrido un error')
   }
 }
 
 getTeachersData()
 
-// REFERENCIAS DE LA ASIGNACIÓN
-let subjectSelected: Ref<{
-  id: number
-  nombre: string
-} | null> = ref(null)
+// REFERENCIAS DEL FORMULARIO
+// let subjectSelected: Ref<{
+//   id: number
+//   nombre: string
+// } | null> = ref(null)
 
-let selectedSubjects: Ref<
+const selectedSubjects: Ref<
   {
     // Array de las asignaturas seleccionadas
     id: number
@@ -105,38 +104,49 @@ let selectedSubjects: Ref<
   }[]
 > = ref([])
 
-let teacherSelected: Ref<{
+const teacherSelected: Ref<{
   id: number
   nombre: string
   apellidos: string
 } | null> = ref(null)
 
-const agregarAsignatura = () => {
-  if (subjectSelected.value) {
-    const existingSubject = selectedSubjects.value.find(
-      (subject) => subject.id === subjectSelected.value?.id
-    )
-    if (!existingSubject) {
-      // Si la asignatura no está en el array
-      selectedSubjects.value.push(subjectSelected.value)
-    } else {
-      // Si la asignatura ya está
-      console.log('La asignatura ya está en la lista')
-    }
-  }
-}
-const borrarAsignatura = (subjectId: number) => {
-  // se usa el metodo filter para crear un nuevo array eliminando la asignatura seleccionada
-  selectedSubjects.value = selectedSubjects.value.filter((subject) => subject.id !== subjectId)
-}
+const formSubmitted = ref(false); // variable para avisos con InlineText
+
+// const agregarAsignatura = () => {
+//   if (subjectSelected.value) {
+//     const existingSubject = selectedSubjects.value.find(
+//       (subject) => subject.id === subjectSelected.value?.id
+//     )
+//     if (!existingSubject) {
+//       // Si la asignatura no está en el array
+//       selectedSubjects.value.push(subjectSelected.value)
+//     } else {
+//       // Si la asignatura ya está
+//       console.log('La asignatura ya está en la lista')
+//     }
+//   }
+// }
+// const borrarAsignatura = (subjectId: number) => {
+//   // se usa el metodo filter para crear un nuevo array eliminando la asignatura seleccionada
+//   selectedSubjects.value = selectedSubjects.value.filter((subject) => subject.id !== subjectId)
+// }
 
 // CREAR RELACIÓN ASIGNATURA-PROFESOR
 const crearSubjectTeacher = () => {
-  selectedSubjects.value.forEach((subject) => {
-    if (teacherSelected.value) {
-      fetchSubjectTeacher(subject.id, teacherSelected.value.id)
-    }
-  })
+  formSubmitted.value = true;
+  let isValid = true
+
+  if (!teacherSelected.value || selectedSubjects.value.length === 0) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
+    isValid = false
+  }
+  if (isValid) {
+    selectedSubjects.value.forEach((subject) => {
+      if (teacherSelected.value) {
+        fetchSubjectTeacher(subject.id, teacherSelected.value.id)
+      }
+    })
+  }
 }
 
 const fetchSubjectTeacher = async (subjectId: number, teacherId: number) => {
@@ -144,8 +154,8 @@ const fetchSubjectTeacher = async (subjectId: number, teacherId: number) => {
     const response = await fetch('http://localhost:3000/asignatura_profesor', {
       method: 'POST',
       body: JSON.stringify({
-        asignatura: teacherId,
-        profesor: subjectId
+        asignatura: subjectId,
+        profesor: teacherId
       }),
       headers: {
         'Content-Type': 'application/json'
@@ -155,14 +165,14 @@ const fetchSubjectTeacher = async (subjectId: number, teacherId: number) => {
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
-      alert('Realizado correctamente')
+      toast.add({ severity: 'success', summary: 'Creado', detail: 'Asignación creada', life: 3000 });
 
       const subjectTeacher = {
         profesor: {
           nombre: teacherSelected.value?.nombre,
           apellidos: teacherSelected.value?.apellidos
         },
-        asignatura: subjectSelected.value?.nombre
+        asignaturas: selectedSubjects.value?.toString()
       }
 
       const data = (await response.json()) as typeof subjectTeacher
@@ -171,14 +181,18 @@ const fetchSubjectTeacher = async (subjectId: number, teacherId: number) => {
 
       // reiniciar todos los valores
       teacherSelected.value = null
-      subjectSelected.value = null
+      // subjectSelected.value = null
       selectedSubjects.value = []
+      formSubmitted.value = false;
+
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
-    alert('Ha ocurrido un error')
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
   }
 }
+
+
 
 // COMPONENTE COMO POPUP PARA EDITAR
 const emit = defineEmits(['cerrarPopUp', 'obtenerSubjectsTeachers', 'resetearSubjectTeacher'])
@@ -296,11 +310,18 @@ const handleSubjectTeacher = () => {
     crearSubjectTeacher()
   }
 }
+
+// para resetear los datos del formulario y poner cada ref a vacío
+function borrarDatosForm() {
+  formSubmitted.value = false;
+  selectedSubjects.value = []
+  teacherSelected.value = null
+}
 </script>
 
 <template>
   <div class="card col-12 xl:col-9 lg:col-12 md:col-12 sm:col-12">
-    <form @submit.prevent="">
+    <form @submit.prevent="crearSubjectTeacher()">
       <h2>Nueva Asignación</h2>
       <div class="p-fluid formgrid grid">
         <div class="field col-12 lg:col-4 md:col-12 sm:col-12 ">
@@ -313,6 +334,7 @@ const handleSubjectTeacher = () => {
                 {{ slotProps.option.email }}
               </div>
             </template>
+
             <template #value="slotProps">
               <div v-if="slotProps.value">
                 {{ slotProps.value.nombre }}
@@ -321,7 +343,19 @@ const handleSubjectTeacher = () => {
               </div>
             </template>
           </Dropdown>
-          <!-- <InlineMessage v-if="!user && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El usuario es obligatorio</InlineMessage> -->
+          <InlineMessage v-if="!teacherSelected && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El profesor es obligatorio</InlineMessage>
+        </div>
+        <div class="field col-12 lg:col-6 md:col-12 sm:col-12 ">
+          <label class="">Seleccionar Asignaturas</label>
+          <MultiSelect :disabled="!teacherSelected" class="" :options="subjectsRefFromServer" optionLabel="nombre" display="chip" filter placeholder="Selecciona asignaturas"
+            v-model="selectedSubjects">
+
+          </MultiSelect>
+          <InlineMessage v-if="selectedSubjects.length == 0 && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">Las asignaturas son obligatorias</InlineMessage>
+        </div>
+        <div class="field col-12">
+          <Button class="justify-content-center w-auto h-auto" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
+          <Button class="justify-content-center w-auto h-auto" severity="secondary" icon="pi pi-trash" iconPos="left" label="Borrar" @click="borrarDatosForm()"></Button>
         </div>
         <div>
 
@@ -329,5 +363,15 @@ const handleSubjectTeacher = () => {
       </div>
     </form>
   </div>
+  <Toast :pt="{
+      container: {
+        class: 'align-items-center'
+      },
+      closeButton: {
+        class: 'border-1'
+      }
+    }">
+  </Toast>
 </template>
+
 <style scoped></style>

@@ -196,26 +196,27 @@ onMounted(() => {
 })
 
 </script>
+
 <template>
   <div class="flex justify-content-start pt-2">
     <div class="card flex justify-content-center">
-      <DataTable v-model:filters="filters" class="" :value="asignaturasRefFromServer" dataKey="id" stripedRows sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" tableStyle="width: 40rem"
-        :pt="{
-          paginator: {
-            paginatorWrapper: { class: 'col-12 flex justify-content-center' },
-            firstPageButton: { class: 'w-auto' },
-            previousPageButton: { class: 'w-auto' },
-            pageButton: { class: 'w-auto' },
-            nextPageButton: { class: 'w-auto' },
-            lastPageButton: { class: 'w-auto' },
-          },
-          table: {
-            class: 'mt-0',
-            style: { 'border': 'none' }
-          }
+      <DataTable v-model:filters="filters" class="" :value="asignaturasRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10"
+        tableStyle="width: 40rem" :pt="{
+        paginator: {
+          paginatorWrapper: { class: 'col-12 flex justify-content-center' },
+          firstPageButton: { class: 'w-auto' },
+          previousPageButton: { class: 'w-auto' },
+          pageButton: { class: 'w-auto' },
+          nextPageButton: { class: 'w-auto' },
+          lastPageButton: { class: 'w-auto' },
+        },
+        table: {
+          class: 'mt-0',
+          style: { 'border': 'none' }
+        }
 
 
-        }">
+      }">
 
         <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
           <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Asignaturas</h5>

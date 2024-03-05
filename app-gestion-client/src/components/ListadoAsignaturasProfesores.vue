@@ -1,15 +1,10 @@
 <script setup lang="ts">
 import { type Ref, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import Popup from './Popup.vue'
-import AltaAsignaturaProfesor from './AltaAsignaturaProfesor.vue'
-import { useLoadingStore } from '@/stores/loading'
-import { useEditingStore } from '@/stores/editar'
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
-import InputNumber from 'primevue/inputnumber'
 import { FilterMatchMode } from 'primevue/api';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from "primevue/useconfirm";
@@ -21,13 +16,11 @@ const confirm = useConfirm();
 const toast = useToast();
 
 const router = useRouter() // router para ir al alumno cuando se clique en él
-const loadingStore = useLoadingStore() // store del Spinner
 
 // OBTENER DATOS DE TODOS LOS PROFESORES
 let teachersRefFromServer: Ref<
   {
     id: number
-    usuario_id: string
     nombre: string
     apellidos: string
     email: string
@@ -46,7 +39,6 @@ const getTeachersData = async () => {
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
-      loadingStore.loadingTrue()
       const data = (await response.json()) as {
         id: number
         usuario_id: string
@@ -110,9 +102,9 @@ const subjectsByTeacherIdRef: Ref<{
     id: number
     nombre: string
     apellidos: string
-    asignaturas: string
+    email: string
   }
-  asignaturas: {
+  asignaciones: {
     id: number
     subject: {
       id: number
@@ -120,8 +112,9 @@ const subjectsByTeacherIdRef: Ref<{
     }
   }[]
 } | null> = ref(null)
+
 const getSubjectsByTeacherIdData = async (teacher: typeof teachersRefFromServer.value[0]) => {
-  console.log(teacher)
+  // console.log(teacher)
   try {
     const response = await fetch(`http://localhost:3000/asignaturas_profesores/teacher/${teacher.id}`, {
       method: 'GET',
@@ -130,100 +123,85 @@ const getSubjectsByTeacherIdData = async (teacher: typeof teachersRefFromServer.
       },
       credentials: 'include'
     })
-    if (!response.ok) {
-      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
-    } else {
-      const data = await response.json()
-      subjectsByTeacherIdRef.value = data
-      console.log(data)
-      console.table(subjectsByTeacherIdRef.value)
 
-
+    if (response.status === 404) {
+      console.warn(`El profesor con id ${teacher.id} no tiene asignaciones`);
+      return null;
     }
-  } catch (error) {
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`);
+    }
+    else {
+      const data = await response.json()
+      console.log(data);
+      // Verificar si el array de asignaciones está vacío
+      if (data && data.asignaciones && data.asignaciones.length > 0) {
+        subjectsByTeacherIdRef.value = data;
+        // console.table(subjectsByTeacherIdRef.value)
+        return data;
+      }
+    }
+  } catch (error: any) {
     console.error('Error en la solicitud:', error)
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+
+    if (error.message.includes('404')) {
+      return null;
+    } else {
+      toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error al obtener los datos de este profesor', life: 3000 });
+    }
   }
 }
 
-//FILTRAR DATOS OBTENIDOS POR EL ID DEL PROFESOR PARA LA TABLA
-const getSubjectsForTeacher = (teacher: typeof teachersRefFromServer.value[0]) => {
-  return subjectsTeachersRefFromServer.value.filter(subject => subject.teacher.id === teacher.id);
+// OBTENER TODOS LOS PROFESORES CON SUS RESPECTIVAS ASIGNACIONES
+const teachersWithSubjectsRef: Ref<{
+  teacher: {
+    id: number
+    nombre: string
+    apellidos: string
+    email: string
+  }
+  asignaciones: {
+    id: number
+    subject: {
+      id: number
+      nombre: string
+    }
+  }[]
+}[]> = ref([])
+
+const getAllTeachersWithSubjects = async () => {
+  teachersWithSubjectsRef.value = [] // reinicio la variable para permitir que se me actualice la vista en la tabla
+  try {
+    for (const teacher of teachersRefFromServer.value) {
+      const data = await getSubjectsByTeacherIdData(teacher)
+      if (data != undefined)
+        teachersWithSubjectsRef.value.push(data)
+    }
+  } catch (error) {
+    console.error('Error en la obtención de asignaturas:', error);
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+  }
+  console.table(teachersWithSubjectsRef.value)
+}
+
+const fetchData = async () => {
+  try {
+    await getTeachersData(); // Espera a que se complete la obtención de profesores
+    await getSubjectsTeachersData(); // Espera a que se complete la obtención de todo el listado asignaturas
+    getAllTeachersWithSubjects();
+  } catch (error) {
+    console.error('Error al obtener datos:', error);
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error obteniendo los datos', life: 3000 });
+  }
 };
 
 
-// CREAR UNA ÚNICA VARIABLE PARA MANEJAR TODAS LAS ASIGNACIONES PARA LA TABLA
-
-
-// ORDENAR RESULTADOS POR VALOR QUE SE INDIQUE
-let ordenarPor: Ref<'teacher.nombre' | 'teacher.apellidos' | 'subject.nombre'> =
-  ref('teacher.nombre')
-
-const ordenarMatriculas = () => {
-  function eliminarTildes(elemento: string): string {
-    return elemento.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-  }
-  // Ordenar por nombre o apellidos del profesor
-  if (ordenarPor.value === 'teacher.nombre' || ordenarPor.value === 'teacher.apellidos') {
-    const datosOrdenados = teachersRefFromServer.value.slice().sort((a, b) => {
-      let valorA = '';
-      let valorB = '';
-
-      if (ordenarPor.value === 'teacher.nombre') {
-        valorA = eliminarTildes(a.nombre.toLowerCase())
-        valorB = eliminarTildes(b.nombre.toLowerCase())
-      } else if (ordenarPor.value === 'teacher.apellidos') {
-        valorA = eliminarTildes(a.apellidos.toLowerCase())
-        valorB = eliminarTildes(b.apellidos.toLowerCase())
-        console.log('ordenado')
-      }
-
-      if (valorA < valorB) {
-        return -1
-      }
-      if (valorA > valorB) {
-        return 1
-      }
-      return 0
-    });
-    teachersRefFromServer.value = datosOrdenados
-  }
-
-  // Ordenar por nombre de la asignatura
-  const datosOrdenados = subjectsTeachersRefFromServer.value.slice().sort((a, b) => {
-    let valorA = ''
-    let valorB = ''
-
-    if (ordenarPor.value === 'teacher.nombre') {
-      valorA = eliminarTildes(a.teacher.nombre.toLowerCase())
-      valorB = eliminarTildes(b.teacher.nombre.toLowerCase())
-    } else if (ordenarPor.value === 'teacher.apellidos') {
-      valorA = eliminarTildes(a.teacher.apellidos.toLowerCase())
-      valorB = eliminarTildes(b.teacher.apellidos.toLowerCase())
-      console.log('ordenado')
-    } else if (ordenarPor.value === 'subject.nombre') {
-      valorA = eliminarTildes(a.subject.nombre.toLowerCase())
-      valorB = eliminarTildes(b.subject.nombre.toLowerCase())
-    }
-
-    if (valorA < valorB) {
-      return -1
-    }
-    if (valorA > valorB) {
-      return 1
-    }
-    return 0
-  })
-  subjectsTeachersRefFromServer.value = datosOrdenados
-}
-onMounted(() => {
-  ordenarMatriculas()
-  getSubjectsTeachersData()
-  getTeachersData()
-})
+// //FILTRAR DATOS OBTENIDOS POR EL ID DEL PROFESOR PARA LA TABLA
+// const filterSubjectsByTeacherId = (teacher: typeof teachersRefFromServer.value[0]) => {
+//   return subjectsTeachersRefFromServer.value.filter(subject => subject.teacher.id === teacher.id);
+// };
 
 // LÓGICA BORRAR ASIGNACIÓN
-
 const confirmDelete = (asignacion: typeof subjectsTeachersRefFromServer.value[0]) => { // al ser un array, le indico el valor de la casilla 0
   confirm.require({
     message: '¿Seguro que quiere borrar esta asignación?',
@@ -258,37 +236,18 @@ const borrarSubjectTeacher = async (asignacion: typeof subjectsTeachersRefFromSe
       }
     )
     if (response.ok) {
-      // loadingStore.loadingTrue()
-      // await new Promise((resolve) => setTimeout(resolve, 2000))
       toast.add({ severity: 'success', summary: 'Borrado', detail: 'Asignación borrada', life: 3000 });
-      // popupVisible.value = false
-      ordenarMatriculas()
-      getSubjectsTeachersData()
     } else {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
     toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
-    // popupVisible.value = false
-  }
-  finally {
-    ordenarMatriculas()
-    getSubjectsTeachersData()
+  } finally {
+    fetchData()
   }
 }
 
-// const cancelarBorrar = () => {
-//   // si se da click en NO se cancela el borrado
-//   popupVisible.value = false
-//   idSubjectTeacherSelected.value = null
-// }
-
-// const mostrarPopup = (id: number) => {
-//   // si se da click en SI, se muestra el popup y recibe el id a borrar
-//   idSubjectTeacherSelected.value = id
-//   popupVisible.value = true
-// }
 
 // LÓGICA EDITAR MATRICULA
 const visibleDialog: Ref<boolean> = ref(false);
@@ -356,6 +315,7 @@ const visibleDialog: Ref<boolean> = ref(false);
 //   console.log(popUpState.value)
 // }
 
+
 // Ir a la página idividual del profesor
 const goToTeacher = (id: number) => {
   router.push({
@@ -378,27 +338,31 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
   initFilters()
 }
 
+// Expandir la tabla
 const expandedRows = ref<{ [key: number]: boolean }>({});
 
 const expandAll = () => {
-  expandedRows.value = subjectsTeachersRefFromServer.value.reduce<{ [key: number]: boolean }>((acc, p) => {
-    acc[p.id] = true;
+  expandedRows.value = teachersWithSubjectsRef.value.reduce<{ [key: number]: boolean }>((acc, p) => {
+    acc[p.teacher.id] = true;
     return acc;
   }, {});
 };
 
-
 const collapseAll = () => {
   expandedRows.value = [];
 };
+
+onMounted(() => {
+  fetchData();
+})
 
 </script>
 
 <template>
   <div class="flex justify-content-start pt-2">
     <div class="card flex justify-content-center">
-      <DataTable v-model:expandedRows="expandedRows" v-model:filters="filters" class="" :value="subjectsTeachersRefFromServer" dataKey="id" sortField="nombre" :sortOrder="1" :paginator="true"
-        :rows="10" tableStyle="width: 60rem" :pt="{
+      <DataTable v-model:expandedRows="expandedRows" v-model:filters="filters" class="" stripedRows :value="teachersWithSubjectsRef" dataKey="teacher.id" sortField="teacher.id" :sortOrder="1"
+        :paginator="true" :rows="10" tableStyle="width: 60rem" :pt="{
         paginator: {
           paginatorWrapper: { class: 'col-12 flex justify-content-center' },
           firstPageButton: { class: 'w-auto' },
@@ -428,8 +392,7 @@ const collapseAll = () => {
           </span>
         </div>
         <Column expander style="width: 1rem" />
-        <Column field="teacher.nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1">
-        </Column>
+        <Column field="teacher.nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
         <Column field="teacher.apellidos" header="Apellidos" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
         <Column field="teacher.email" header="Email" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
         <Column headerStyle="width:5%; min-width:8rem">
@@ -440,7 +403,7 @@ const collapseAll = () => {
         </Column>
 
         <template #expansion="slotProps">
-          <DataTable :value="getSubjectsForTeacher(slotProps.data.teacher)" tableStyle="width: 10rem" :pt="{
+          <DataTable :value="slotProps.data.asignaciones" selection-mode="single" tableStyle="width: 10rem" :pt="{
         table: {
           class: 'mt-0 ml-7',
           style: {
@@ -452,7 +415,6 @@ const collapseAll = () => {
             <Column field="subject.nombre" header="Asignatura" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"> </Column>
             <Column headerStyle="" bodyClass="flex p-1 pl-1">
               <template #body="slotProps">
-                <!-- <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" @click="mostrarDialog(slotProps.data)"></Button> -->
                 <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" @click="confirmDelete(slotProps.data)"></Button>
               </template>
             </Column>

@@ -222,10 +222,12 @@ onMounted(() => {
 })
 
 </script>
+
 <template>
   <div class="flex justify-content-start pt-2">
     <div class="card flex justify-content-center">
-      <DataTable v-model:filters="filters" class="" :value="teachersRefFromServer" dataKey="id" stripedRows sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" tableStyle="width: 40rem" :pt="{
+      <DataTable v-model:filters="filters" class="" :value="teachersRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10"
+        tableStyle="width: 40rem" :pt="{
         paginator: {
           paginatorWrapper: { class: 'col-12 flex justify-content-center' },
           firstPageButton: { class: 'w-auto' },
@@ -312,4 +314,5 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
 <style scoped></style>

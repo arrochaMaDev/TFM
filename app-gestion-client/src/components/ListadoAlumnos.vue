@@ -252,10 +252,12 @@ onMounted(() => {
 })
 
 </script>
+
 <template>
   <div class="flex justify-content-start pt-2">
     <div class="card flex justify-content-center">
-      <DataTable v-model:filters="filters" class="" :value="studentsRefFromServer" dataKey="id" stripedRows sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" tableStyle="width: 80rem" :pt="{
+      <DataTable v-model:filters="filters" class="" :value="studentsRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10"
+        tableStyle="width: 80rem" :pt="{
         paginator: {
           paginatorWrapper: { class: 'col-12 flex justify-content-center' },
           firstPageButton: { class: 'w-auto' },
@@ -316,7 +318,10 @@ onMounted(() => {
       <Dialog v-model:visible="visibleDialog" modal header="Editar Alumno" class="w-4" :pt="{
         header: { class: 'flex align-items-baseline h-5rem' },
         title: { class: '' },
-        closeButtonIcon: { class: '' }
+        closeButtonIcon: { class: '' },
+        mask: {
+          style: 'backdrop-filter: blur(3px)'
+        }
       }">
 
         <span class="p-text-secondary flex mb-5">Actualizar información</span>

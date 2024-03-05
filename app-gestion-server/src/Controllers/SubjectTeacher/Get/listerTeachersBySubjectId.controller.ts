@@ -37,8 +37,8 @@ export class ListerTeachersBySubjectIdController {
       }
 
       const teachersDto = {
-        asignatura: subject, // recibo primero los datos de la asignatura y luego le añado el array de profesores
-        profesores: teachers.map(({ id, teacher }) => ({
+        subject: subject, // recibo primero los datos de la asignatura y luego le añado el array de profesores
+        teachers: teachers.map(({ id, teacher }) => ({
           id,
           teacher: {
             id: teacher.id,
