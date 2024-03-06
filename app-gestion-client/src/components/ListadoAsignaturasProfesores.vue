@@ -391,7 +391,7 @@ onMounted(() => {
             <Button rounded icon="pi pi-filter-slash" label="" outlined @click="clearFilter()"></Button>
           </span>
         </div>
-        <Column expander style="width: 1rem" />
+        <Column expander style="width: 1rem"></Column>
         <Column field="teacher.nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
         <Column field="teacher.apellidos" header="Apellidos" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
         <Column field="teacher.email" header="Email" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>

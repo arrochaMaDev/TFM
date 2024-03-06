@@ -44,6 +44,7 @@ export class ListerTeachersBySubjectIdController {
             id: teacher.id,
             nombre: teacher.nombre,
             apellidos: teacher.apellidos,
+            email: teacher.email,
           },
         })),
       };

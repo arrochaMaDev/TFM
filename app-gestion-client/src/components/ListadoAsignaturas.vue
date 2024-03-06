@@ -169,6 +169,65 @@ const editarAsignatura = async () => {
   }
 }
 
+// LÓGICA MOSTRAR PROFESORES ASIGNADOS
+const visibleDialogTeacher: Ref<boolean> = ref(false);
+
+const teachersBySubjectId: Ref<{
+  subject: {
+    id: number
+    nombre: string
+  },
+  teachers: {
+    id: number
+    teacher: {
+      id: number
+      nombre: string
+      apellidos: string
+      email: string
+    }
+  }[]
+} | undefined> = ref(undefined)
+
+const getTeachersBySubjectId = async (subject: typeof asignaturasRefFromServer.value[0]) => {
+
+  try {
+    const response = await fetch(`http://localhost:3000/asignaturas_profesores/subject/${subject.id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (response.status === 404) {
+      toast.add({ severity: 'warn', summary: 'No hay datos', detail: 'La asignatura no tiene profesores asignados', life: 3000 });
+      return null;
+    }
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      visibleDialogTeacher.value = true
+
+      const data = (await response.json())
+      teachersBySubjectId.value = data
+      console.table(teachersBySubjectId.value)
+    }
+  }
+  catch (error: any) {
+    console.error('Error en la solicitud:', error)
+    if (error.message.includes('404')) {
+      return null;
+    } else {
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    }
+  }
+}
+
+const resetDataTeachers = () => {
+  visibleDialogTeacher.value = false
+  teachersBySubjectId.value = undefined
+
+}
+
 // DATOS TABLA
 // const columns = [
 //   { field: 'id', header: 'id' },
@@ -226,11 +285,10 @@ onMounted(() => {
             <Button rounded icon="pi pi-filter-slash" label="" outlined @click="clearFilter()"></Button>
           </span>
         </div>
-
         <Column field="nombre" header="Nombre" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"> </Column>
-
         <Column headerStyle="width: 5%" bodyClass="flex p-1 pl-1">
           <template #body="slotProps">
+            <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" @click="getTeachersBySubjectId(slotProps.data)"></Button>
             <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" @click="mostrarDialog(slotProps.data)"></Button>
             <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" @click="confirmDelete(slotProps.data)"></Button>
           </template>
@@ -251,7 +309,7 @@ onMounted(() => {
         content: { class: 'pb-3 pt-1' }
       }
         "></ConfirmDialog>
-
+      <!-- Dialog editar asignatura  -->
       <Dialog v-model:visible="visibleDialog" modal header="Editar Asignatura" class="w-2" :pt="{
         header: { class: 'flex align-items-baseline h-5rem' },
         title: { class: '' },
@@ -271,6 +329,26 @@ onMounted(() => {
           <Button type="button" rounded label="Actualizar" @click="editarAsignatura()"></Button>
         </div>
         <Toast></Toast>
+      </Dialog>
+      <!-- Dialog profesores asignados -->
+      <Dialog v-model:visible="visibleDialogTeacher" @after-hide="resetDataTeachers()" modal header="Profesores asignados" class="w-4" :pt="{
+        header: { class: 'flex align-items-baseline h-5rem' },
+        title: { class: '' },
+        closeButtonIcon: { class: '' },
+        mask: {
+          style: 'backdrop-filter: blur(3px)'
+        }
+      }">
+        <DataTable :value="teachersBySubjectId?.teachers" dataKey="teachers.id" stripedRows selectionMode="single" sortField="teachers.teacher.id" :sortOrder="1" tableStyle="width: 40rem" :pt="{
+        table: {
+          class: 'mt-0 mb-5',
+          style: { 'border': 'none' }
+        }
+      }">
+          <Column field="teacher.nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="h-3rem p-0 pl-1"> </Column>
+          <Column field="teacher.apellidos" header="Apellidos" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="h-3rem p-0 pl-1"></Column>
+          <Column field="teacher.email" header="Email" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="h-3rem p-0 pl-1"></Column>
+        </DataTable>
       </Dialog>
     </div>
   </div>
