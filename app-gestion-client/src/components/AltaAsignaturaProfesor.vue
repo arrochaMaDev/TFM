@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useLoadingStore } from '@/stores/loading'
-import { type Ref, ref } from 'vue'
+import { type Ref, ref, watch } from 'vue'
 import Dropdown from 'primevue/dropdown';
 import MultiSelect from 'primevue/multiselect';
 import InlineMessage from 'primevue/inlinemessage';
@@ -91,14 +91,8 @@ const getTeachersData = async () => {
 getTeachersData()
 
 // REFERENCIAS DEL FORMULARIO
-// let subjectSelected: Ref<{
-//   id: number
-//   nombre: string
-// } | null> = ref(null)
-
 const selectedSubjects: Ref<
   {
-    // Array de las asignaturas seleccionadas
     id: number
     nombre: string
   }[]
@@ -132,22 +126,107 @@ const formSubmitted = ref(false); // variable para avisos con InlineText
 // }
 
 // CREAR RELACIÓN ASIGNATURA-PROFESOR
-const crearSubjectTeacher = () => {
+const crearSubjectTeacher = async () => {
   formSubmitted.value = true;
-  let isValid = true
+  let isValid = true;
 
-  if (!teacherSelected.value || selectedSubjects.value.length === 0) {
-    toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
-    isValid = false
+  try {
+    if (!teacherSelected.value || selectedSubjects.value.length === 0) {
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
+      isValid = false;
+    }
+
+    if (teacherSelected.value && isValid) {
+      await getSubjectsByTeacherId(teacherSelected.value);
+      eliminarDuplicados();
+      console.log(selectedSubjects.value) // imprimo el array ya filtrado
+
+      selectedSubjects.value.forEach((subject) => {
+        if (teacherSelected.value) {
+          fetchSubjectTeacher(subject.id, teacherSelected.value.id)
+        }
+      })
+    }
+  } catch (error) {
+    console.error('Error en la función crearSubjectTeacher:', error);
   }
-  if (isValid) {
-    selectedSubjects.value.forEach((subject) => {
-      if (teacherSelected.value) {
-        fetchSubjectTeacher(subject.id, teacherSelected.value.id)
-      }
+};
+
+// watch(subjectsByTeacherIdRef, () => {
+//       if (subjectsByTeacherIdRef.value && subjectsByTeacherIdRef.value.asignaciones) {
+//         eliminarDuplicados();
+//         console.log(selectedSubjects.value);
+//       }
+//     });
+
+
+// COMPROBAR SI YA TIENE ESA ASIGNATURA ASIGNADA
+const subjectsByTeacherIdRef: Ref<{
+  teacher: {
+    id: number
+    nombre: string
+    apellidos: string
+    email: string
+  }
+  asignaciones: {
+    id: number
+    subject: {
+      id: number
+      nombre: string
+    }
+  }[]
+} | null> = ref(null)
+
+const getSubjectsByTeacherId = async (teacher: typeof teachersRefFromServer.value[0]) => {
+  // console.log(teacher)
+  try {
+    const response = await fetch(`http://localhost:3000/asignaturas_profesores/teacher/${teacher.id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
     })
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`);
+    }
+    else {
+      const data = await response.json()
+      console.log(data);
+
+      if (data && data.asignaciones && data.asignaciones.length > 0) {
+        subjectsByTeacherIdRef.value = data;
+      }
+    }
+  } catch (error: any) {
+    console.error('Error en la solicitud:', error)
+
+    if (error.message.includes('404')) {
+      return null;
+    } else {
+      toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error al obtener los datos de este profesor', life: 3000 });
+    }
   }
 }
+// Chequear si hay duplicados entre las asignaturas del array y las que estén en la BD
+const eliminarDuplicados = () => {
+  if (subjectsByTeacherIdRef.value && subjectsByTeacherIdRef.value.asignaciones) {
+    // recorro el array y extraigo todos los Ids de las asignaciones que haya
+    const asignacionesIds = subjectsByTeacherIdRef.value.asignaciones.map(asignacion => asignacion.subject.id);
+    const selectedSubjectsIds = selectedSubjects.value.map(subject => subject.id);
+    // verifico si alguna coincide
+    const repetido = asignacionesIds.some(id => selectedSubjectsIds.includes(id)); // retorna true o falsa
+
+    const duplicados = asignacionesIds.filter(id => selectedSubjectsIds.includes(id));
+
+    if (duplicados.length > 0) {
+      // Elimina las asignaturas duplicadas del array selectedSubjects
+      selectedSubjects.value = selectedSubjects.value.filter(subject => !duplicados.includes(subject.id));
+    }
+  }
+};
+
 
 const fetchSubjectTeacher = async (subjectId: number, teacherId: number) => {
   try {
@@ -181,17 +260,14 @@ const fetchSubjectTeacher = async (subjectId: number, teacherId: number) => {
 
       // reiniciar todos los valores
       teacherSelected.value = null
-      // subjectSelected.value = null
       selectedSubjects.value = []
       formSubmitted.value = false;
-
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
   }
 }
-
 
 
 // COMPONENTE COMO POPUP PARA EDITAR

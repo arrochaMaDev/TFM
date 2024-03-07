@@ -21,13 +21,19 @@ const router = useRouter() // router para ir al alumno cuando se clique en él
 const loadingStore = useLoadingStore() // store del Spinner
 
 // OBTENER DATOS DE TODOS LOS PROFESORES
-let teachersRefFromServer: Ref<
+const teachersRefFromServer: Ref<
   {
     id: number
     usuario_id: string
     nombre: string
     apellidos: string
     email: string
+    userId: {
+      id: number
+      username: string
+      email: string
+      permiso: number | string // para poder cambiar el permiso a string
+    }
   }[]
 > = ref([])
 
@@ -45,15 +51,30 @@ const getTeachersData = async () => {
     } else {
       loadingStore.loadingTrue()
 
-      const data = (await response.json()) as {
-        id: number
-        usuario_id: string
-        nombre: string
-        apellidos: string
-        email: string
-      }[]
-      teachersRefFromServer.value = data
-      console.log(data)
+      // const data = (await response.json())
+      const data: {
+        id: number;
+        usuario_id: string;
+        nombre: string;
+        apellidos: string;
+        email: string;
+        userId: {
+          id: number;
+          username: string;
+          email: string;
+          permiso: number;
+        };
+      }[] = await response.json(); console.log(data)
+
+      // Para cambiar el permiso a string
+      const updatedData = data.map((teacher) => ({
+        ...teacher,
+        userId: {
+          ...teacher.userId,
+          permiso: PermisoToString(teacher.userId.permiso)
+        }
+      }));
+      teachersRefFromServer.value = updatedData
       console.log(teachersRefFromServer.value)
     }
   } catch (error) {
@@ -61,6 +82,19 @@ const getTeachersData = async () => {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
   } finally {
     loadingStore.loadingFalse()
+  }
+}
+
+const PermisoToString = (permiso: number) => {
+  switch (permiso) {
+    case 0:
+      return 'Alumno'
+    case 1:
+      return 'Profesor'
+    case 9:
+      return 'Administrador'
+    default:
+      return 'Desconocido'
   }
 }
 
@@ -227,7 +261,7 @@ onMounted(() => {
   <div class="flex justify-content-start pt-2">
     <div class="card flex justify-content-center">
       <DataTable v-model:filters="filters" class="" :value="teachersRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10"
-        tableStyle="width: 40rem" :pt="{
+        tableStyle="width: 70rem" :pt="{
         paginator: {
           paginatorWrapper: { class: 'col-12 flex justify-content-center' },
           firstPageButton: { class: 'w-auto' },
@@ -254,6 +288,9 @@ onMounted(() => {
         <Column field="nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"> </Column>
         <Column field="apellidos" header="Apellidos" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
         <Column field="email" header="Email" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+        <Column field="userId.username" header="Username" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+        <Column field="userId.email" header="Email de usuario" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+        <Column field="userId.permiso" header="Permiso" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
         <!-- <Column v-for="col of columns" :key="col.field" class="" :field="col.field" :header="col.header" :pt="{
           root: { class: '' },
           headerContent: { class: 'text-center m-2 p-2 h-2rem text-xl font-semibold' }

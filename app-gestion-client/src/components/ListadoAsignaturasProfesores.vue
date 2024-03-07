@@ -57,7 +57,7 @@ const getTeachersData = async () => {
 }
 
 // OBTENER DATOS DE TODAS LAS ASIGNACIONES
-let subjectsTeachersRefFromServer: Ref<
+const subjectsTeachersRefFromServer: Ref<
   {
     id: number
     teacher: {
@@ -113,7 +113,7 @@ const subjectsByTeacherIdRef: Ref<{
   }[]
 } | null> = ref(null)
 
-const getSubjectsByTeacherIdData = async (teacher: typeof teachersRefFromServer.value[0]) => {
+const getSubjectsByTeacherId = async (teacher: typeof teachersRefFromServer.value[0]) => {
   // console.log(teacher)
   try {
     const response = await fetch(`http://localhost:3000/asignaturas_profesores/teacher/${teacher.id}`, {
@@ -173,7 +173,7 @@ const getAllTeachersWithSubjects = async () => {
   teachersWithSubjectsRef.value = [] // reinicio la variable para permitir que se me actualice la vista en la tabla
   try {
     for (const teacher of teachersRefFromServer.value) {
-      const data = await getSubjectsByTeacherIdData(teacher)
+      const data = await getSubjectsByTeacherId(teacher)
       if (data != undefined)
         teachersWithSubjectsRef.value.push(data)
     }
