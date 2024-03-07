@@ -5,9 +5,23 @@ import Popup from './Popup.vue'
 import AltaUsuario from './AltaUsuario.vue'
 import { useLoadingStore } from '@/stores/loading'
 import { useEditingStore } from '@/stores/editar'
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import { FilterMatchMode } from 'primevue/api';
+import ConfirmDialog from 'primevue/confirmdialog';
+import { useConfirm } from "primevue/useconfirm";
+import { useToast } from "primevue/usetoast";
+import Toast from 'primevue/toast';
+import Dialog from 'primevue/dialog';
+import Dropdown from 'primevue/dropdown';
+
+
+const confirm = useConfirm();
+const toast = useToast();
 
 const router = useRouter() // router para ir al usuario cuando se clique en él
-const loadingStore = useLoadingStore() // store del Spinner
 
 // OBTENER DATOS DE TODOS LOS USUARIOS
 let usersRefFromServer: Ref<
@@ -15,7 +29,7 @@ let usersRefFromServer: Ref<
     id: number
     username: string
     email: string
-    permiso: number
+    permiso: number | string // para poder cambiar el permiso a string
   }[]
 > = ref([])
 
@@ -31,14 +45,21 @@ const getUsersData = async () => {
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
-      const data = (await response.json()) as {
-        id: number
-        username: string
-        email: string
-        permiso: number
-      }[]
-      usersRefFromServer.value = data
-      console.log(data)
+      // const data = (await response.json())
+      const data: {
+        id: number;
+        username: string;
+        email: string;
+        permiso: number;
+      }[] = await response.json(); console.log(data)
+
+      // Para cambiar el permiso a string
+      const updatedData = data.map((user) => ({
+        ...user,
+        permiso: PermisoToString(user.permiso)
+      }
+      ));
+      usersRefFromServer.value = updatedData
       console.log(usersRefFromServer.value)
     }
   } catch (error) {
@@ -47,46 +68,7 @@ const getUsersData = async () => {
   }
 }
 
-// ORDENAR RESULTADOS POR VALOR QUE SE INDIQUE
-// let arrayOrdenado: Ref<
-//   {
-//     id: number
-//     username: string
-//     email: string
-//     pass: string
-//     permiso: number
-//   }[]
-// > = ref([]) // Nuevo array Ref para ordenar la lsta según se indique
-
-let ordenarPor: Ref<'id' | 'username' | 'email' | 'permiso' | 'email'> = ref('id')
-
-const ordenarArray = () => {
-  // arrayOrdenado.value = [...usersRefFromServer.value]
-  const valor = ordenarPor.value
-
-  usersRefFromServer.value.sort((a, b) => {
-    const valorA = a[valor].toString().toLowerCase()
-    const valorB = b[valor].toString().toLowerCase()
-    if (valor === 'id') {
-      return a[valor] - b[valor]
-    } else {
-      if (valorA < valorB) {
-        return -1
-      }
-      if (valorA > valorB) {
-        return 1
-      }
-      return 0
-    }
-  })
-}
-
-onMounted(() => {
-  ordenarArray()
-  getUsersData()
-})
-
-const obtenerPermisoString = (permiso: number) => {
+const PermisoToString = (permiso: number) => {
   switch (permiso) {
     case 0:
       return 'Alumno'
@@ -98,14 +80,35 @@ const obtenerPermisoString = (permiso: number) => {
       return 'Desconocido'
   }
 }
-// LÓGICA BORRAR USUARIO
-let popupVisible: Ref<boolean> = ref(false) // ref para ocultar o mostrar el popup
-let idUsuarioSeleccionado: Ref<number | null> = ref(null) // ref del id del usuario seleccionado para borrar
 
-const borrarUsuario = async () => {
-  // funcion con async/await y try/catch en vez de fetch con .then y .catch
+onMounted(() => {
+  getUsersData()
+})
+
+
+// LÓGICA BORRAR USUARIO
+const confirmDelete = (usuario: typeof usersRefFromServer.value[0]) => {
+  console.table(usuario) // al ser un array, le indico el valor de la casilla 0
+  confirm.require({
+    message: '¿Seguro que quiere borrar este profesor?',
+    header: 'Borrar Profesor',
+    icon: 'pi pi-info-circle',
+    rejectLabel: 'Cancelar',
+    acceptLabel: 'Borrar',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-danger',
+    accept: () => {
+      borrarUsuario(usuario)
+    },
+    reject: () => {
+      toast.add({ severity: 'info', summary: 'Cancelado', detail: 'Se ha cancelado la operación', life: 3000 });
+    }
+  });
+};
+
+const borrarUsuario = async (usuario: typeof usersRefFromServer.value[0]) => {
   try {
-    const response = await fetch(`http://localhost:3000/usuario/${idUsuarioSeleccionado.value}`, {
+    const response = await fetch(`http://localhost:3000/usuario/${usuario.id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json'
@@ -113,194 +116,220 @@ const borrarUsuario = async () => {
       credentials: 'include'
     })
     if (response.status === 204) {
-      loadingStore.loadingTrue()
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      alert('Usuario borrado con éxito')
-      popupVisible.value = false
-      getUsersData()
+      toast.add({ severity: 'success', summary: 'Borrado', detail: 'Usuario borrado', life: 3000 });
     } else {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
-    alert('Ha ocurrido un error')
-    popupVisible.value = false
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
   } finally {
-    loadingStore.loadingFalse()
+    getUsersData()
   }
 }
 
-const cancelarBorrar = () => {
-  // si se da click en NO se cancela el borrado
-  popupVisible.value = false
-  idUsuarioSeleccionado.value = null
-}
 
-const mostrarPopup = (id: number) => {
-  // si se da click en SI, se muestra el popup y recibe el id del usuario a borrar
-  idUsuarioSeleccionado.value = id
-  popupVisible.value = true
-}
+// LÓGICA EDITAR USUARIO
+// const editingStore = useEditingStore() // store del componente editar Usuario
 
-// LÓGICA EDITAR ALUMNO
-const editingStore = useEditingStore() // store del componente editar Usuario
+const visibleDialog: Ref<boolean> = ref(false);
 
-let popUpState: Ref<boolean> = ref(editingStore.editarFalse()) // variable del estado del popUp
-console.log(popUpState.value)
-
-let usuarioEditar: Ref<
+const usuarioEditar: Ref<
   | {
-      id: number
-      usuario_id: string
-      nombre: string
-      apellidos: string
-      dni: string
-      direccion: string
-      telefono: number
-      email: string
+    id: number
+    username: string
+    email: string
+    pass: string
+    permiso: number | string
+  }> = ref({
+    id: 0,
+    username: '',
+    pass: '',
+    email: '',
+    permiso: 0
+  }); // lo inicializo para evitar problemas con null o undefined en v-model
+
+const mostrarDialog = (usuario: typeof usuarioEditar.value) => {
+  visibleDialog.value = true
+  usuarioEditar.value = { ...usuario } // spread crea un nuevo objeto y copia superficialmente el objeto
+  console.table(usuarioEditar.value)
+}
+
+// validar datos del dialog
+const patronEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const editarUsuario = async () => {
+  let isValid = true
+  if (!patronEmail.test(usuarioEditar.value.email)) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
+    isValid = false
+  }
+  if (!usuarioEditar.value.username || !usuarioEditar.value.email) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
+    isValid = false
+  }
+  if (isValid) {
+    console.log(usuarioEditar.value.id)
+    try {
+      const response = await fetch(`http://localhost:3000/usuario/${usuarioEditar.value?.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          username: usuarioEditar.value?.username,
+          email: usuarioEditar.value?.email,
+          // pass: usuarioEditar.value?.pass,
+          permiso: usuarioEditar.value?.permiso
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      if (!response.ok) {
+        throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+      } else {
+        toast.add({ severity: 'success', summary: 'Editado', detail: 'Usuario editado', life: 3000 });
+        const usuarioEditado = {
+          username: usuarioEditar.value?.username,
+          email: usuarioEditar.value?.email,
+          pass: usuarioEditar.value?.pass,
+          permiso: usuarioEditar.value?.permiso
+        };
+        console.table(usuarioEditado)
+      }
+    } catch (error) {
+      console.error('Error en la solicitud:', error)
+      toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    } finally {
+      visibleDialog.value = false
+      getUsersData()
     }
-  | undefined
-> = ref(undefined)
-
-const editarUsuario = (student: any) => {
-  // popUpState.value = true
-  editingStore.editarTrue()
-  usuarioEditar.value = student
-  // fetch para obtener los datos del usuario
-  fetch(`http://localhost:3000/student/${usuarioEditar.value?.id}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include'
-  }).then(async (response) => {
-    const data = (await response.json()) as {
-      id: number
-      usuario_id: string
-      nombre: string
-      apellidos: string
-      dni: string
-      direccion: string
-      telefono: number
-      email: string
-    }
-    usuarioEditar.value = data
-    console.table(data)
-  })
+  }
 }
 
-const mostrarAltaUsuario = () => {
-  // popUpState.value = true
-  popUpState.value = editingStore.editarTrue()
-  console.log(popUpState.value)
-}
-
-const resetearPopUpState = () => {
-  // popUpState.value = false
-  popUpState.value = editingStore.editarFalse()
-  console.log(popUpState.value)
-}
+// Dropdown permisos 
+const permisos = ref([
+  { name: 'Alumno', code: 0 },
+  { name: 'Profesor', code: 1 },
+  { name: 'Administrador', code: 9 },
+]);
 
 // Ir a la página idividual del usuario
-const goToStudent = (id: number) => {
+const goToUser = (id: number) => {
   router.push({
     path: `/usuario/${id}`
   })
 }
+
+// Filtrar datos
+const filters = ref() // variable filtro
+
+const initFilters = () => { // componente filtro en global para que busque cualquier valor
+  filters.value =
+  {
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  }
+}
+initFilters()
+
+const clearFilter = () => { // para borrar los filtros, reinicio la función y el value = null
+  initFilters()
+}
 </script>
 <template>
-  <div class="container">
-    <div id="ordenarPor">
-      <label for="ordenarPor">Ordenar por:</label>
-      <select v-model="ordenarPor" @change="ordenarArray">
-        <option value="username">Username</option>
-        <option value="email">Email</option>
-        <option value="pass">Pass</option>
-        <option value="permiso">Permiso</option>
-      </select>
+  <div class="flex justify-content-start pt-2">
+    <div class="card flex justify-content-center">
+      <DataTable v-model:filters="filters" class="" :value="usersRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10"
+        tableStyle="width: 50rem" :pt="{
+        paginator: {
+          paginatorWrapper: { class: 'col-12 flex justify-content-center' },
+          firstPageButton: { class: 'w-auto' },
+          previousPageButton: { class: 'w-auto' },
+          pageButton: { class: 'w-auto' },
+          nextPageButton: { class: 'w-auto' },
+          lastPageButton: { class: 'w-auto' },
+        },
+        table: {
+          class: 'mt-0',
+          style: { 'border': 'none' }
+        }
+      }">
+
+        <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
+          <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Usuarios</h5>
+          <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+            <i class="pi pi-search"></i>
+            <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Buscar..." />
+            <Button rounded icon="pi pi-filter-slash" label="" outlined @click="clearFilter()"></Button>
+          </span>
+        </div>
+
+        <Column field="username" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"> </Column>
+        <Column field="email" header="Email" sortable headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+        <Column field="permiso" header="Permiso" sortable headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+        <!-- <Column v-for="col of columns" :key="col.field" class="" :field="col.field" :header="col.header" :pt="{
+          root: { class: '' },
+          headerContent: { class: 'text-center m-2 p-2 h-2rem text-xl font-semibold' }
+        }">
+        </Column> -->
+        <!-- :pt="{ headerContent: { style: { 'background-color': 'red' } } }" -->
+        <Column headerStyle="width:20%; min-width:8rem" bodyClass="flex p-1 pl-1">
+          <template #body="slotProps">
+            <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" @click="goToUser(slotProps.data.id)"></Button>
+            <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" @click="mostrarDialog(slotProps.data)"></Button>
+            <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" @click="confirmDelete(slotProps.data)"></Button>
+          </template>
+        </Column>
+      </DataTable>
+
+      <Toast :pt="{
+        container: {
+          class: 'align-items-center'
+        },
+        closeButton: {
+          class: 'border-1'
+        }
+      }"></Toast>
+      <ConfirmDialog :pt="{
+        header: { class: 'pb-0 pt-2' },
+        content: { class: 'pb-3 pt-1' }
+      }"></ConfirmDialog>
+
+
+      <Dialog v-model:visible="visibleDialog" modal header="Editar Usuario" class="w-3" :pt="{
+        header: { class: 'flex align-items-baseline h-5rem' },
+        title: { class: '' },
+        closeButtonIcon: { class: '' },
+        mask: {
+          style: 'backdrop-filter: blur(3px)'
+        }
+      }">
+
+        <span class="p-text-secondary flex mb-5">Actualizar información</span>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="username" class="font-semibold w-6rem">Username</label>
+          <InputText id="username" class="w-7" v-model="usuarioEditar.username" :class="{ 'p-invalid': !usuarioEditar.username }" />
+        </div>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="email" class="font-semibold w-6rem">Email</label>
+          <InputText id="email" class="w-7" v-model="usuarioEditar.email" :class="{ 'p-invalid': !usuarioEditar.email }" />
+        </div>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="pass" class="font-semibold w-6rem">Contraseña</label>
+          <InputText id="pass" class="w-7" v-model="usuarioEditar.pass" :class="{ 'p-invalid': !usuarioEditar.pass }" />
+        </div>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="permiso" class="font-semibold w-6rem">Permiso</label>
+          <Dropdown class="" id="permisos" :options="permisos" optionLabel="name" optionValue="code" checkmark :highlightOnSelect="false" showClear placeholder="Selecciona un permiso"
+            v-model="usuarioEditar.permiso" />
+        </div>
+        <div class="flex justify-content-center mb-3 pt-2">
+          <Button type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialog = false"></Button>
+          <Button type="button" rounded label="Actualizar" @click="editarUsuario()"></Button>
+        </div>
+        <Toast></Toast>
+      </Dialog>
+
     </div>
-    <div>
-      <table id="tabla">
-        <th colspan="3"><h3>LISTADO DE USUARIOS</h3></th>
-        <tr>
-          <th>
-            <h3>Username</h3>
-          </th>
-          <th>
-            <h3>Email</h3>
-          </th>
-          <th>
-            <h3>Permiso</h3>
-          </th>
-        </tr>
-        <tr id="user" v-for="user in usersRefFromServer" :key="user.id">
-          <td>{{ user.username }}</td>
-          <td>{{ user.email }}</td>
-          <td>{{ obtenerPermisoString(user.permiso) }}</td>
-          <!-- llamo a la funcion obtenerPermiso para que me obtenga el number y me genere el texto para mostrarlo -->
-          <td>
-            <button type="button" @click="goToStudent(user.id)">Ver</button>
-          </td>
-          <td>
-            <button type="button" @click="editarUsuario(user), mostrarAltaUsuario()">Editar</button>
-          </td>
-          <td><button type="button" @click="mostrarPopup(user.id)">Borrar</button></td>
-          <!-- le paso el id del usuario que quiero borrar -->
-        </tr>
-      </table>
-    </div>
-    <Popup v-if="popupVisible" @confirmar="borrarUsuario" @cancelar="cancelarBorrar"></Popup>
-    <!-- recibo un emit de confirmar que ejecuta la funcion borrarUsuario y otro emit de cancelar que ejecuta cancelarBorrar -->
-    <AltaUsuario
-      v-if="popUpState"
-      :isEditing="popUpState"
-      @cerrarPopUp="resetearPopUpState"
-      @obtenerUsuarios="getUsersData()"
-      @resetearUsuario="editarUsuario(usuarioEditar)"
-      :usuarioParaEditar="usuarioEditar"
-    >
-      <!-- para resetear valores, recibo un emit y vuelvo a ejecutar la funcion editarUsuarios con los parámetros recibidos del componente hijo-->
-    </AltaUsuario>
   </div>
 </template>
-<style scoped>
-#ordenarPor {
-  margin: 0px;
-}
-table {
-  margin-top: 0px;
-  width: max-content;
-  border: none;
-
-  & th {
-    background-color: rgb(79, 90, 86);
-  }
-  & td {
-    width: fit-content;
-    text-align: left;
-    vertical-align: top;
-    border: none;
-    border-spacing: 0;
-  }
-}
-
-table tr:hover td {
-  transition: background-color 0.5s;
-  background-color: rgb(106, 98, 53);
-}
-
-table tr:hover td:nth-last-child(-n + 3) {
-  background-color: initial;
-}
-
-button {
-  width: 50px;
-  height: 25px;
-  background-color: hsla(160, 100%, 37%, 1);
-  color: white;
-  border: 1px solid hsla(160, 100%, 37%, 1);
-  border-radius: 5px;
-  margin: 1px;
-  cursor: pointer;
-}
-</style>
+<style scoped></style>

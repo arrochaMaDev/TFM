@@ -124,9 +124,9 @@ const borrarDatosForm = () => {
           <InlineMessage v-if="!userRef.email.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El email es obligatorio</InlineMessage>
         </div>
         <div class="field col-12 lg:col-4 md:col-4 sm:col-12">
-          <label class="">Pass</label>
+          <label class="">Contraseña</label>
           <Password id="pass" toggleMask :feedback="false" v-model="userRef.pass.value" />
-          <InlineMessage v-if="!userRef.pass.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El password es obligatorio</InlineMessage>
+          <InlineMessage v-if="!userRef.pass.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La contraseña es obligatorio</InlineMessage>
         </div>
         <div class="field col-12 lg:col-4 md:col-4 sm:col-12">
           <label class="">Repeat Pass</label>
@@ -146,13 +146,13 @@ const borrarDatosForm = () => {
     </form>
   </div>
   <Toast :pt="{
-    container: {
-      class: 'align-items-center'
-    },
-    closeButton: {
-      class: 'border-1'
-    }
-  }"></Toast>
+      container: {
+        class: 'align-items-center'
+      },
+      closeButton: {
+        class: 'border-1'
+      }
+    }"></Toast>
 </template>
 
 <style scoped></style>

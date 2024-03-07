@@ -1,19 +1,13 @@
 <script setup lang="ts">
-import { useLoadingStore } from '@/stores/loading'
-import { type Ref, ref, watch } from 'vue'
+import { type Ref, ref } from 'vue'
 import Dropdown from 'primevue/dropdown';
 import MultiSelect from 'primevue/multiselect';
 import InlineMessage from 'primevue/inlinemessage';
 import Button from 'primevue/button';
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
 
 const toast = useToast();
-
-const loadingStore = useLoadingStore() // store del Spinner
-
 
 // OBTENER DATOS DE TODAS LAS ASIGNATURAS
 let subjectsRefFromServer: Ref<
@@ -106,25 +100,6 @@ const teacherSelected: Ref<{
 
 const formSubmitted = ref(false); // variable para avisos con InlineText
 
-// const agregarAsignatura = () => {
-//   if (subjectSelected.value) {
-//     const existingSubject = selectedSubjects.value.find(
-//       (subject) => subject.id === subjectSelected.value?.id
-//     )
-//     if (!existingSubject) {
-//       // Si la asignatura no está en el array
-//       selectedSubjects.value.push(subjectSelected.value)
-//     } else {
-//       // Si la asignatura ya está
-//       console.log('La asignatura ya está en la lista')
-//     }
-//   }
-// }
-// const borrarAsignatura = (subjectId: number) => {
-//   // se usa el metodo filter para crear un nuevo array eliminando la asignatura seleccionada
-//   selectedSubjects.value = selectedSubjects.value.filter((subject) => subject.id !== subjectId)
-// }
-
 // CREAR RELACIÓN ASIGNATURA-PROFESOR
 const crearSubjectTeacher = async () => {
   formSubmitted.value = true;
@@ -151,14 +126,6 @@ const crearSubjectTeacher = async () => {
     console.error('Error en la función crearSubjectTeacher:', error);
   }
 };
-
-// watch(subjectsByTeacherIdRef, () => {
-//       if (subjectsByTeacherIdRef.value && subjectsByTeacherIdRef.value.asignaciones) {
-//         eliminarDuplicados();
-//         console.log(selectedSubjects.value);
-//       }
-//     });
-
 
 // COMPROBAR SI YA TIENE ESA ASIGNATURA ASIGNADA
 const subjectsByTeacherIdRef: Ref<{
@@ -213,20 +180,19 @@ const getSubjectsByTeacherId = async (teacher: typeof teachersRefFromServer.valu
 const eliminarDuplicados = () => {
   if (subjectsByTeacherIdRef.value && subjectsByTeacherIdRef.value.asignaciones) {
     // recorro el array y extraigo todos los Ids de las asignaciones que haya
-    const asignacionesIds = subjectsByTeacherIdRef.value.asignaciones.map(asignacion => asignacion.subject.id);
-    const selectedSubjectsIds = selectedSubjects.value.map(subject => subject.id);
-    // verifico si alguna coincide
-    const repetido = asignacionesIds.some(id => selectedSubjectsIds.includes(id)); // retorna true o falsa
+    const subjectsIdsOfTeacher = subjectsByTeacherIdRef.value.asignaciones.map(subjectsTeacher => subjectsTeacher.subject.id);
+    const selectedSubjectsIds = selectedSubjects.value.map(subjectSelected => subjectSelected.id);
 
-    const duplicados = asignacionesIds.filter(id => selectedSubjectsIds.includes(id));
+    const repetido = subjectsIdsOfTeacher.some(id => selectedSubjectsIds.includes(id)); // verifico si alguna coincide, retorna true o false
+
+    const duplicados = subjectsIdsOfTeacher.filter(id => selectedSubjectsIds.includes(id)); // filtro los que incluyan el mismo id
 
     if (duplicados.length > 0) {
-      // Elimina las asignaturas duplicadas del array selectedSubjects
+      // modifico el array dejando solo las que NO tengan el mismo id, eliminando lo que coincida
       selectedSubjects.value = selectedSubjects.value.filter(subject => !duplicados.includes(subject.id));
     }
   }
 };
-
 
 const fetchSubjectTeacher = async (subjectId: number, teacherId: number) => {
   try {
@@ -266,124 +232,6 @@ const fetchSubjectTeacher = async (subjectId: number, teacherId: number) => {
   } catch (error) {
     console.error('Error en la solicitud:', error)
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
-  }
-}
-
-
-// COMPONENTE COMO POPUP PARA EDITAR
-const emit = defineEmits(['cerrarPopUp', 'obtenerSubjectsTeachers', 'resetearSubjectTeacher'])
-const props = defineProps<{
-  subjectTeacherParaEditar:
-  | {
-    id: number
-    subject: {
-      id: number
-      nombre: string
-    }
-    teacher: {
-      id: number
-      nombre: string
-      apellidos: string
-    }
-  }
-  | undefined
-  isEditing: boolean
-}>()
-
-let subjectTeacherEditada = ref({ ...props.subjectTeacherParaEditar })
-// let matriculaEditada = ref({
-//   id: props.matriculaParaEditar?.id || 0,
-//   student: {
-//     id: props.matriculaParaEditar?.student.id || 0,
-//     nombre: props.matriculaParaEditar?.student.nombre || '',
-//     apellidos: props.matriculaParaEditar?.student.apellidos || '',
-//     dni: props.matriculaParaEditar?.student.dni || ''
-//   },
-//   subject: {
-//     id: props.matriculaParaEditar?.subject.id || 0,
-//     nombre: props.matriculaParaEditar?.subject.nombre || ''
-//   },
-//   teacher: {
-//     id: props.matriculaParaEditar?.teacher.id || 0,
-//     nombre: props.matriculaParaEditar?.teacher.nombre || '',
-//     apellidos: props.matriculaParaEditar?.teacher.apellidos || ''
-//   }
-// })
-
-let popUpStyle: Ref<boolean> = ref(props.isEditing) // variable para activar el estilo popUp
-
-// FETCH PARA ACTUALIZAR MATRICULA:
-const actualizarSubjectTeacher = async () => {
-  try {
-    const response = await fetch(
-      `http://localhost:3000/asignatura_profesor/${subjectTeacherEditada.value?.id}`,
-      {
-        method: 'PUT',
-        body: JSON.stringify({
-          newSubject: subjectTeacherEditada.value?.subject,
-          newTeacher: subjectTeacherEditada.value?.teacher
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      }
-    )
-    if (!response.ok) {
-      throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
-    } else {
-      alert('Realizado con éxito')
-      // Imprimo los datos que he introducido
-      const subjectTeacherAcualizada = {
-        subject: {
-          id: subjectTeacherEditada.value.subject?.id,
-          nombre: subjectTeacherEditada.value.subject?.nombre
-        },
-        teacher: {
-          id: subjectTeacherEditada.value.teacher?.id,
-          nombre: subjectTeacherEditada.value.teacher?.nombre,
-          apellidos: subjectTeacherEditada.value.teacher?.apellidos
-        }
-      }
-      console.table(subjectTeacherAcualizada)
-      popUpStyle.value = false
-    }
-  } catch (error) {
-    console.error('Error en la solicitud:', error)
-    alert('Ha ocurrido un error')
-  } finally {
-    emit('cerrarPopUp')
-    emit('obtenerSubjectsTeachers')
-  }
-}
-
-// para resetear los valores como están actualmente en la BD
-// const resetearValoresIniciales = () => {
-//   console.log('resetear valores iniciales')
-//   const subject = props.matriculaParaEditar?.subject
-//   const teacher = props.matriculaParaEditar?.teacher
-
-//   if (subject && teacher) {
-//     matriculaEditada.value.subject = { id: subject.id, nombre: subject.nombre }
-//     matriculaEditada.value.teacher = {
-//       id: teacher.id,
-//       nombre: teacher.nombre,
-//       apellidos: teacher.apellidos
-//     }
-//   }
-
-// matriculaEditada.value.subject = props.matriculaParaEditar?.subject
-// matriculaEditada.value.teacher = props.matriculaParaEditar?.teacher
-//   emit( 'resetearSubjectTeacher',  subjectTeacherEditada) // hago el emit y paso además matriculaEditada según el valor de solo lectura de las props recibidas
-
-//   return matriculaEditada.value
-// }
-
-const handleSubjectTeacher = () => {
-  if (popUpStyle.value) {
-    actualizarSubjectTeacher()
-  } else {
-    crearSubjectTeacher()
   }
 }
 

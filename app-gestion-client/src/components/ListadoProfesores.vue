@@ -99,7 +99,7 @@ const PermisoToString = (permiso: number) => {
 }
 
 
-// LÓGICA BORRAR ALUMNO
+// LÓGICA BORRAR PROFESOR
 
 const confirmDelete = (profesor: typeof teachersRefFromServer.value[0]) => {
   console.table(profesor) // al ser un array, le indico el valor de la casilla 0

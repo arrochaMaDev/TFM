@@ -74,7 +74,6 @@ const getStudentsData = async () => {
 
 
 // LÓGICA BORRAR ALUMNO
-
 const confirmDelete = (alumno: typeof studentsRefFromServer.value[0]) => { // al ser un array, le indico el valor de la casilla 0
   confirm.require({
     message: '¿Seguro que quiere borrar este alumno?',
