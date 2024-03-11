@@ -29,6 +29,7 @@ const borrarDatosForm = () => {
   teacherRef.asignaturas.value = []
   selectedUserId.value = undefined
   formSubmitted.value = false;
+  user.value = undefined
 }
 
 // OBTENER ASIGNATURAS DE LA BD
@@ -114,57 +115,58 @@ const user: Ref<{
 const permisoString: Ref<string> = ref("")
 
 const getUser = async () => {
-  console.log("obteniendo usuario")
-  try {
-    const response = await fetch(`http://localhost:3000/usuario/${selectedUserId.value}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    })
-    if (!response.ok) {
-      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
-    } else {
-      const data = await response.json() as {
-        id: number
-        username: string
-        email: string
-        permiso: number
-      }
-      user.value = data
-      // console.table(user.value)
+  if (selectedUserId.value != undefined) {
+    try {
+      const response = await fetch(`http://localhost:3000/usuario/${selectedUserId.value}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      if (!response.ok) {
+        throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+      } else {
+        const data = await response.json() as {
+          id: number
+          username: string
+          email: string
+          permiso: number
+        }
+        user.value = data
+        // console.table(user.value)
 
-      // PERMISO A STRING
-      switch (user.value.permiso) {
-        case 0:
-          permisoString.value = 'Alumno'
-          break;
-        case 1:
-          permisoString.value = 'Profesor'
-          break;
-        case 9:
-          permisoString.value = 'Aministrador'
-          break;
-        case null:
-          permisoString.value = '';
-          break;
-        default:
-          permisoString.value = ''
+        // PERMISO A STRING
+        switch (user.value.permiso) {
+          case 0:
+            permisoString.value = 'Alumno'
+            break;
+          case 1:
+            permisoString.value = 'Profesor'
+            break;
+          case 9:
+            permisoString.value = 'Aministrador'
+            break;
+          case null:
+            permisoString.value = '';
+            break;
+          default:
+            permisoString.value = ''
+        }
       }
     }
-  }
-  catch (error) {
-    console.error('Error en la solicitud:', error)
-    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    catch (error) {
+      console.error('Error en la solicitud:', error)
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    }
   }
 }
 
-watch(selectedUserId, () => {
-  if (selectedUserId.value) {
-    getUser()
-  }
-})
+// watch(selectedUserId, () => {
+//   if (selectedUserId.value) {
+//     getUser()
+//   }
+// })
 
 // VALIDAR DATOS DEL FORMULARIO
 const patronEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -254,16 +256,16 @@ const crearProfesor = async () => {
           <div class="field col-12 lg:col-4 md:col-12 sm:col-12 ">
             <label class="">Seleccionar usuario</label>
             <Dropdown class="" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput"
-              placeholder="Selecciona un usuario" v-model="selectedUserId" />
+              placeholder="Selecciona un usuario" v-model="selectedUserId" @change="getUser()" />
             <InlineMessage v-if="!user && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El usuario es obligatorio</InlineMessage>
           </div>
-          <div v-if="selectedUserId" class="ml-1">
+          <div v-if="selectedUserId != undefined" class="ml-1">
             <DataTable :value="[user]" class="pl-1" tableStyle="width: 30rem" :pt="{
-              table: {
-                class: 'mt-0',
-                style: { 'border': 'none' }
-              }
-            }">
+      table: {
+        class: 'mt-0',
+        style: { 'border': 'none' }
+      }
+    }">
               <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
               <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
               <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem">
@@ -282,13 +284,13 @@ const crearProfesor = async () => {
     </form>
   </div>
   <Toast :pt="{
-    container: {
-      class: 'align-items-center'
-    },
-    closeButton: {
-      class: 'border-1'
-    }
-  }">
+      container: {
+        class: 'align-items-center'
+      },
+      closeButton: {
+        class: 'border-1'
+      }
+    }">
   </Toast>
 </template>
 

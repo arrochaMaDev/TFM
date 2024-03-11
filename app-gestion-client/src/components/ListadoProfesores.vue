@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import { type Ref, ref, onMounted } from 'vue'
+import { type Ref, ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLoadingStore } from '@/stores/loading'
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
+import Dropdown from 'primevue/dropdown';
 import { FilterMatchMode } from 'primevue/api';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
+import Tag from 'primevue/tag';
+
 
 
 const confirm = useConfirm();
@@ -145,11 +148,97 @@ const borrarProfesor = async (profesor: typeof teachersRefFromServer.value[0]) =
     getTeachersData()
   }
 }
+//OBTENER USUARIOS PARA EDITAR ASIGNACION
+const usersRefFromServer: Ref<{
+  id: number,
+  username: string,
+  email: string,
+  permiso: number
+}[]> = ref([])
+
+const getUsersData = async () => {
+  try {
+    const response = await fetch('http://localhost:3000/usuarios', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      const data = await response.json() as {
+        id: number
+        username: string
+        email: string
+        permiso: number
+      }[]
+      usersRefFromServer.value = data
+      // console.table(usersRefFromServer.value)
+      // console.log(data)
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+  }
+}
+getUsersData()
+
+//OBTENER USUARIO PARA MOSTRAR
+const permisoString: Ref<string> = ref("")
+
+const getUser = async () => {
+  if (profesorEditar.value.userId.id != undefined) {
+    try {
+      const response = await fetch(`http://localhost:3000/usuario/${profesorEditar.value.userId.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      if (!response.ok) {
+        throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+      } else {
+        const data = await response.json() as {
+          id: number
+          username: string
+          email: string
+          permiso: number
+        }
+        profesorEditar.value.userId = data
+        // console.table(user.value)
+
+        // PERMISO A STRING
+        switch (profesorEditar.value.userId.permiso) {
+          case 0:
+            permisoString.value = 'Alumno'
+            break;
+          case 1:
+            permisoString.value = 'Profesor'
+            break;
+          case 9:
+            permisoString.value = 'Aministrador'
+            break;
+          case null:
+            permisoString.value = '';
+            break;
+          // default:
+          //   permisoString.value = ''
+        }
+      }
+    }
+    catch (error) {
+      console.error('Error en la solicitud:', error)
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    }
+  }
+}
+
 
 // LÓGICA EDITAR PROFESOR
-
 const visibleDialog: Ref<boolean> = ref(false);
-
 
 const profesorEditar: Ref<
   | {
@@ -157,14 +246,27 @@ const profesorEditar: Ref<
     nombre: string
     apellidos: string
     email: string
+    userId: {
+      id: number
+      username: string
+      email: string
+      permiso: number | string // para poder cambiar el permiso a string
+    }
   }> = ref({
     id: 0,
     nombre: '',
     apellidos: '',
-    email: ''
+    email: '',
+    userId: {
+      id: 0,
+      username: '',
+      email: '',
+      permiso: ''
+    }
   }); // lo inicializo para evitar problemas con null o undefined en v-model
 
 const mostrarDialog = (teacher: typeof teachersRefFromServer.value[0]) => {
+  getUser() //Obtener usuario
   visibleDialog.value = true
   profesorEditar.value = { ...teacher } // spread crea un nuevo objeto y copia superficialmente el objeto
   console.table(profesorEditar.value)
@@ -191,7 +293,8 @@ const editarProfesor = async () => {
         body: JSON.stringify({
           nombre: profesorEditar.value?.nombre,
           apellidos: profesorEditar.value?.apellidos,
-          email: profesorEditar.value?.email
+          email: profesorEditar.value?.email,
+          userId: profesorEditar.value?.userId.id
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -205,7 +308,8 @@ const editarProfesor = async () => {
         const profesorActualizado = {
           nombre: profesorEditar.value?.nombre,
           apellidos: profesorEditar.value?.apellidos,
-          email: profesorEditar.value?.email
+          email: profesorEditar.value?.email,
+          userId: profesorEditar.value?.userId.id
         };
         console.table(profesorActualizado)
       }
@@ -218,7 +322,6 @@ const editarProfesor = async () => {
     }
   }
 }
-
 
 // Ir a la página idividual del profesor
 const goToTeacher = (id: number) => {
@@ -238,10 +341,17 @@ const goToTeacher = (id: number) => {
 // Filtrar datos
 const filters = ref() // variable filtro
 
+const permisos = ['Alumno', 'Profesor', 'Administrador'];
+
 const initFilters = () => { // componente filtro en global para que busque cualquier valor
   filters.value =
   {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'apellidos': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'email': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'userId.username': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'userId.permiso': { value: null, matchMode: FilterMatchMode.EQUALS },
   }
 }
 initFilters()
@@ -255,13 +365,35 @@ onMounted(() => {
   getTeachersData()
 })
 
+//Ver usuarios asignados
+const mostrarUsuario = ref(false)
+const toogleMostrarUsuario = () => {
+  mostrarUsuario.value = !mostrarUsuario.value
+}
+
+const getSeverity = (permiso: string) => {
+  switch (permiso) {
+    case 'Alumno':
+      return 'success';
+
+    case 'Profesor':
+      return 'primary';
+
+    case 'Administrador':
+      return 'warning';
+
+    default:
+      return undefined;
+  }
+};
+
 </script>
 
 <template>
   <div class="flex justify-content-start pt-2">
     <div class="card flex justify-content-center">
-      <DataTable v-model:filters="filters" class="" :value="teachersRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10"
-        tableStyle="width: 70rem" :pt="{
+      <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['nombre', 'apellidos', 'email', 'userId.username', 'userId.email', 'userId.permiso']" class="" removableSort
+        :value="teachersRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" tableStyle="width: 40rem" :pt="{
         paginator: {
           paginatorWrapper: { class: 'col-12 flex justify-content-center' },
           firstPageButton: { class: 'w-auto' },
@@ -274,29 +406,57 @@ onMounted(() => {
           class: 'mt-0',
           style: { 'border': 'none' }
         }
-      }">
+      }
+        ">
 
         <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
           <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Profesores</h5>
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
-            <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Buscar..." />
-            <Button rounded icon="pi pi-filter-slash" label="" outlined @click="clearFilter()"></Button>
+            <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Búsqueda global..." />
+            <Button rounded icon="pi pi-filter-slash" label="" title="Limpiar filtros" outlined @click="clearFilter()"></Button>
+            <Button rounded icon="pi pi-users" label="" title="Mostrar Usuarios" outlined @click="toogleMostrarUsuario()"></Button>
           </span>
         </div>
-
-        <Column field="nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"> </Column>
-        <Column field="apellidos" header="Apellidos" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
-        <Column field="email" header="Email" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
-        <Column field="userId.username" header="Username" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
-        <Column field="userId.email" header="Email de usuario" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
-        <Column field="userId.permiso" header="Permiso" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
-        <!-- <Column v-for="col of columns" :key="col.field" class="" :field="col.field" :header="col.header" :pt="{
-          root: { class: '' },
-          headerContent: { class: 'text-center m-2 p-2 h-2rem text-xl font-semibold' }
-        }">
-        </Column> -->
-        <!-- :pt="{ headerContent: { style: { 'background-color': 'red' } } }" -->
+        <Column field="nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+          <template #filter="{ filterModel }">
+            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+          </template>
+        </Column>
+        <Column field="apellidos" header="Apellidos" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+          <template #filter="{ filterModel }">
+            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+          </template>
+        </Column>
+        <Column field="email" header="Email" sortable headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+          <template #filter="{ filterModel }">
+            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+          </template>
+        </Column>
+        <div v-if="mostrarUsuario">
+          <Column field="userId.username" header="Username" sortable headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+            <template #filter="{ filterModel }">
+              <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+            </template>
+          </Column>
+          <Column field="userId.email" header="Email de usuario" sortable headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+            <template #filter="{ filterModel }">
+              <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+            </template>
+          </Column>
+          <Column field="userId.permiso" header="Permiso" headerStyle="width:40%; min-width:8rem" :show-filter-match-modes="false">
+            <template #body="{ data }">
+              <Tag :value="data.userId.permiso" :severity="getSeverity(data.userId.permiso)" />
+            </template>
+            <template #filter="{ filterModel }">
+              <Dropdown v-model="filterModel.value" :options="permisos" placeholder="Selecciona" class="p-column-filter" style="width: auto">
+                <template #option="slotProps">
+                  <Tag :value="slotProps.option" :severity="getSeverity(slotProps.option)" />
+                </template>
+              </Dropdown>
+            </template>
+          </Column>
+        </div>
         <Column headerStyle="width:20%; min-width:8rem" bodyClass="flex p-1 pl-1">
           <template #body="slotProps">
             <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" @click="goToTeacher(slotProps.data.id)"></Button>
@@ -313,11 +473,13 @@ onMounted(() => {
         closeButton: {
           class: 'border-1'
         }
-      }"></Toast>
+      }
+        "></Toast>
       <ConfirmDialog :pt="{
         header: { class: 'pb-0 pt-2' },
         content: { class: 'pb-3 pt-1' }
-      }"></ConfirmDialog>
+      }
+        "></ConfirmDialog>
 
       <Dialog v-model:visible="visibleDialog" modal header="Editar Profesor" class="w-3" :pt="{
         header: { class: 'flex align-items-baseline h-5rem' },
@@ -326,7 +488,8 @@ onMounted(() => {
         mask: {
           style: 'backdrop-filter: blur(3px)'
         }
-      }">
+      }
+        ">
 
         <span class="p-text-secondary flex mb-5">Actualizar información</span>
         <div class="flex align-items-center gap-3 mb-3">
@@ -340,6 +503,28 @@ onMounted(() => {
         <div class="flex align-items-center gap-3 mb-3">
           <label for="email" class="font-semibold w-6rem">Email</label>
           <InputText id="email" class="w-7" v-model="profesorEditar.email" :class="{ 'p-invalid': !profesorEditar.email }" />
+        </div>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="usuario" class="font-semibold w-6rem">Usuario</label>
+          <Dropdown class="" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput"
+            placeholder="Selecciona un usuario" v-model="profesorEditar.userId.id" @change="getUser()" />
+        </div>
+        <div v-if="profesorEditar.userId.id != undefined" class="">
+          <DataTable :value="[profesorEditar.userId]" class="pl-1" tableStyle="width: 30rem" :pt="{
+        table: {
+          class: 'mt-0',
+          style: { 'border': 'none' }
+        }
+      }
+        ">
+            <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+            <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+            <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem">
+              <template #body="">
+                {{ permisoString }}
+              </template>
+            </Column>
+          </DataTable>
         </div>
         <div class="flex justify-content-center mb-3 pt-2">
           <Button type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialog = false"></Button>

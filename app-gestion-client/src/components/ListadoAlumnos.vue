@@ -2,7 +2,6 @@
 import { type Ref, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLoadingStore } from '@/stores/loading'
-import { useEditingStore } from '@/stores/editar'
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button'
@@ -23,7 +22,7 @@ const router = useRouter() // router para ir al alumno cuando se clique en él
 const loadingStore = useLoadingStore() // store del Spinner
 
 // OBTENER DATOS DE TODOS LOS ESTUDIANTES
-let studentsRefFromServer: Ref<
+const studentsRefFromServer: Ref<
   {
     id: number
     usuario_id: string
@@ -48,8 +47,8 @@ const getStudentsData = async () => {
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
-      loadingStore.loadingTrue()
 
+      // const data = (await response.json())
       const data = (await response.json()) as {
         id: number
         usuario_id: string
@@ -59,8 +58,23 @@ const getStudentsData = async () => {
         direccion: string
         telefono: number
         email: string
+        userId: {
+          id: number
+          username: string
+          email: string
+          permiso: number
+        }
       }[]
-      studentsRefFromServer.value = data
+
+      // Para cambiar el permiso a string
+      const updatedData = data.map((student) => ({
+        ...student,
+        userId: {
+          ...student.userId,
+          permiso: PermisoToString(student.userId.permiso)
+        }
+      }));
+      studentsRefFromServer.value = updatedData
       console.log(data)
       console.log(studentsRefFromServer.value)
     }
@@ -72,6 +86,22 @@ const getStudentsData = async () => {
   }
 }
 
+const PermisoToString = (permiso: number) => {
+  switch (permiso) {
+    case 0:
+      return 'Alumno'
+    case 1:
+      return 'Profesor'
+    case 9:
+      return 'Administrador'
+    default:
+      return 'Desconocido'
+  }
+}
+
+onMounted(() => {
+  getStudentsData()
+})
 
 // LÓGICA BORRAR ALUMNO
 const confirmDelete = (alumno: typeof studentsRefFromServer.value[0]) => { // al ser un array, le indico el valor de la casilla 0
@@ -119,10 +149,7 @@ const borrarAlumno = async (alumno: typeof studentsRefFromServer.value[0]) => {
 }
 
 // LÓGICA EDITAR ALUMNO
-const editingStore = useEditingStore() // store del componente editar Alumno
-
 const visibleDialog: Ref<boolean> = ref(false);
-
 
 const alumnoEditar: Ref<
   | {
@@ -134,6 +161,12 @@ const alumnoEditar: Ref<
     direccion: string
     telefono: number
     email: string
+    // usuario: {
+    //   id: number
+    //   username: string
+    //   email: string
+    //   permiso: number
+    // }
   }> = ref({
     id: 0,
     usuario_id: '',
@@ -142,7 +175,13 @@ const alumnoEditar: Ref<
     dni: '',
     direccion: '',
     telefono: 0,
-    email: ''
+    email: '',
+    // usuario: {
+    //   id: 0,
+    //   username: '',
+    //   email: '',
+    //   permiso: 0
+    // }
   }); // lo inicializo para evitar problemas con null o undefined en v-model
 
 const mostrarDialog = (student: typeof studentsRefFromServer.value[0]) => {
@@ -245,18 +284,20 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
   initFilters()
 }
 
-// ON MOUNTED
-onMounted(() => {
-  getStudentsData()
-})
 
+
+//Ver usuarios asignados
+const mostrarUsuario = ref(false)
+const toogleMostrarUsuario = () => {
+  mostrarUsuario.value = !mostrarUsuario.value
+}
 </script>
 
 <template>
   <div class="flex justify-content-start pt-2">
     <div class="card flex justify-content-center">
       <DataTable v-model:filters="filters" class="" :value="studentsRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10"
-        tableStyle="width: 80rem" :pt="{
+        tableStyle="width: auto" :pt="{
         paginator: {
           paginatorWrapper: { class: 'col-12 flex justify-content-center' },
           firstPageButton: { class: 'w-auto' },
@@ -277,6 +318,8 @@ onMounted(() => {
             <i class="pi pi-search"></i>
             <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Buscar..." />
             <Button rounded icon="pi pi-filter-slash" label="" outlined @click="clearFilter()"></Button>
+            <Button rounded icon="pi pi-users" label="" outlined @click="toogleMostrarUsuario()"></Button>
+
           </span>
         </div>
 
@@ -286,12 +329,11 @@ onMounted(() => {
         <Column field="direccion" header="Dirección" headerStyle="width:70%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
         <Column field="telefono" header="Teléfono" headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
         <Column field="email" header="Email" headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
-        <!-- <Column v-for="col of columns" :key="col.field" class="" :field="col.field" :header="col.header" :pt="{
-          root: { class: '' },
-          headerContent: { class: 'text-center m-2 p-2 h-2rem text-xl font-semibold' }
-        }">
-        </Column> -->
-        <!-- :pt="{ headerContent: { style: { 'background-color': 'red' } } }" -->
+        <div v-if="mostrarUsuario">
+          <Column field="userId.username" header="Username" headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+          <Column field="userId.email" header="Email de Usuario" headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+          <Column field="userId.permiso" header="Permiso" headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+        </div>
         <Column headerStyle="width:5%; min-width:8rem" bodyClass="flex p-1 pl-1">
           <template #body="slotProps">
             <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" @click="goToStudent(slotProps.data.id)"></Button>

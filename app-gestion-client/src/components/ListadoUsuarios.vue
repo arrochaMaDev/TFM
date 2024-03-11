@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { type Ref, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import Popup from './Popup.vue'
-import AltaUsuario from './AltaUsuario.vue'
-import { useLoadingStore } from '@/stores/loading'
-import { useEditingStore } from '@/stores/editar'
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
+import Password from 'primevue/password'
 import { FilterMatchMode } from 'primevue/api';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from "primevue/useconfirm";
@@ -21,10 +18,10 @@ import Dropdown from 'primevue/dropdown';
 const confirm = useConfirm();
 const toast = useToast();
 
-const router = useRouter() // router para ir al usuario cuando se clique en él
+const router = useRouter()
 
 // OBTENER DATOS DE TODOS LOS USUARIOS
-let usersRefFromServer: Ref<
+const usersRefFromServer: Ref<
   {
     id: number
     username: string
@@ -81,9 +78,147 @@ const PermisoToString = (permiso: number) => {
   }
 }
 
+// //OBTENER DATOS DE TODOS LOS ALUMNOS
+// const studentsRefFromServer: Ref<
+//   {
+//     id: number
+//     usuario_id: string
+//     nombre: string
+//     apellidos: string
+//     dni: string
+//     direccion: string
+//     telefono: number
+//     email: string
+//     userId: {
+//       id: number
+//       username: string
+//       email: string
+//       permiso: number
+//     }
+//   }[]
+// > = ref([])
+
+// const getStudentsData = async () => {
+//   try {
+//     const response = await fetch('http://localhost:3000/students', {
+//       method: 'GET',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       },
+//       credentials: 'include'
+//     })
+//     if (!response.ok) {
+//       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+//     } else {
+
+//       // const data = (await response.json())
+//       const data = (await response.json()) as {
+//         id: number
+//         usuario_id: string
+//         nombre: string
+//         apellidos: string
+//         dni: string
+//         direccion: string
+//         telefono: number
+//         email: string
+//         userId: {
+//           id: number
+//           username: string
+//           email: string
+//           permiso: number
+//         }
+//       }[]
+
+//       studentsRefFromServer.value = data
+//       console.log(studentsRefFromServer.value)
+//     }
+//   } catch (error) {
+//     console.error('Error en la solicitud:', error)
+//     toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+//   }
+// }
+
+// // OBTENER DATOS DE TODOS LOS PROFESORES
+// const teachersRefFromServer: Ref<
+//   {
+//     id: number
+//     usuario_id: string
+//     nombre: string
+//     apellidos: string
+//     email: string
+//     userId: {
+//       id: number
+//       username: string
+//       email: string
+//       permiso: number | string // para poder cambiar el permiso a string
+//     }
+//   }[]
+// > = ref([])
+
+// const getTeachersData = async () => {
+//   try {
+//     const response = await fetch('http://localhost:3000/teachers', {
+//       method: 'GET',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       },
+//       credentials: 'include'
+//     })
+//     if (!response.ok) {
+//       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+//     } else {
+
+//       // const data = (await response.json())
+//       const data: {
+//         id: number;
+//         usuario_id: string;
+//         nombre: string;
+//         apellidos: string;
+//         email: string;
+//         userId: {
+//           id: number;
+//           username: string;
+//           email: string;
+//           permiso: number;
+//         };
+//       }[] = await response.json(); console.log(data)
+//       teachersRefFromServer.value = data
+//       console.log(teachersRefFromServer.value)
+//     }
+//   } catch (error) {
+//     console.error('Error en la solicitud:', error)
+//     toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+//   }
+// }
+
 onMounted(() => {
   getUsersData()
+  // getStudentsData()
+  // getTeachersData()
 })
+
+// const usersWithTeacherAndStudents: Ref<{
+//   id: number
+//   username: string
+//   email: string
+//   permiso: string
+//   students: {
+//     id: number
+//     nombre: string
+//     apellidos: string
+//     dni: string
+//     direccion: string
+//     telefono: number
+//     email: string
+//   }[]
+//   teachers: {
+//     id: number;
+//     nombre: string;
+//     apellidos: string;
+//     email: string;
+//   }[]
+// }[]> = ref([])
+
 
 
 // LÓGICA BORRAR USUARIO
@@ -130,8 +265,6 @@ const borrarUsuario = async (usuario: typeof usersRefFromServer.value[0]) => {
 
 
 // LÓGICA EDITAR USUARIO
-// const editingStore = useEditingStore() // store del componente editar Usuario
-
 const visibleDialog: Ref<boolean> = ref(false);
 
 const usuarioEditar: Ref<
@@ -149,9 +282,24 @@ const usuarioEditar: Ref<
     permiso: 0
   }); // lo inicializo para evitar problemas con null o undefined en v-model
 
+// Para cambiar el permiso a un número y evitar problemas en el post
+const permisoToNumber = (permiso: string) => {
+  switch (permiso) {
+    case 'Alumno':
+      return 0
+    case 'Profesor':
+      return '1'
+    case 'Administrador':
+      return 9
+    default:
+      return ''
+  }
+}
+
 const mostrarDialog = (usuario: typeof usuarioEditar.value) => {
   visibleDialog.value = true
   usuarioEditar.value = { ...usuario } // spread crea un nuevo objeto y copia superficialmente el objeto
+  usuarioEditar.value.permiso = permisoToNumber(usuarioEditar.value.permiso.toString())
   console.table(usuarioEditar.value)
 }
 
@@ -164,19 +312,18 @@ const editarUsuario = async () => {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
     isValid = false
   }
-  if (!usuarioEditar.value.username || !usuarioEditar.value.email) {
+  if (!usuarioEditar.value.username || !usuarioEditar.value.email || !usuarioEditar.value.pass || !usuarioEditar.value.permiso) {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
     isValid = false
   }
   if (isValid) {
-    console.log(usuarioEditar.value.id)
     try {
       const response = await fetch(`http://localhost:3000/usuario/${usuarioEditar.value?.id}`, {
         method: 'PUT',
         body: JSON.stringify({
           username: usuarioEditar.value?.username,
           email: usuarioEditar.value?.email,
-          // pass: usuarioEditar.value?.pass,
+          pass: usuarioEditar.value?.pass,
           permiso: usuarioEditar.value?.permiso
         }),
         headers: {
@@ -266,12 +413,6 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
         <Column field="username" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"> </Column>
         <Column field="email" header="Email" sortable headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
         <Column field="permiso" header="Permiso" sortable headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
-        <!-- <Column v-for="col of columns" :key="col.field" class="" :field="col.field" :header="col.header" :pt="{
-          root: { class: '' },
-          headerContent: { class: 'text-center m-2 p-2 h-2rem text-xl font-semibold' }
-        }">
-        </Column> -->
-        <!-- :pt="{ headerContent: { style: { 'background-color': 'red' } } }" -->
         <Column headerStyle="width:20%; min-width:8rem" bodyClass="flex p-1 pl-1">
           <template #body="slotProps">
             <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" @click="goToUser(slotProps.data.id)"></Button>
@@ -295,7 +436,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       }"></ConfirmDialog>
 
 
-      <Dialog v-model:visible="visibleDialog" modal header="Editar Usuario" class="w-3" :pt="{
+      <Dialog v-model:visible="visibleDialog" modal header="Editar Usuario" class="w-4" :pt="{
         header: { class: 'flex align-items-baseline h-5rem' },
         title: { class: '' },
         closeButtonIcon: { class: '' },
@@ -315,14 +456,14 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
         </div>
         <div class="flex align-items-center gap-3 mb-3">
           <label for="pass" class="font-semibold w-6rem">Contraseña</label>
-          <InputText id="pass" class="w-7" v-model="usuarioEditar.pass" :class="{ 'p-invalid': !usuarioEditar.pass }" />
+          <Password id="pass" class="w-7" :feedback="false" v-model="usuarioEditar.pass" :class="{ 'p-invalid': !usuarioEditar.pass }" />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
           <label for="permiso" class="font-semibold w-6rem">Permiso</label>
           <Dropdown class="" id="permisos" :options="permisos" optionLabel="name" optionValue="code" checkmark :highlightOnSelect="false" showClear placeholder="Selecciona un permiso"
-            v-model="usuarioEditar.permiso" />
+            v-model="usuarioEditar.permiso" :class="{ 'p-invalid': usuarioEditar.permiso == null }" />
         </div>
-        <div class="flex justify-content-center mb-3 pt-2">
+        <div class=" flex justify-content-center mb-3 pt-2">
           <Button type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialog = false"></Button>
           <Button type="button" rounded label="Actualizar" @click="editarUsuario()"></Button>
         </div>
