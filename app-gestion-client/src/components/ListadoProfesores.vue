@@ -282,7 +282,7 @@ const editarProfesor = async () => {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
     isValid = false
   }
-  if (!profesorEditar.value.nombre || !profesorEditar.value.apellidos || !profesorEditar.value.email) {
+  if (!profesorEditar.value.nombre || !profesorEditar.value.apellidos || !profesorEditar.value.email || !profesorEditar.value.userId.id) {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
     isValid = false
   }
@@ -330,14 +330,6 @@ const goToTeacher = (id: number) => {
   })
 }
 
-// DATOS TABLA
-// const columns = [
-//   { field: 'id', header: 'id' },
-//   { field: 'nombre', header: 'Nombre' },
-//   { field: 'apellidos', header: 'Apellidos' },
-//   { field: 'email', header: 'Email' }
-// ];
-
 // Filtrar datos
 const filters = ref() // variable filtro
 
@@ -351,6 +343,7 @@ const initFilters = () => { // componente filtro en global para que busque cualq
     'apellidos': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'email': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'userId.username': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'userId.email': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'userId.permiso': { value: null, matchMode: FilterMatchMode.EQUALS },
   }
 }
@@ -372,14 +365,14 @@ const toogleMostrarUsuario = () => {
 }
 
 const getSeverity = (permiso: string) => {
-  switch (permiso) {
-    case 'Alumno':
+  switch (permiso.toLowerCase()) {
+    case 'alumno':
       return 'success';
 
-    case 'Profesor':
+    case 'profesor':
       return 'primary';
 
-    case 'Administrador':
+    case 'administrador':
       return 'warning';
 
     default:
@@ -414,8 +407,8 @@ const getSeverity = (permiso: string) => {
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
             <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Búsqueda global..." />
-            <Button rounded icon="pi pi-filter-slash" label="" title="Limpiar filtros" outlined @click="clearFilter()"></Button>
-            <Button rounded icon="pi pi-users" label="" title="Mostrar Usuarios" outlined @click="toogleMostrarUsuario()"></Button>
+            <Button rounded icon="pi pi-filter-slash" label="" v-tooltip.top="'Limpiar filtros'" outlined @click="clearFilter()"></Button>
+            <Button rounded icon="pi pi-users" label="" v-tooltip.top="'Mostrar Usuarios'" outlined @click="toogleMostrarUsuario()"></Button>
           </span>
         </div>
         <Column field="nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
@@ -428,7 +421,7 @@ const getSeverity = (permiso: string) => {
             <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
           </template>
         </Column>
-        <Column field="email" header="Email" sortable headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+        <Column field="email" header="Email" sortable headerStyle="width:40%; min-width:6rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
           <template #filter="{ filterModel }">
             <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
           </template>
@@ -439,12 +432,12 @@ const getSeverity = (permiso: string) => {
               <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
             </template>
           </Column>
-          <Column field="userId.email" header="Email de usuario" sortable headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+          <Column field="userId.email" header="Email de usuario" sortable headerStyle="width:40%; min-width:13rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
             <template #filter="{ filterModel }">
               <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
             </template>
           </Column>
-          <Column field="userId.permiso" header="Permiso" headerStyle="width:40%; min-width:8rem" :show-filter-match-modes="false">
+          <Column field="userId.permiso" header="Permiso" headerStyle="width:40%; min-width:6rem" :show-filter-match-modes="false">
             <template #body="{ data }">
               <Tag :value="data.userId.permiso" :severity="getSeverity(data.userId.permiso)" />
             </template>
@@ -459,9 +452,9 @@ const getSeverity = (permiso: string) => {
         </div>
         <Column headerStyle="width:20%; min-width:8rem" bodyClass="flex p-1 pl-1">
           <template #body="slotProps">
-            <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" @click="goToTeacher(slotProps.data.id)"></Button>
-            <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" @click="mostrarDialog(slotProps.data)"></Button>
-            <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" @click="confirmDelete(slotProps.data)"></Button>
+            <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.id)"></Button>
+            <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Profesor'" @click="mostrarDialog(slotProps.data)"></Button>
+            <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Profesor'" @click="confirmDelete(slotProps.data)"></Button>
           </template>
         </Column>
       </DataTable>
@@ -507,7 +500,7 @@ const getSeverity = (permiso: string) => {
         <div class="flex align-items-center gap-3 mb-3">
           <label for="usuario" class="font-semibold w-6rem">Usuario</label>
           <Dropdown class="" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput"
-            placeholder="Selecciona un usuario" v-model="profesorEditar.userId.id" @change="getUser()" />
+            placeholder="Selecciona un usuario" v-model="profesorEditar.userId.id" @change="getUser()" :class="{ 'p-invalid': profesorEditar.userId.id == undefined }" />
         </div>
         <div v-if="profesorEditar.userId.id != undefined" class="">
           <DataTable :value="[profesorEditar.userId]" class="pl-1" tableStyle="width: 30rem" :pt="{
@@ -527,7 +520,7 @@ const getSeverity = (permiso: string) => {
           </DataTable>
         </div>
         <div class="flex justify-content-center mb-3 pt-2">
-          <Button type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialog = false"></Button>
+          <Button type="button" rounded label="Cancelar" severity="secondary" @click=" getTeachersData(), visibleDialog = false"></Button>
           <Button type="button" rounded label="Actualizar" @click="editarProfesor()"></Button>
         </div>
         <Toast></Toast>

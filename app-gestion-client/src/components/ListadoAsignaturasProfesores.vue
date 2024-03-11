@@ -11,6 +11,9 @@ import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
+import MultiSelect from 'primevue/multiselect';
+
+
 
 const confirm = useConfirm();
 const toast = useToast();
@@ -252,26 +255,52 @@ const borrarSubjectTeacher = async (asignacion: typeof subjectsTeachersRefFromSe
 // LÓGICA EDITAR MATRICULA
 const visibleDialog: Ref<boolean> = ref(false);
 
+const teacherWithSubjectsEditar: Ref<
+  | {
+    teacher: {
+      id: number
+      nombre: string
+      apellidos: string
+      email: string
+    }
+    asignaciones: {
+      subject: {
+        id: number
+        nombre: string
+      }
+    }[]
+  }
+> = ref({
+  teacher: {
+    id: 0,
+    nombre: '',
+    apellidos: '',
+    email: ''
+  },
+  asignaciones: []
+})
+
+const selectedSubjects: Ref<
+  {
+    id: number
+    nombre: string
+  }[]
+> = ref([])
+
+
+const mostrarDialog = (teachersubjects: typeof teachersWithSubjectsRef.value[0]) => {
+  visibleDialog.value = true
+  teacherWithSubjectsEditar.value = { ...teachersubjects } // spread crea un nuevo objeto y copia superficialmente el objeto
+  selectedSubjects.value = { ...teacherWithSubjectsEditar.value.asignaciones }
+  //iterar asignaciones con un map y sacar clave valor para meter las asignaturas asignadas en el array de selectedSubjects
+  console.table(teacherWithSubjectsEditar.value)
+}
+
 // const editingStore = useEditingStore() // store del componente editar Alumno
 
 // let popUpState: Ref<boolean> = ref(editingStore.editarFalse()) // variable del estado del popUp
 // console.log(popUpState.value)
 
-// let subjectTeacherEditar: Ref<
-//   | {
-//     id: number
-//     subject: {
-//       id: number
-//       nombre: string
-//     }
-//     teacher: {
-//       id: number
-//       nombre: string
-//       apellidos: string
-//     }
-//   }
-//   | undefined
-// > = ref(undefined)
 
 // const editarSubjectTeacher = (subjectTeacher: any) => {
 //   // popUpState.value = true
@@ -325,11 +354,19 @@ const goToTeacher = (id: number) => {
 
 // Filtrar datos
 const filters = ref() // variable filtro
+const filters1 = ref() // variable filtro
+
 
 const initFilters = () => { // componente filtro en global para que busque cualquier valor
   filters.value =
   {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'teacher.nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'teacher.apellidos': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'teacher.email': { value: null, matchMode: FilterMatchMode.CONTAINS },
+  }
+  filters1.value = {
+    'subject.nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
   }
 }
 initFilters()
@@ -361,8 +398,9 @@ onMounted(() => {
 <template>
   <div class="flex justify-content-start pt-2">
     <div class="card flex justify-content-center">
-      <DataTable v-model:expandedRows="expandedRows" v-model:filters="filters" class="" stripedRows :value="teachersWithSubjectsRef" dataKey="teacher.id" sortField="teacher.id" :sortOrder="1"
-        :paginator="true" :rows="10" tableStyle="width: 60rem" :pt="{
+      <DataTable v-model:expandedRows="expandedRows" v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['teacher.nombre', 'teacher.apellidos', 'teacher.email', 'subject.nombre']"
+        class="" removableSort removableSortstripedRows :value="teachersWithSubjectsRef" dataKey="teacher.id" sortField="teacher.id" :sortOrder="1" :paginator="true" :rows="10"
+        tableStyle="width: fit-content" :pt="{
         paginator: {
           paginatorWrapper: { class: 'col-12 flex justify-content-center' },
           firstPageButton: { class: 'w-auto' },
@@ -378,8 +416,8 @@ onMounted(() => {
       }">
         <template #header>
           <div class="flex flex-wrap justify-content-end h-1rem align-content-center">
-            <Button class="w-auto" severity="secondary" text icon="pi pi-plus" label="Expand All" @click="expandAll"></Button>
-            <Button class="w-auto" severity="secondary" text icon="pi pi-minus" label="Collapse All" @click="collapseAll"></Button>
+            <Button class="w-auto" severity="secondary" text icon="pi pi-plus" label="Expandir" v-tooltip.top="'Expandir todo'" @click="expandAll"></Button>
+            <Button class="w-auto" severity="secondary" text icon="pi pi-minus" label="Colapsar" v-tooltip.top="'Colapsar todo'" @click="collapseAll"></Button>
           </div>
         </template>
 
@@ -392,18 +430,31 @@ onMounted(() => {
           </span>
         </div>
         <Column expander style="width: 1rem"></Column>
-        <Column field="teacher.nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
-        <Column field="teacher.apellidos" header="Apellidos" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
-        <Column field="teacher.email" header="Email" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+        <Column field="teacher.nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+          <template #filter="{ filterModel }">
+            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+          </template>
+        </Column>
+        <Column field="teacher.apellidos" header="Apellidos" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+          <template #filter="{ filterModel }">
+            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+          </template>
+        </Column>
+        <Column field="teacher.email" header="Email" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false"> <template
+            #filter="{ filterModel }">
+            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+          </template>
+        </Column>
         <Column headerStyle="width:5%; min-width:8rem">
-
           <template #body="slotProps">
-            <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" @click="goToTeacher(slotProps.data.teacher.id)"></Button>
+            <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.teacher.id)"></Button>
+            <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Profesor'" @click="mostrarDialog(slotProps.data)"></Button>
           </template>
         </Column>
 
         <template #expansion="slotProps">
-          <DataTable :value="slotProps.data.asignaciones" selection-mode="single" tableStyle="width: 10rem" :pt="{
+          <DataTable :value="slotProps.data.asignaciones" v-model:filters="filters1" filterDisplay="menu" :globalFilterFields="['subject.nombre']" class="" removableSort selection-mode="single"
+            tableStyle="width: 10rem" :pt="{
         table: {
           class: 'mt-0 ml-7',
           style: {
@@ -412,10 +463,14 @@ onMounted(() => {
         }
       }
         ">
-            <Column field="subject.nombre" header="Asignatura" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"> </Column>
-            <Column headerStyle="" bodyClass="flex p-1 pl-1">
+            <Column field="subject.nombre" header="Asignaturas" sortable headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <Column headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="flex p-1 pl-1">
               <template #body="slotProps">
-                <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" @click="confirmDelete(slotProps.data)"></Button>
+                <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Asignatura'" @click="confirmDelete(slotProps.data)"></Button>
               </template>
             </Column>
           </DataTable>
@@ -438,12 +493,42 @@ onMounted(() => {
       }
         "></ConfirmDialog>
 
-  <Dialog v-model:visible="visibleDialog" modal header="Editar Alumno" class="w-4" :pt="{
+  <Dialog v-model:visible="visibleDialog" modal header="Editar Asignación" class="w-4" :pt="{
         header: { class: 'flex align-items-baseline h-5rem' },
         title: { class: '' },
         closeButtonIcon: { class: '' }
       }
-        "></Dialog>
+        ">
+    <span class="p-text-secondary flex mb-5">Actualizar relación de asignaturas</span>
+
+    <div v-if="teacherWithSubjectsEditar.teacher != undefined" class="">
+      <label class="text-xl text-800 font-bold pl-1">Datos del profesor</label>
+      <DataTable :value="[teacherWithSubjectsEditar.teacher]" class="pt-1" tableStyle="width: 30rem" :pt="{
+        table: {
+          class: 'mt-0',
+          style: { 'border': 'none' }
+        }
+      }
+        ">
+        <Column field="nombre" header="Nombre" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+        <Column field="apellidos" header="Apellidos" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+        <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
+      </DataTable>
+    </div>
+    <div class="field col-12 lg:col-6 md:col-12 sm:col-12 ">
+      <label class="">Seleccionar Asignaturas</label>
+      <MultiSelect :disabled="!selectedSubjects" class="" :options="teacherWithSubjectsEditar.asignaciones" optionLabel="subject.nombre" display="chip" filter placeholder="Selecciona asignaturas"
+        v-model="selectedSubjects">
+      </MultiSelect>
+    </div>
+    <div v-for="asignacion in teacherWithSubjectsEditar.asignaciones" :key="asignacion.subject.id">
+
+      {{ asignacion.subject.nombre }}
+    </div>
+
+
+
+  </Dialog>
 </template>
 
 <style scoped></style>

@@ -7,12 +7,15 @@ import Column from 'primevue/column';
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
+import Dropdown from 'primevue/dropdown';
 import { FilterMatchMode } from 'primevue/api';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
+import Tag from 'primevue/tag';
+
 
 
 const confirm = useConfirm();
@@ -32,6 +35,12 @@ const studentsRefFromServer: Ref<
     direccion: string
     telefono: number
     email: string
+    userId: {
+      id: number
+      username: string
+      email: string
+      permiso: number | string // para poder cambiar el permiso a string
+    }
   }[]
 > = ref([])
 
@@ -148,6 +157,94 @@ const borrarAlumno = async (alumno: typeof studentsRefFromServer.value[0]) => {
   }
 }
 
+//OBTENER USUARIOS PARA EDITAR ASIGNACION
+const usersRefFromServer: Ref<{
+  id: number,
+  username: string,
+  email: string,
+  permiso: number
+}[]> = ref([])
+
+const getUsersData = async () => {
+  try {
+    const response = await fetch('http://localhost:3000/usuarios', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      const data = await response.json() as {
+        id: number
+        username: string
+        email: string
+        permiso: number
+      }[]
+      usersRefFromServer.value = data
+      // console.table(usersRefFromServer.value)
+      // console.log(data)
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+  }
+}
+getUsersData()
+
+//OBTENER USUARIO PARA MOSTRAR
+const permisoString: Ref<string> = ref("")
+
+const getUser = async () => {
+  if (alumnoEditar.value.userId.id != undefined) {
+    try {
+      const response = await fetch(`http://localhost:3000/usuario/${alumnoEditar.value.userId.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      if (!response.ok) {
+        throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+      } else {
+        const data = await response.json() as {
+          id: number
+          username: string
+          email: string
+          permiso: number
+        }
+        alumnoEditar.value.userId = data
+        // console.table(user.value)
+
+        // PERMISO A STRING
+        switch (alumnoEditar.value.userId.permiso) {
+          case 0:
+            permisoString.value = 'Alumno'
+            break;
+          case 1:
+            permisoString.value = 'Profesor'
+            break;
+          case 9:
+            permisoString.value = 'Aministrador'
+            break;
+          case null:
+            permisoString.value = '';
+            break;
+          // default:
+          //   permisoString.value = ''
+        }
+      }
+    }
+    catch (error) {
+      console.error('Error en la solicitud:', error)
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    }
+  }
+}
+
 // LÓGICA EDITAR ALUMNO
 const visibleDialog: Ref<boolean> = ref(false);
 
@@ -161,12 +258,12 @@ const alumnoEditar: Ref<
     direccion: string
     telefono: number
     email: string
-    // usuario: {
-    //   id: number
-    //   username: string
-    //   email: string
-    //   permiso: number
-    // }
+    userId: {
+      id: number
+      username: string
+      email: string
+      permiso: number | string // para poder cambiar el permiso a string
+    }
   }> = ref({
     id: 0,
     usuario_id: '',
@@ -176,19 +273,21 @@ const alumnoEditar: Ref<
     direccion: '',
     telefono: 0,
     email: '',
-    // usuario: {
-    //   id: 0,
-    //   username: '',
-    //   email: '',
-    //   permiso: 0
-    // }
+    userId: {
+      id: 0,
+      username: '',
+      email: '',
+      permiso: 0
+    }
   }); // lo inicializo para evitar problemas con null o undefined en v-model
 
 const mostrarDialog = (student: typeof studentsRefFromServer.value[0]) => {
+  getUser() //Obtener usuario
   visibleDialog.value = true
   alumnoEditar.value = { ...student } // spread crea un nuevo objeto y copia superficialmente el objeto
   console.table(alumnoEditar.value)
 }
+
 
 // validar datos del dialog
 const patronTel = /^\d{9}$/
@@ -205,7 +304,7 @@ const editarAlumno = async () => {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
     isValid = false
   }
-  if (!alumnoEditar.value.nombre || !alumnoEditar.value.apellidos || !alumnoEditar.value.dni || !alumnoEditar.value.direccion || !alumnoEditar.value.telefono || !alumnoEditar.value.email) {
+  if (!alumnoEditar.value.nombre || !alumnoEditar.value.apellidos || !alumnoEditar.value.dni || !alumnoEditar.value.direccion || !alumnoEditar.value.telefono || !alumnoEditar.value.email || !alumnoEditar.value.userId.id) {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
     isValid = false
   }
@@ -219,7 +318,8 @@ const editarAlumno = async () => {
           dni: alumnoEditar.value?.dni,
           direccion: alumnoEditar.value?.direccion,
           telefono: Number(alumnoEditar.value?.telefono),
-          email: alumnoEditar.value?.email
+          email: alumnoEditar.value?.email,
+          userId: alumnoEditar.value?.userId.id
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -258,24 +358,24 @@ const goToStudent = (id: number) => {
   })
 }
 
-// DATOS TABLA
-const columns = [
-  { field: 'id', header: 'id' },
-  { field: 'nombre', header: 'Nombre' },
-  { field: 'apellidos', header: 'Apellidos' },
-  { field: 'dni', header: 'DNI' },
-  { field: 'direccion', header: 'Dirección' },
-  { field: 'telefono', header: 'Teléfono' },
-  { field: 'email', header: 'Email' }
-];
-
 // Filtrar datos
 const filters = ref() // variable filtro
+
+const permisos = ['Alumno', 'Profesor', 'Administrador'];
 
 const initFilters = () => { // componente filtro en global para que busque cualquier valor
   filters.value =
   {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'apellidos': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'dni': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'direccion': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'telefono': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'email': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'userId.username': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'userId.email': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'userId.permiso': { value: null, matchMode: FilterMatchMode.EQUALS },
   }
 }
 initFilters()
@@ -284,20 +384,34 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
   initFilters()
 }
 
-
-
 //Ver usuarios asignados
 const mostrarUsuario = ref(false)
 const toogleMostrarUsuario = () => {
   mostrarUsuario.value = !mostrarUsuario.value
 }
+
+const getSeverity = (permiso: string) => {
+  switch (permiso.toLowerCase()) {
+    case 'alumno':
+      return 'success';
+
+    case 'profesor':
+      return 'info';
+
+    case 'administrador':
+      return 'warning';
+
+    default:
+      return undefined;
+  }
+};
 </script>
 
 <template>
-  <div class="flex justify-content-start pt-2">
+  <div class="flex justify-content-start pt-2 ">
     <div class="card flex justify-content-center">
-      <DataTable v-model:filters="filters" class="" :value="studentsRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10"
-        tableStyle="width: auto" :pt="{
+      <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['nombre', 'apellidos', 'email', 'userId.username', 'userId.email', 'userId.permiso']" class="" removableSort
+        :value="studentsRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" tableStyle="width: fit-content" :pt="{
         paginator: {
           paginatorWrapper: { class: 'col-12 flex justify-content-center' },
           firstPageButton: { class: 'w-auto' },
@@ -316,29 +430,71 @@ const toogleMostrarUsuario = () => {
           <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Alumnos</h5>
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
-            <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Buscar..." />
-            <Button rounded icon="pi pi-filter-slash" label="" outlined @click="clearFilter()"></Button>
-            <Button rounded icon="pi pi-users" label="" outlined @click="toogleMostrarUsuario()"></Button>
-
+            <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Búsqueda global..." />
+            <Button rounded icon="pi pi-filter-slash" label="" v-tooltip.top="'Limpiar filtros'" outlined @click="clearFilter()"></Button>
+            <Button rounded icon="pi pi-users" label="" v-tooltip.top="'Mostrar Usuarios'" outlined @click="toogleMostrarUsuario()"></Button>
           </span>
         </div>
 
-        <Column field="nombre" header="Nombre" sortable headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"> </Column>
-        <Column field="apellidos" header="Apellidos" sortable headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
-        <Column field="dni" header="DNI" headerStyle="width:5%; min-width:8rem; height:1rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
-        <Column field="direccion" header="Dirección" headerStyle="width:70%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
-        <Column field="telefono" header="Teléfono" headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
-        <Column field="email" header="Email" headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+        <Column field="nombre" header="Nombre" sortable headerStyle="min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+          <template #filter="{ filterModel }">
+            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+          </template>
+        </Column>
+        <Column field="apellidos" header="Apellidos" sortable headerStyle="min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+          <template #filter="{ filterModel }">
+            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+          </template>
+        </Column>
+        <Column field="dni" header="DNI" sortable headerStyle="min-width:7rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+          <template #filter="{ filterModel }">
+            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+          </template>
+        </Column>
+        <Column field="direccion" header="Dirección" sortable headerStyle="min-width:19rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+          <template #filter="{ filterModel }">
+            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+          </template>
+        </Column>
+        <Column field="telefono" header="Teléfono" sortable headerStyle="min-width:6rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+          <template #filter="{ filterModel }">
+            <InputText v-model="filterModel.value" type="number" class="p-column-filter" placeholder="Buscar..." />
+          </template>
+        </Column>
+        <Column field="email" header="Email" sortable headerStyle="min-width:13rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+          <template #filter="{ filterModel }">
+            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+          </template>
+        </Column>
         <div v-if="mostrarUsuario">
-          <Column field="userId.username" header="Username" headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
-          <Column field="userId.email" header="Email de Usuario" headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
-          <Column field="userId.permiso" header="Permiso" headerStyle="width:5%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+          <Column field="userId.username" header="Username" sortable headerStyle="min-width:6rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+            <template #filter="{ filterModel }">
+              <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+            </template>
+          </Column>
+          <Column field="userId.email" header="Email de Usuario" sortable headerStyle="min-width:13rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+            <template #filter="{ filterModel }">
+              <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+            </template>
+          </Column>
+          <Column field="userId.permiso" header="Permiso" sortable headerStyle="min-width:7rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+            <template #body="{ data }">
+              <Tag :value="data.userId.permiso" :severity="getSeverity(data.userId.permiso)" />
+            </template>
+            <template #filter="{ filterModel }">
+              <Dropdown v-model="filterModel.value" :options="permisos" placeholder="Selecciona" class="p-column-filter" style="width: auto">
+                <template #option="slotProps">
+                  <Tag :value="slotProps.option" :severity="getSeverity(slotProps.option)" />
+                </template>
+              </Dropdown>
+            </template>
+          </Column>
         </div>
-        <Column headerStyle="width:5%; min-width:8rem" bodyClass="flex p-1 pl-1">
+        <Column headerStyle="min-width:8rem" bodyClass="flex p-1 pl-0">
           <template #body="slotProps">
-            <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" @click="goToStudent(slotProps.data.id)"></Button>
-            <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" @click="mostrarDialog(slotProps.data)"></Button>
-            <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" @click="confirmDelete(slotProps.data)"></Button>
+            <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Alumno'" @click="goToStudent(slotProps.data.id)"></Button>
+            <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Alumno'" @click="mostrarDialog(slotProps.data)"></Button>
+            <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Alumno'" @click="confirmDelete(slotProps.data)"></Button>
           </template>
         </Column>
       </DataTable>
@@ -356,7 +512,7 @@ const toogleMostrarUsuario = () => {
         content: { class: 'pb-3 pt-1' }
       }"></ConfirmDialog>
 
-      <Dialog v-model:visible="visibleDialog" modal header="Editar Alumno" class="w-4" :pt="{
+      <Dialog v-model:visible="visibleDialog" modal header="Editar Alumno" class="w-3" :pt="{
         header: { class: 'flex align-items-baseline h-5rem' },
         title: { class: '' },
         closeButtonIcon: { class: '' },
@@ -390,8 +546,30 @@ const toogleMostrarUsuario = () => {
           <label for="email" class="font-semibold w-6rem">Email</label>
           <InputText id="email" class="w-5" v-model="alumnoEditar.email" :class="{ 'p-invalid': !alumnoEditar.email }" />
         </div>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="usuario" class="font-semibold w-6rem">Usuario</label>
+          <Dropdown class="" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput"
+            placeholder="Selecciona un usuario" v-model="alumnoEditar.userId.id" @change="getUser()" :class="{ 'p-invalid': alumnoEditar.userId.id == undefined }" />
+        </div>
+        <div v-if="alumnoEditar.userId.id != undefined" class="">
+          <DataTable :value="[alumnoEditar.userId]" class="pl-1" tableStyle="width: 30rem" :pt="{
+        table: {
+          class: 'mt-0',
+          style: { 'border': 'none' }
+        }
+      }
+        ">
+            <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+            <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+            <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem">
+              <template #body="">
+                {{ permisoString }}
+              </template>
+            </Column>
+          </DataTable>
+        </div>
         <div class="flex justify-content-center mb-3 pt-2">
-          <Button type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialog = false"></Button>
+          <Button type="button" rounded label="Cancelar" severity="secondary" @click="getStudentsData(), visibleDialog = false"></Button>
           <Button type="button" rounded label="Actualizar" @click="editarAlumno()"></Button>
         </div>
         <Toast></Toast>

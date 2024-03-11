@@ -20,6 +20,7 @@ import router from './router'
 import PrimeVue from 'primevue/config'
 import ConfirmationService from 'primevue/confirmationservice'
 import ToastService from 'primevue/toastservice'
+import Tooltip from 'primevue/tooltip'
 
 // import 'primeflex/primeflex.css'
 import 'primevue/resources/themes/lara-light-indigo/theme.css'
@@ -41,6 +42,7 @@ app.use(VueCookies, {
 app.use(PrimeVue, { ripple: true, inputStyle: 'outlined' }) // oulined??
 app.use(ConfirmationService)
 app.use(ToastService)
+app.directive('tooltip', Tooltip)
 
 // router.beforeEach(function (to: any, from: any, next: any) {
 //   window.scrollTo(0, 0)

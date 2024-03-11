@@ -13,6 +13,8 @@ import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
+import Tag from 'primevue/tag';
+
 
 
 const confirm = useConfirm();
@@ -78,147 +80,9 @@ const PermisoToString = (permiso: number) => {
   }
 }
 
-// //OBTENER DATOS DE TODOS LOS ALUMNOS
-// const studentsRefFromServer: Ref<
-//   {
-//     id: number
-//     usuario_id: string
-//     nombre: string
-//     apellidos: string
-//     dni: string
-//     direccion: string
-//     telefono: number
-//     email: string
-//     userId: {
-//       id: number
-//       username: string
-//       email: string
-//       permiso: number
-//     }
-//   }[]
-// > = ref([])
-
-// const getStudentsData = async () => {
-//   try {
-//     const response = await fetch('http://localhost:3000/students', {
-//       method: 'GET',
-//       headers: {
-//         'Content-Type': 'application/json'
-//       },
-//       credentials: 'include'
-//     })
-//     if (!response.ok) {
-//       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
-//     } else {
-
-//       // const data = (await response.json())
-//       const data = (await response.json()) as {
-//         id: number
-//         usuario_id: string
-//         nombre: string
-//         apellidos: string
-//         dni: string
-//         direccion: string
-//         telefono: number
-//         email: string
-//         userId: {
-//           id: number
-//           username: string
-//           email: string
-//           permiso: number
-//         }
-//       }[]
-
-//       studentsRefFromServer.value = data
-//       console.log(studentsRefFromServer.value)
-//     }
-//   } catch (error) {
-//     console.error('Error en la solicitud:', error)
-//     toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
-//   }
-// }
-
-// // OBTENER DATOS DE TODOS LOS PROFESORES
-// const teachersRefFromServer: Ref<
-//   {
-//     id: number
-//     usuario_id: string
-//     nombre: string
-//     apellidos: string
-//     email: string
-//     userId: {
-//       id: number
-//       username: string
-//       email: string
-//       permiso: number | string // para poder cambiar el permiso a string
-//     }
-//   }[]
-// > = ref([])
-
-// const getTeachersData = async () => {
-//   try {
-//     const response = await fetch('http://localhost:3000/teachers', {
-//       method: 'GET',
-//       headers: {
-//         'Content-Type': 'application/json'
-//       },
-//       credentials: 'include'
-//     })
-//     if (!response.ok) {
-//       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
-//     } else {
-
-//       // const data = (await response.json())
-//       const data: {
-//         id: number;
-//         usuario_id: string;
-//         nombre: string;
-//         apellidos: string;
-//         email: string;
-//         userId: {
-//           id: number;
-//           username: string;
-//           email: string;
-//           permiso: number;
-//         };
-//       }[] = await response.json(); console.log(data)
-//       teachersRefFromServer.value = data
-//       console.log(teachersRefFromServer.value)
-//     }
-//   } catch (error) {
-//     console.error('Error en la solicitud:', error)
-//     toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
-//   }
-// }
-
 onMounted(() => {
   getUsersData()
-  // getStudentsData()
-  // getTeachersData()
 })
-
-// const usersWithTeacherAndStudents: Ref<{
-//   id: number
-//   username: string
-//   email: string
-//   permiso: string
-//   students: {
-//     id: number
-//     nombre: string
-//     apellidos: string
-//     dni: string
-//     direccion: string
-//     telefono: number
-//     email: string
-//   }[]
-//   teachers: {
-//     id: number;
-//     nombre: string;
-//     apellidos: string;
-//     email: string;
-//   }[]
-// }[]> = ref([])
-
 
 
 // LÓGICA BORRAR USUARIO
@@ -370,10 +234,15 @@ const goToUser = (id: number) => {
 // Filtrar datos
 const filters = ref() // variable filtro
 
+const permisos1 = ['Alumno', 'Profesor', 'Administrador'];
+
 const initFilters = () => { // componente filtro en global para que busque cualquier valor
   filters.value =
   {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'username': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'email': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'permiso': { value: null, matchMode: FilterMatchMode.EQUALS },
   }
 }
 initFilters()
@@ -381,12 +250,28 @@ initFilters()
 const clearFilter = () => { // para borrar los filtros, reinicio la función y el value = null
   initFilters()
 }
+
+const getSeverity = (permiso: string) => {
+  switch (permiso.toLowerCase()) {
+    case 'alumno':
+      return 'success';
+
+    case 'profesor':
+      return 'info';
+
+    case 'administrador':
+      return 'warning';
+
+    default:
+      return undefined;
+  }
+};
 </script>
 <template>
   <div class="flex justify-content-start pt-2">
     <div class="card flex justify-content-center">
-      <DataTable v-model:filters="filters" class="" :value="usersRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10"
-        tableStyle="width: 50rem" :pt="{
+      <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['username', 'email', 'permiso']" class="" removableSort :value="usersRefFromServer" dataKey="id" stripedRows
+        selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" tableStyle="width: auto" :pt="{
         paginator: {
           paginatorWrapper: { class: 'col-12 flex justify-content-center' },
           firstPageButton: { class: 'w-auto' },
@@ -406,13 +291,32 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
             <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Buscar..." />
-            <Button rounded icon="pi pi-filter-slash" label="" outlined @click="clearFilter()"></Button>
+            <Button rounded icon="pi pi-filter-slash" label="" v-tooltip.top="'Limpiar filtros'" outlined @click="clearFilter()"></Button>
           </span>
         </div>
 
-        <Column field="username" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"> </Column>
-        <Column field="email" header="Email" sortable headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
-        <Column field="permiso" header="Permiso" sortable headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+        <Column field="username" header="Username" sortable headerStyle="min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+          <template #filter="{ filterModel }">
+            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+          </template>
+        </Column>
+        <Column field="email" header="Email" sortable headerStyle="min-width:14rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+          <template #filter="{ filterModel }">
+            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+          </template>
+        </Column>
+        <Column field="permiso" header="Permiso" sortable headerStyle="min-width:7rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+          <template #body="{ data }">
+            <Tag :value="data.permiso" :severity="getSeverity(data.permiso)" />
+          </template>
+          <template #filter="{ filterModel }">
+            <Dropdown v-model="filterModel.value" :options="permisos1" placeholder="Selecciona" class="p-column-filter" style="width: auto">
+              <template #option="slotProps">
+                <Tag :value="slotProps.option" :severity="getSeverity(slotProps.option)" />
+              </template>
+            </Dropdown>
+          </template>
+        </Column>
         <Column headerStyle="width:20%; min-width:8rem" bodyClass="flex p-1 pl-1">
           <template #body="slotProps">
             <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" @click="goToUser(slotProps.data.id)"></Button>
@@ -436,7 +340,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       }"></ConfirmDialog>
 
 
-      <Dialog v-model:visible="visibleDialog" modal header="Editar Usuario" class="w-4" :pt="{
+      <Dialog v-model:visible="visibleDialog" modal header="Editar Usuario" class="w-3" :pt="{
         header: { class: 'flex align-items-baseline h-5rem' },
         title: { class: '' },
         closeButtonIcon: { class: '' },

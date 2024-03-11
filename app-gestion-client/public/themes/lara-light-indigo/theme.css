@@ -2947,6 +2947,7 @@
 .p-column-filter-overlay .p-column-filter-row-items {
   padding: 0.75rem 0;
 }
+
 .p-column-filter-overlay .p-column-filter-row-items .p-column-filter-row-item {
   margin: 0;
   padding: 0.75rem 1.25rem;
@@ -3000,9 +3001,13 @@
 }
 .p-column-filter-overlay-menu .p-column-filter-add-rule {
   padding: 0.75rem 1.25rem;
+  background-color: red;
 }
 .p-column-filter-overlay-menu .p-column-filter-buttonbar {
   padding: 1.25rem;
+  padding-top: 0px; /* añadido */
+  display: flex;
+  flex-direction: column;
 }
 
 .fc {
@@ -5961,7 +5966,8 @@
   border-radius: 6px;
 }
 .p-tag.p-tag-success {
-  background-color: #22c55e;
+  /* background-color: #22c55e; ORIGINAL */
+  background-color: #56b87a;
   color: #ffffff;
 }
 .p-tag.p-tag-info {

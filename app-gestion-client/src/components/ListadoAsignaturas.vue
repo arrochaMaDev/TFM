@@ -228,12 +228,6 @@ const resetDataTeachers = () => {
 
 }
 
-// DATOS TABLA
-// const columns = [
-//   { field: 'id', header: 'id' },
-//   { field: 'nombre', header: 'Nombre' },
-// ];
-
 // Filtrar datos
 const filters = ref() // variable filtro
 
@@ -258,9 +252,9 @@ onMounted(() => {
 
 <template>
   <div class="flex justify-content-start pt-2">
-    <div class="card flex justify-content-center">
+    <div class="card flex justify-content-center ">
       <DataTable v-model:filters="filters" class="" :value="asignaturasRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10"
-        tableStyle="width: 40rem" :pt="{
+        tableStyle="width: fit-content" :pt="{
         paginator: {
           paginatorWrapper: { class: 'col-12 flex justify-content-center' },
           firstPageButton: { class: 'w-auto' },
@@ -278,19 +272,19 @@ onMounted(() => {
       }">
 
         <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
-          <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Asignaturas</h5>
+          <h5 class="m-0 text-3xl text-800 font-bold pl-1 w-3">Listado Asignaturas</h5>
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
             <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Buscar..." />
-            <Button rounded icon="pi pi-filter-slash" label="" outlined @click="clearFilter()"></Button>
+            <Button rounded icon="pi pi-filter-slash" label="" v-tooltip.top="'Limpiar filtros'" outlined @click="clearFilter()"></Button>
           </span>
         </div>
         <Column field="nombre" header="Nombre" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"> </Column>
         <Column headerStyle="width: 5%" bodyClass="flex p-1 pl-1">
           <template #body="slotProps">
-            <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" @click="getTeachersBySubjectId(slotProps.data)"></Button>
-            <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" @click="mostrarDialog(slotProps.data)"></Button>
-            <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" @click="confirmDelete(slotProps.data)"></Button>
+            <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver profesores'" @click="getTeachersBySubjectId(slotProps.data)"></Button>
+            <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Asignatura'" @click="mostrarDialog(slotProps.data)"></Button>
+            <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Asignatura'" @click="confirmDelete(slotProps.data)"></Button>
           </template>
         </Column>
       </DataTable>
@@ -322,7 +316,7 @@ onMounted(() => {
         <span class="p-text-secondary flex mb-5">Actualizar información</span>
         <div class="flex align-items-center gap-3 mb-3">
           <label for="nombre" class="font-semibold w-6rem">Nombre</label>
-          <InputText id="nombre" class="w-7" v-model="asignaturaEditar.nombre" :class="{ 'p-invalid': !asignaturaEditar.nombre }" />
+          <InputText id="nombre" class="w-3" v-model="asignaturaEditar.nombre" :class="{ 'p-invalid': !asignaturaEditar.nombre }" />
         </div>
         <div class="flex justify-content-center mb-3 pt-2">
           <Button type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialog = false"></Button>
