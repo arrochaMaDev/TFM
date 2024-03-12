@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { type Ref, ref } from 'vue'
+import { type Ref, ref, watch } from 'vue'
 import Dropdown from 'primevue/dropdown';
 import MultiSelect from 'primevue/multiselect';
 import InlineMessage from 'primevue/inlinemessage';
 import Button from 'primevue/button';
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
 
 const toast = useToast();
 
@@ -92,11 +94,22 @@ const selectedSubjects: Ref<
   }[]
 > = ref([])
 
-const teacherSelected: Ref<{
-  id: number
-  nombre: string
-  apellidos: string
-} | null> = ref(null)
+// const teacherSelected: Ref<{
+//   id: number
+//   nombre: string
+//   apellidos: string
+// } | null> = ref(null)
+
+const teacherSelected: Ref<typeof teachersRefFromServer.value[0] | null> = ref(null)
+
+watch(teacherSelected, () => {
+  if (teacherSelected.value) {
+    getSubjectsByTeacherId(teacherSelected.value)
+  }
+  if (!teacherSelected.value) {
+    selectedSubjects.value = []; // Si teacherSelected es false false, selectedSubjects es array vacío
+  }
+});
 
 const formSubmitted = ref(false); // variable para avisos con InlineText
 
@@ -144,8 +157,9 @@ const subjectsByTeacherIdRef: Ref<{
   }[]
 } | null> = ref(null)
 
+let existenAsignaciones = ref(false)
+
 const getSubjectsByTeacherId = async (teacher: typeof teachersRefFromServer.value[0]) => {
-  // console.log(teacher)
   try {
     const response = await fetch(`http://localhost:3000/asignaturas_profesores/teacher/${teacher.id}`, {
       method: 'GET',
@@ -156,14 +170,18 @@ const getSubjectsByTeacherId = async (teacher: typeof teachersRefFromServer.valu
     })
 
     if (!response.ok) {
+      existenAsignaciones.value = false
       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`);
     }
     else {
       const data = await response.json()
       console.log(data);
 
+
+
       if (data && data.asignaciones && data.asignaciones.length > 0) {
         subjectsByTeacherIdRef.value = data;
+        existenAsignaciones.value = true
       }
     }
   } catch (error: any) {
@@ -241,6 +259,16 @@ function borrarDatosForm() {
   selectedSubjects.value = []
   teacherSelected.value = null
 }
+
+watch(teacherSelected, (newValue) => {
+  if (newValue) {
+    getSubjectsByTeacherId(newValue);
+  }
+});
+
+const getValueForDatatable = () => {
+  return subjectsByTeacherIdRef.value?.asignaciones || [];
+};
 </script>
 
 <template>
@@ -269,6 +297,7 @@ function borrarDatosForm() {
           </Dropdown>
           <InlineMessage v-if="!teacherSelected && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El profesor es obligatorio</InlineMessage>
         </div>
+
         <div class="field col-12 lg:col-6 md:col-12 sm:col-12 ">
           <label class="">Seleccionar Asignaturas</label>
           <MultiSelect :disabled="!teacherSelected" class="" :options="subjectsRefFromServer" optionLabel="nombre" display="chip" filter placeholder="Selecciona asignaturas"
@@ -281,8 +310,43 @@ function borrarDatosForm() {
           <Button class="justify-content-center w-auto h-auto" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
           <Button class="justify-content-center w-auto h-auto" severity="secondary" icon="pi pi-trash" iconPos="left" label="Borrar" @click="borrarDatosForm()"></Button>
         </div>
-        <div>
+        <!-- Tabla del profesor seleccionado -->
+        <div v-if="teacherSelected" class="field col-5">
+          <label class="text-xl text-800 font-bold pl-1">Datos del profesor</label>
+          <DataTable :value="[teacherSelected]" class="pt-1" tableStyle="width: 30rem" :pt="{
+      table: {
+        class: 'mt-0 pl-1',
+        style: { 'border': 'none' }
+      }
+    }
+      ">
+            <Column field="nombre" header="Nombre" Class="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+            <Column field="apellidos" header=" Apellidos" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+            <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
+          </DataTable>
+        </div>
+        <div v-if="teacherSelected && existenAsignaciones" class="field col-5">
+          <label class="text-xl text-800 font-bold pl-1">Asignaturas ya asignadas</label>
+          <DataTable :value="getValueForDatatable()" class="pt-1" tableStyle="width: 30rem" :paginator="true" :rows="5" :pt="{
+      paginator: {
+        paginatorWrapper: { class: 'col-12 flex justify-content-center' },
+        firstPageButton: { class: 'w-auto' },
+        previousPageButton: { class: 'w-auto' },
+        pageButton: { class: 'w-auto' },
+        nextPageButton: { class: 'w-auto' },
+        lastPageButton: { class: 'w-auto' },
+      },
+      table: {
+        class: 'mt-0 pl-1',
+        style: { 'border': 'none' }
+      }
+    }
+      ">
+            <Column field="subject.nombre" header="Asignaturas" Class="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+          </DataTable>
+        </div>
 
+        <div>
         </div>
       </div>
     </form>
