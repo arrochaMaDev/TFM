@@ -316,7 +316,7 @@ onMounted(() => {
         <span class="p-text-secondary flex mb-5">Actualizar información</span>
         <div class="flex align-items-center gap-3 mb-3">
           <label for="nombre" class="font-semibold w-6rem">Nombre</label>
-          <InputText id="nombre" class="w-3" v-model="asignaturaEditar.nombre" :class="{ 'p-invalid': !asignaturaEditar.nombre }" />
+          <InputText id="nombre" class="w-full" v-model="asignaturaEditar.nombre" :class="{ 'p-invalid': !asignaturaEditar.nombre }" />
         </div>
         <div class="flex justify-content-center mb-3 pt-2">
           <Button type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialog = false"></Button>

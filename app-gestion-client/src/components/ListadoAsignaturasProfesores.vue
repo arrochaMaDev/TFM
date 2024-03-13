@@ -11,9 +11,8 @@ import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
-import MultiSelect from 'primevue/multiselect';
-
-
+import Dropdown from 'primevue/dropdown';
+import Tag from 'primevue/tag';
 
 const confirm = useConfirm();
 const toast = useToast();
@@ -137,12 +136,17 @@ const getSubjectsByTeacherId = async (teacher: typeof teachersRefFromServer.valu
     else {
       const data = await response.json()
       console.log(data);
+
+      if (visibleDialog.value) {
+        teacherWithSubjectsEditar.value = data
+      }
       // Verificar si el array de asignaciones está vacío
-      if (data && data.asignaciones && data.asignaciones.length > 0) {
+      if (data && data.asignaciones && data.asignaciones.length > 0 && !visibleDialog.value) {
         subjectsByTeacherIdRef.value = data;
         // console.table(subjectsByTeacherIdRef.value)
         return data;
       }
+
     }
   } catch (error: any) {
     console.error('Error en la solicitud:', error)
@@ -198,14 +202,9 @@ const fetchData = async () => {
   }
 };
 
-
-// //FILTRAR DATOS OBTENIDOS POR EL ID DEL PROFESOR PARA LA TABLA
-// const filterSubjectsByTeacherId = (teacher: typeof teachersRefFromServer.value[0]) => {
-//   return subjectsTeachersRefFromServer.value.filter(subject => subject.teacher.id === teacher.id);
-// };
-
 // LÓGICA BORRAR ASIGNACIÓN
 const confirmDelete = (asignacion: typeof subjectsTeachersRefFromServer.value[0]) => { // al ser un array, le indico el valor de la casilla 0
+  console.log(asignacion)
   confirm.require({
     message: '¿Seguro que quiere borrar esta asignación?',
     header: 'Borrar Asignación',
@@ -255,94 +254,192 @@ const borrarSubjectTeacher = async (asignacion: typeof subjectsTeachersRefFromSe
 // LÓGICA EDITAR MATRICULA
 const visibleDialog: Ref<boolean> = ref(false);
 
-const teacherWithSubjectsEditar: Ref<
-  | {
+const selectedSubject: Ref<
+  {
+    id: number
+    nombre: string
+  } | undefined
+> = ref(undefined)
+
+const asignacionEditar: Ref<
+  {
+    id: number
     teacher: {
       id: number
       nombre: string
       apellidos: string
       email: string
     }
-    asignaciones: {
-      subject: {
-        id: number
-        nombre: string
-      }
-    }[]
+    subject: {
+      id: number
+      nombre: string
+    }
+  } | undefined
+> = ref(undefined)
+
+const asignacionOnlySubject: Ref<
+  {
+    id: number
+    subject: {
+      id: number
+      nombre: string
+    }
   }
 > = ref({
-  teacher: {
+  id: 0,
+  subject: {
     id: 0,
     nombre: '',
-    apellidos: '',
-    email: ''
   },
-  asignaciones: []
 })
 
-const selectedSubjects: Ref<
+const teacherWithSubjectsEditar: Ref<typeof teachersWithSubjectsRef.value[0] | undefined> = ref(undefined)
+
+// Obtener datos de todas las asignaturas
+const subjectsRefFromServer: Ref<
   {
     id: number
     nombre: string
   }[]
 > = ref([])
 
-
-const mostrarDialog = (teachersubjects: typeof teachersWithSubjectsRef.value[0]) => {
-  visibleDialog.value = true
-  teacherWithSubjectsEditar.value = { ...teachersubjects } // spread crea un nuevo objeto y copia superficialmente el objeto
-  selectedSubjects.value = { ...teacherWithSubjectsEditar.value.asignaciones }
-  //iterar asignaciones con un map y sacar clave valor para meter las asignaturas asignadas en el array de selectedSubjects
-  console.table(teacherWithSubjectsEditar.value)
+const getSubjectsData = async () => {
+  try {
+    const response = await fetch('http://localhost:3000/asignaturas', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      const data = (await response.json()) as {
+        id: number
+        nombre: string
+      }[]
+      subjectsRefFromServer.value = data
+      console.log(data)
+      console.log(subjectsRefFromServer.value)
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+  }
 }
 
-// const editingStore = useEditingStore() // store del componente editar Alumno
+// Obtener datos totales de la asignacion para rescatar los datos del profesor y verificar si ya se le ha asignado la nueva asignatura
+const getAsignacionData = async (asignacionId: number) => {
+  console.log(asignacionId)
+  try {
+    const response = await fetch(`http://localhost:3000/asignatura_profesor/${asignacionId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      const data = await response.json()
+      asignacionEditar.value = data
+      console.table(asignacionEditar.value)
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+  }
+}
+// mostrar el dialog de editar
+const mostrarDialog = (asignacion: typeof asignacionOnlySubject.value) => {
+  visibleDialog.value = true
+  getSubjectsData()
+  getAsignacionData(asignacion.id)
+}
 
-// let popUpState: Ref<boolean> = ref(editingStore.editarFalse()) // variable del estado del popUp
-// console.log(popUpState.value)
+// logica de editar y verificar
+const editarSubjectTeacher = async () => {
+  let isValid = true;
+  try {
+    if (!selectedSubject.value) {
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
+      isValid = false;
+    }
+
+    if (isValid && asignacionEditar.value && selectedSubject.value) {
+      await getSubjectsByTeacherId(asignacionEditar.value.teacher);
+    }
+
+    if (isValid && asignacionEditar.value && selectedSubject.value && !existenDuplicados()) {
+      fetchEditarSubjectTeacher(asignacionEditar.value.id, selectedSubject.value)
+    }
+  } catch (error) {
+    console.error('Error en la función editarSubjectTeacher:', error);
+  }
+}
+const fetchEditarSubjectTeacher = async (asignacionId: number, subjectSelected: typeof selectedSubject.value) => {
+  try {
+    const response = await fetch(`http://localhost:3000/asignatura_profesor/${asignacionId}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        newSubject: {
+          id: subjectSelected?.id
+        }
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      toast.add({ severity: 'success', summary: 'Editado', detail: 'Asignación editada', life: 3000 });
+      const asignacionActualizada = {
+        id: asignacionEditar.value?.id,
+        teacher: {
+          id: asignacionEditar.value?.teacher.id,
+          nombre: asignacionEditar.value?.teacher.nombre,
+          apellidos: asignacionEditar.value?.teacher.apellidos,
+          email: asignacionEditar.value?.teacher.email,
+        },
+        subject: {
+          id: subjectSelected?.id,
+          nombre: subjectSelected?.nombre
+        }
+      };
+      console.table(asignacionActualizada)
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+  } finally {
+    visibleDialog.value = false
+    getAllTeachersWithSubjects()
+  }
+}
 
 
-// const editarSubjectTeacher = (subjectTeacher: any) => {
-//   // popUpState.value = true
-//   editingStore.editarTrue()
-//   subjectTeacherEditar.value = subjectTeacher
-//   // fetch para obtener los datos del alumno
-//   fetch(`http://localhost:3000/asignatura_profesor/${subjectTeacherEditar.value?.id}`, {
-//     method: 'GET',
-//     headers: {
-//       'Content-Type': 'application/json'
-//     },
-//     credentials: 'include'
-//   }).then(async (response) => {
-//     const data = (await response.json()) as {
-//       id: number
-//       subject: {
-//         id: number
-//         nombre: string
-//       }
-//       teacher: {
-//         id: number
-//         nombre: string
-//         apellidos: string
-//       }
-//     }
-//     subjectTeacherEditar.value = data
-//     console.table(data)
-//   })
-//   getSubjectsTeachersData()
-// }
+// Chequear si hay duplicados entre las asignaturas del array y las que estén en la BD
+// modificacion de eliminarDuplicados del alta asignaciones pero retornando true o false
+const existenDuplicados = () => {
+  if (teacherWithSubjectsEditar.value && selectedSubject) {
+    // recorro el array y extraigo todos los Ids de las asignaciones que haya
+    const subjectsIdsOfTeacher = teacherWithSubjectsEditar.value.asignaciones.map(subjectsTeacher => subjectsTeacher.subject.id);
+    const selectedSubjectId = selectedSubject.value?.id
+    const duplicados = subjectsIdsOfTeacher.filter(subjectId => subjectId === selectedSubjectId); // filtro los que incluyan el mismo id
 
-// const mostrarSubjectTeacher = () => {
-//   // popUpState.value = true
-//   popUpState.value = editingStore.editarTrue()
-//   console.log(popUpState.value)
-// }
-
-// const resetearPopUpState = () => {
-//   // popUpState.value = false
-//   popUpState.value = editingStore.editarFalse()
-//   console.log(popUpState.value)
-// }
+    if (duplicados.length > 0) {
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'La asignatura seleccionada ya se encuentra asignada al profesor', life: 3000 });
+      return true
+    }
+    if (duplicados.length == 0) {
+      return false
+    }
+  }
+};
 
 
 // Ir a la página idividual del profesor
@@ -448,10 +545,9 @@ onMounted(() => {
         <Column headerStyle="width:5%; min-width:8rem">
           <template #body="slotProps">
             <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.teacher.id)"></Button>
-            <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Profesor'" @click="mostrarDialog(slotProps.data)"></Button>
           </template>
         </Column>
-
+        <!-- Tabla asignaturas asignadas -->
         <template #expansion="slotProps">
           <DataTable :value="slotProps.data.asignaciones" v-model:filters="filters1" filterDisplay="menu" :globalFilterFields="['subject.nombre']" class="" removableSort selection-mode="single"
             tableStyle="width: 10rem" :pt="{
@@ -471,6 +567,7 @@ onMounted(() => {
             <Column headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="flex p-1 pl-1">
               <template #body="slotProps">
                 <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Asignatura'" @click="confirmDelete(slotProps.data)"></Button>
+                <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Asignatura'" @click="mostrarDialog(slotProps.data)"></Button>
               </template>
             </Column>
           </DataTable>
@@ -492,42 +589,42 @@ onMounted(() => {
         content: { class: 'pb-3 pt-1' }
       }
         "></ConfirmDialog>
-
-  <Dialog v-model:visible="visibleDialog" modal header="Editar Asignación" class="w-4" :pt="{
+  <!-- Dialog editar asignación -->
+  <Dialog v-model:visible="visibleDialog" modal header="Editar Asignación" class="w-3" :pt="{
         header: { class: 'flex align-items-baseline h-5rem' },
         title: { class: '' },
         closeButtonIcon: { class: '' }
       }
         ">
-    <span class="p-text-secondary flex mb-5">Actualizar relación de asignaturas</span>
+    <span class="p-text-secondary flex mb-5">Cambiar asignatura</span>
 
-    <div v-if="teacherWithSubjectsEditar.teacher != undefined" class="">
-      <label class="text-xl text-800 font-bold pl-1">Datos del profesor</label>
-      <DataTable :value="[teacherWithSubjectsEditar.teacher]" class="pt-1" tableStyle="width: 30rem" :pt="{
+    <label class="text-xl text-800 font-bold">Datos del profesor</label>
+    <DataTable :value="[asignacionEditar?.teacher]" class="pt-1" tableStyle="width: 30rem" :pt="{
         table: {
           class: 'mt-0',
           style: { 'border': 'none' }
         }
       }
         ">
-        <Column field="nombre" header="Nombre" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="apellidos" header="Apellidos" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
-      </DataTable>
-    </div>
-    <div class="field col-12 lg:col-6 md:col-12 sm:col-12 ">
-      <label class="">Seleccionar Asignaturas</label>
-      <MultiSelect :disabled="!selectedSubjects" class="" :options="teacherWithSubjectsEditar.asignaciones" optionLabel="subject.nombre" display="chip" filter placeholder="Selecciona asignaturas"
-        v-model="selectedSubjects">
-      </MultiSelect>
-    </div>
-    <div v-for="asignacion in teacherWithSubjectsEditar.asignaciones" :key="asignacion.subject.id">
+      <Column field="nombre" header="Nombre" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="apellidos" header="Apellidos" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
+    </DataTable>
 
-      {{ asignacion.subject.nombre }}
+    <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12 pt-4">
+      <label class="text-xl text-800 font-bold">Asignatura a editar</label>
+      <Tag class="ml-1 mt-1 w-max" :value="asignacionEditar?.subject.nombre" severity="secondary" />
     </div>
 
-
-
+    <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12">
+      <label class="text-xl text-800 font-bold pl-1">Selecciona nueva Asignatura</label>
+      <Dropdown class="w-5 mt-2" :options="subjectsRefFromServer" optionLabel="nombre" display="chip" filter placeholder="Selecciona..." v-model="selectedSubject">
+      </Dropdown>
+    </div>
+    <div class="flex justify-content-center mb-3 pt-2">
+      <Button type="button" rounded label="Cancelar" severity="secondary" @click="getAllTeachersWithSubjects(), visibleDialog = false"></Button>
+      <Button type="button" rounded label="Actualizar" @click="editarSubjectTeacher()"></Button>
+    </div>
   </Dialog>
 </template>
 

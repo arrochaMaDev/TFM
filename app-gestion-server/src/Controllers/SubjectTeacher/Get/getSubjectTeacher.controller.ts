@@ -29,7 +29,7 @@ export class GetSubjectteacherController {
           id: subjectTeacher.teacher.id,
           nombre: subjectTeacher.teacher.nombre,
           apellidos: subjectTeacher.teacher.apellidos,
-          asignaturas: subjectTeacher.teacher.asignaturas,
+          email: subjectTeacher.teacher.email,
         },
       };
       return response.status(200).json(subjectTeacherDto);

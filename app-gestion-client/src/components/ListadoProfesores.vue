@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, ref, onMounted, watch } from 'vue'
+import { type Ref, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLoadingStore } from '@/stores/loading'
 import DataTable from 'primevue/datatable';

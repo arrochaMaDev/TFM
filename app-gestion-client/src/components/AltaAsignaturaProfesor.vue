@@ -12,7 +12,7 @@ import Column from 'primevue/column';
 const toast = useToast();
 
 // OBTENER DATOS DE TODAS LAS ASIGNATURAS
-let subjectsRefFromServer: Ref<
+const subjectsRefFromServer: Ref<
   {
     id: number
     nombre: string
