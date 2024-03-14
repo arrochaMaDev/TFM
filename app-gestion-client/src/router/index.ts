@@ -12,7 +12,7 @@ import Profesor from '@/components/Profesor.vue'
 import Usuario from '@/components/Usuario.vue'
 import LoginUser from '@/components/LoginUser.vue'
 import ListadoProfesores from '@/components/ListadoProfesores.vue'
-import Matricula from '@/components/Matricula.vue'
+import AltaMatricula from '@/components/AltaMatricula.vue'
 import ListadoMatriculas from '@/components/ListadoMatriculas.vue'
 import ListadoUsuarios from '@/components/ListadoUsuarios.vue'
 import AltaAsignaturaProfesorVue from '@/components/AltaAsignaturaProfesor.vue'
@@ -137,10 +137,10 @@ const router = createRouter({
       component: LoginUser
     },
     {
-      path: '/matricula',
-      name: 'matricula',
+      path: '/alta-matricula',
+      name: 'alta-matricula',
 
-      component: Matricula
+      component: AltaMatricula
     },
     {
       path: '/listado-matriculas',

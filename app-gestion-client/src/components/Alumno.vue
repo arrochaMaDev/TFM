@@ -2,7 +2,7 @@
 import { ref, type Ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Popup from './Popup.vue'
-import Matricula from './Matricula.vue'
+import Matricula from './AltaMatricula.vue'
 import { useEditingStore } from '@/stores/editar'
 
 const router = useRouter()
@@ -197,23 +197,23 @@ console.log(popUpState.value)
 
 let matriculaEditar: Ref<
   | {
+    id: number
+    student: {
       id: number
-      student: {
-        id: number
-        nombre: string
-        apellidos: string
-        dni: string
-      }
-      subject: {
-        id: number
-        nombre: string
-      }
-      teacher: {
-        id: number
-        nombre: string
-        apellidos: string
-      }
+      nombre: string
+      apellidos: string
+      dni: string
     }
+    subject: {
+      id: number
+      nombre: string
+    }
+    teacher: {
+      id: number
+      nombre: string
+      apellidos: string
+    }
+  }
   | undefined
 > = ref(undefined)
 
@@ -279,7 +279,9 @@ const resetearPopUpState = () => {
     </ul>
     <div>
       <table id="tabla" v-if="matriculaFromServer">
-        <th colspan="3"><h3>MATRICULAS</h3></th>
+        <th colspan="3">
+          <h3>MATRICULAS</h3>
+        </th>
         <tr>
           <th>Curso Escolar</th>
           <th>
@@ -303,14 +305,8 @@ const resetearPopUpState = () => {
       </table>
     </div>
     <Popup v-if="popupVisible" @confirmar="borrarMatricula" @cancelar="cancelarBorrar"></Popup>
-    <Matricula
-      v-if="popUpState"
-      :isEditing="popUpState"
-      @cerrarPopUp="resetearPopUpState"
-      @obtenerMatriculas="getMatriculasData()"
-      @resetearMatricula="editarMatricula(matriculaEditar)"
-      :matriculaParaEditar="matriculaEditar"
-    >
+    <Matricula v-if="popUpState" :isEditing="popUpState" @cerrarPopUp="resetearPopUpState" @obtenerMatriculas="getMatriculasData()" @resetearMatricula="editarMatricula(matriculaEditar)"
+      :matriculaParaEditar="matriculaEditar">
     </Matricula>
     <button type="button" @click="confirmacionBorrar">Borrar alumno</button>
     <div v-show="confirmacionEliminar">
@@ -326,6 +322,7 @@ const resetearPopUpState = () => {
 #ordenarPor {
   margin: 0px;
 }
+
 table {
   margin-top: 0px;
   width: max-content;
@@ -334,6 +331,7 @@ table {
   & th {
     background-color: rgb(79, 90, 86);
   }
+
   & td {
     width: fit-content;
     text-align: left;

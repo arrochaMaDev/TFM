@@ -21,15 +21,16 @@ let menuArray: MenuItem[] = [
         label: 'Nuevo',
         items: [
             { label: 'Nuevo Usuario', icon: 'pi pi-plus', to: '/alta-usuario' },
-            { label: 'Nuevo Alumno', icon: 'pi pi-plus', to: '/alta-alumno' },
             { label: 'Nuevo Profesor', icon: 'pi pi-plus', to: '/alta-profesor' },
             { label: 'Nueva Asignatura', icon: 'pi pi-plus', to: '/alta-asignatura' },
+            { label: 'Nuevo Alumno', icon: 'pi pi-plus', to: '/alta-alumno' },
         ]
     },
     {
         label: 'Asignar',
         items: [
             { label: 'Nueva asignación', icon: 'pi pi-arrow-right-arrow-left', to: '/alta-asignatura-profesor' },
+            { label: 'Nueva Matrícula', icon: 'pi pi-book', to: '/alta-matricula' },
         ]
     },
     {
@@ -74,4 +75,3 @@ const menu = Vue.ref(menuArray);
         <AppSubmenu :items="menu" class="layout-menu" :root="true" @menuitem-click="onMenuItemClick" />
     </div>
 </template>
-

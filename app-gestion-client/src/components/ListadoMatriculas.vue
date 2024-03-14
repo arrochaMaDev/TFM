@@ -2,7 +2,7 @@
 import { type Ref, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Popup from './Popup.vue'
-import Matricula from './Matricula.vue'
+import Matricula from './AltaMatricula.vue'
 import { useLoadingStore } from '@/stores/loading'
 import { useEditingStore } from '@/stores/editar'
 
@@ -262,7 +262,9 @@ const goToStudent = (id: number) => {
     </div>
     <div>
       <table id="tabla">
-        <th colspan="5"><h3>LISTADO DE MATRICULAS</h3></th>
+        <th colspan="5">
+          <h3>LISTADO DE MATRICULAS</h3>
+        </th>
         <tr>
           <th>Curso Escolar</th>
           <th>
@@ -304,14 +306,8 @@ const goToStudent = (id: number) => {
 
     <Popup v-if="popupVisible" @confirmar="borrarMatricula" @cancelar="cancelarBorrar"></Popup>
     <!-- recibo un emit de confirmar que ejecuta la funcion borrarAlumno y otro emit de cancelar que ejecuta cancelarBorrar -->
-    <Matricula
-      v-if="popUpState"
-      :isEditing="popUpState"
-      @cerrarPopUp="resetearPopUpState"
-      @obtenerMatriculas="getMatriculasData()"
-      @resetearMatricula="editarMatricula(matriculaEditar)"
-      :matriculaParaEditar="matriculaEditar"
-    >
+    <Matricula v-if="popUpState" :isEditing="popUpState" @cerrarPopUp="resetearPopUpState" @obtenerMatriculas="getMatriculasData()" @resetearMatricula="editarMatricula(matriculaEditar)"
+      :matriculaParaEditar="matriculaEditar">
       <!-- para resetear valores, recibo un emit y vuelvo a ejecutar la funcion editarAlumnos con los parámetros recibidos del componente hijo -->
     </Matricula>
   </div>
@@ -320,6 +316,7 @@ const goToStudent = (id: number) => {
 #ordenarPor {
   margin: 0px;
 }
+
 table {
   margin-top: 0px;
   width: max-content;
@@ -328,6 +325,7 @@ table {
   & th {
     background-color: rgb(79, 90, 86);
   }
+
   & td {
     width: fit-content;
     text-align: left;

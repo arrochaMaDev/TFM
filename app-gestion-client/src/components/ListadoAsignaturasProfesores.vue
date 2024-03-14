@@ -566,8 +566,8 @@ onMounted(() => {
             </Column>
             <Column headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="flex p-1 pl-1">
               <template #body="slotProps">
-                <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Asignatura'" @click="confirmDelete(slotProps.data)"></Button>
-                <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Asignatura'" @click="mostrarDialog(slotProps.data)"></Button>
+                <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Asignación'" @click="confirmDelete(slotProps.data)"></Button>
+                <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Asignación'" @click="mostrarDialog(slotProps.data)"></Button>
               </template>
             </Column>
           </DataTable>

@@ -241,20 +241,20 @@ const fetchSubjectTeacher = async (subjectId: number, teacherId: number) => {
       const data = (await response.json()) as typeof subjectTeacher
 
       console.table(data)
-
-      // reiniciar todos los valores
-      teacherSelected.value = null
-      selectedSubjects.value = []
-      formSubmitted.value = false;
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+  } finally {
+    // reiniciar todos los valores
+    teacherSelected.value = null
+    selectedSubjects.value = []
+    formSubmitted.value = false;
   }
 }
 
 // para resetear los datos del formulario y poner cada ref a vacío
-function borrarDatosForm() {
+const borrarDatosForm = () => {
   formSubmitted.value = false;
   selectedSubjects.value = []
   teacherSelected.value = null
