@@ -15,4 +15,3 @@ import * as Vue from 'vue';
 </template>
 
 <style scoped></style>
-

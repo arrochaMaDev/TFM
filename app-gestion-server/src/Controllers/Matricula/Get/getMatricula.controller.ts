@@ -22,26 +22,26 @@ export class GetMatriculaController {
           .json({ message: 'Matrícula no encontrada' });
       }
       // OPCION DE CONTROLAR LOS DATOS MEDIANTE UN DTO
-      const matriculaDto = {
-        id: matricula.id,
-        student: {
-          id: matricula.student.id,
-          nombre: matricula.student.nombre,
-          apellidos: matricula.student.apellidos,
-        },
-        subject: {
-          id: matricula.subject.id,
-          nombre: matricula.subject.nombre,
-        },
-        teacher: {
-          id: matricula.teacher.id,
-          nombre: matricula.teacher.nombre,
-          apellidos: matricula.teacher.apellidos,
-          asignaturas: matricula.teacher.asignaturas,
-        },
-        year: matricula.year,
-      };
-      return response.status(200).json(matriculaDto);
+      // const matriculaDto = {
+      //   id: matricula.id,
+      //   student: {
+      //     id: matricula.student.id,
+      //     nombre: matricula.student.nombre,
+      //     apellidos: matricula.student.apellidos,
+      //   },
+      //   subject: {
+      //     id: matricula.subject.id,
+      //     nombre: matricula.subject.nombre,
+      //   },
+      //   teacher: {
+      //     id: matricula.teacher.id,
+      //     nombre: matricula.teacher.nombre,
+      //     apellidos: matricula.teacher.apellidos,
+      //     asignaturas: matricula.teacher.asignaturas,
+      //   },
+      //   year: matricula.year,
+      // };
+      return response.status(200).json(matricula);
     } catch (error) {
       console.error(error);
       return response

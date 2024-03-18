@@ -49,7 +49,7 @@ const getTeachersData = async () => {
         email: string
       }[]
       teachersRefFromServer.value = data
-      console.log(data)
+      // console.log(data)
       console.log(teachersRefFromServer.value)
     }
   } catch (error) {
@@ -89,8 +89,8 @@ const getSubjectsTeachersData = async () => {
     } else {
       const data = await response.json()
       subjectsTeachersRefFromServer.value = data
-      console.log(data)
-      console.table(subjectsTeachersRefFromServer.value)
+      // console.log(data)
+      console.log(subjectsTeachersRefFromServer.value)
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
@@ -201,6 +201,10 @@ const fetchData = async () => {
     toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error obteniendo los datos', life: 3000 });
   }
 };
+
+onMounted(() => {
+  fetchData();
+})
 
 // LÓGICA BORRAR ASIGNACIÓN
 const confirmDelete = (asignacion: typeof subjectsTeachersRefFromServer.value[0]) => { // al ser un array, le indico el valor de la casilla 0
@@ -329,7 +333,7 @@ const getSubjectsData = async () => {
   }
 }
 
-// Obtener datos totales de la asignacion para rescatar los datos del profesor y verificar si ya se le ha asignado la nueva asignatura
+// Obtener datos totales de la asignacion para rescatar los datos del profesor y ver los datos de la asignacion a editar
 const getAsignacionData = async (asignacionId: number) => {
   console.log(asignacionId)
   try {
@@ -426,10 +430,10 @@ const fetchEditarSubjectTeacher = async (asignacionId: number, subjectSelected: 
 // modificacion de eliminarDuplicados del alta asignaciones pero retornando true o false
 const existenDuplicados = () => {
   if (teacherWithSubjectsEditar.value && selectedSubject) {
-    // recorro el array y extraigo todos los Ids de las asignaciones que haya
-    const subjectsIdsOfTeacher = teacherWithSubjectsEditar.value.asignaciones.map(subjectsTeacher => subjectsTeacher.subject.id);
+    // recorro el array y extraigo todos los Ids de las asignaturas que haya
+    const subjectsIdsOfTeacher = teacherWithSubjectsEditar.value.asignaciones.map(subjectTeacher => subjectTeacher.subject.id);
     const selectedSubjectId = selectedSubject.value?.id
-    const duplicados = subjectsIdsOfTeacher.filter(subjectId => subjectId === selectedSubjectId); // filtro los que incluyan el mismo id
+    const duplicados = subjectsIdsOfTeacher.filter(subjectId => subjectId === selectedSubjectId); // filtro si esa asignacion ya se encuentra en las asignaciones del profesor
 
     if (duplicados.length > 0) {
       toast.add({ severity: 'warn', summary: 'Error', detail: 'La asignatura seleccionada ya se encuentra asignada al profesor', life: 3000 });
@@ -486,10 +490,6 @@ const collapseAll = () => {
   expandedRows.value = [];
 };
 
-onMounted(() => {
-  fetchData();
-})
-
 </script>
 
 <template>
@@ -523,7 +523,7 @@ onMounted(() => {
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
             <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Buscar..." />
-            <Button rounded icon="pi pi-filter-slash" label="" outlined @click="clearFilter()"></Button>
+            <Button rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
           </span>
         </div>
         <Column expander style="width: 1rem"></Column>
@@ -564,7 +564,7 @@ onMounted(() => {
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>
             </Column>
-            <Column headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="flex p-1 pl-1">
+            <Column header="" headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="flex p-1 pl-1">
               <template #body="slotProps">
                 <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Asignación'" @click="confirmDelete(slotProps.data)"></Button>
                 <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Asignación'" @click="mostrarDialog(slotProps.data)"></Button>
@@ -589,6 +589,7 @@ onMounted(() => {
         content: { class: 'pb-3 pt-1' }
       }
         "></ConfirmDialog>
+
   <!-- Dialog editar asignación -->
   <Dialog v-model:visible="visibleDialog" modal header="Editar Asignación" class="w-3" :pt="{
         header: { class: 'flex align-items-baseline h-5rem' },
@@ -618,7 +619,7 @@ onMounted(() => {
 
     <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12">
       <label class="text-xl text-800 font-bold pl-1">Selecciona nueva Asignatura</label>
-      <Dropdown class="w-5 mt-2" :options="subjectsRefFromServer" optionLabel="nombre" display="chip" filter placeholder="Selecciona..." v-model="selectedSubject">
+      <Dropdown class="w-max mt-2" :options="subjectsRefFromServer" optionLabel="nombre" display="chip" filter placeholder="Selecciona..." v-model="selectedSubject">
       </Dropdown>
     </div>
     <div class="flex justify-content-center mb-3 pt-2">

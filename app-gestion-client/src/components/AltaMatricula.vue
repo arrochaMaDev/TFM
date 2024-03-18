@@ -55,7 +55,7 @@ const getStudentsData = async () => {
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
-    alert('Ha ocurrido un error')
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
   } finally {
     loadingStore.loadingFalse()
   }
@@ -93,7 +93,7 @@ const getSubjectsData = async () => {
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
-    alert('Ha ocurrido un error')
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
   } finally {
     loadingStore.loadingFalse()
   }
