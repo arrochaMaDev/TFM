@@ -286,7 +286,7 @@ const borrarMatricula = async (matricula: typeof matriculasRefFromServer.value[0
       }
     )
     if (response.ok) {
-      toast.add({ severity: 'success', summary: 'Borrado', detail: 'Asignación borrada', life: 3000 });
+      toast.add({ severity: 'success', summary: 'Borrado', detail: 'Matrícula borrada', life: 3000 });
     } else {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
     }

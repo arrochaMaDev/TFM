@@ -48,7 +48,7 @@ export class ListerMatriculasByStudentIdController {
             id: teacher.id,
             nombre: teacher.nombre,
             apellidos: teacher.apellidos,
-            asignaturas: teacher.asignaturas,
+            email: teacher.email,
           },
           year,
         })),
