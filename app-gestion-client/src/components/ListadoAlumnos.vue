@@ -162,7 +162,7 @@ const usersRefFromServer: Ref<{
   id: number,
   username: string,
   email: string,
-  permiso: number
+  permiso: number | string
 }[]> = ref([])
 
 const getUsersData = async () => {
@@ -194,8 +194,8 @@ const getUsersData = async () => {
 }
 getUsersData()
 
-//OBTENER USUARIO PARA MOSTRAR
-const permisoString: Ref<string> = ref("")
+//OBTENER USUARIO PARA MOSTRAR EN LA TABLA AL EDITAR
+// const permisoString: Ref<string> = ref("")
 
 const getUser = async () => {
   if (alumnoEditar.value.userId.id != undefined) {
@@ -222,17 +222,30 @@ const getUser = async () => {
         // PERMISO A STRING
         switch (alumnoEditar.value.userId.permiso) {
           case 0:
-            permisoString.value = 'Alumno'
+            alumnoEditar.value.userId.permiso = 'Alumno'
             break;
           case 1:
-            permisoString.value = 'Profesor'
+            alumnoEditar.value.userId.permiso = 'Profesor'
             break;
           case 9:
-            permisoString.value = 'Aministrador'
+            alumnoEditar.value.userId.permiso = 'Aministrador'
             break;
           case null:
-            permisoString.value = '';
+            alumnoEditar.value.userId.permiso = '';
             break;
+          // switch (alumnoEditar.value.userId.permiso) {
+          //   case 0:
+          //     permisoString.value = 'Alumno'
+          //     break;
+          //   case 1:
+          //     permisoString.value = 'Profesor'
+          //     break;
+          //   case 9:
+          //     permisoString.value = 'Aministrador'
+          //     break;
+          //   case null:
+          //     permisoString.value = '';
+          //     break;
           // default:
           //   permisoString.value = ''
         }
@@ -281,8 +294,8 @@ const alumnoEditar: Ref<
     }
   }); // lo inicializo para evitar problemas con null o undefined en v-model
 
-const mostrarDialog = (student: typeof studentsRefFromServer.value[0]) => {
-  getUser() //Obtener usuario
+const mostrarDialog = async (student: typeof studentsRefFromServer.value[0]) => {
+  await getUser() //Obtener usuario
   visibleDialog.value = true
   alumnoEditar.value = { ...student } // spread crea un nuevo objeto y copia superficialmente el objeto
   console.table(alumnoEditar.value)
@@ -563,7 +576,7 @@ const getSeverity = (permiso: string) => {
             <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
             <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem">
               <template #body="">
-                {{ permisoString }}
+                {{ alumnoEditar.userId.permiso }}
               </template>
             </Column>
           </DataTable>
