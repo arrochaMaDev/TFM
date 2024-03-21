@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { type Ref, ref, onMounted, watch } from 'vue'
+import { type Ref, ref, watch } from 'vue'
 import { useLoadingStore } from '@/stores/loading'
 import Dropdown from 'primevue/dropdown';
-import MultiSelect from 'primevue/multiselect';
 import InlineMessage from 'primevue/inlinemessage';
 import Button from 'primevue/button';
 import { useToast } from "primevue/usetoast";
@@ -126,7 +125,7 @@ const onlyTeachersArray: Ref<{
   email: string
 }[]> = ref([])
 
-const getTeachersData = async () => {
+const getTeachersBySubjectData = async () => {
   try {
     if (!subjectSelected.value) {
       // Manejar el caso en el que no haya una asignatura seleccionada
@@ -177,8 +176,6 @@ const getTeachersData = async () => {
   }
 }
 
-// getTeachersData()
-
 // REFERENCIAS DE LA MATRICULA
 const subjectSelected: Ref<{
   id: number
@@ -228,53 +225,54 @@ const crearMatricula = async () => {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
     isValid = false;
   }
-
-  try {
-    const response = await fetch('http://localhost:3000/matricula', {
-      method: 'POST',
-      body: JSON.stringify({
-        alumno: studentSelected.value?.id,
-        asignatura: subjectSelected.value?.id,
-        profesor: teacherSelected.value?.id,
-        year: añoEscolar
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    })
-    if (!response.ok) {
-      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
-    } else {
-      toast.add({ severity: 'success', summary: 'Creado', detail: 'Asignación creada', life: 3000 });
-
-      const matricula = {
-        alumno: {
-          nombre: studentSelected.value?.nombre,
-          apellidos: studentSelected.value?.apellidos
+  if (isValid) {
+    try {
+      const response = await fetch('http://localhost:3000/matricula', {
+        method: 'POST',
+        body: JSON.stringify({
+          alumno: studentSelected.value?.id,
+          asignatura: subjectSelected.value?.id,
+          profesor: teacherSelected.value?.id,
+          year: añoEscolar
+        }),
+        headers: {
+          'Content-Type': 'application/json'
         },
-        asignatura: subjectSelected.value?.nombre,
-        profesor: {
-          nombre: teacherSelected.value?.nombre,
-          apellidos: teacherSelected.value?.apellidos
+        credentials: 'include'
+      })
+      if (!response.ok) {
+        throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+      } else {
+        toast.add({ severity: 'success', summary: 'Creado', detail: 'Asignación creada', life: 3000 });
+
+        const matricula = {
+          alumno: {
+            nombre: studentSelected.value?.nombre,
+            apellidos: studentSelected.value?.apellidos
+          },
+          asignatura: subjectSelected.value?.nombre,
+          profesor: {
+            nombre: teacherSelected.value?.nombre,
+            apellidos: teacherSelected.value?.apellidos
+          }
         }
+
+        const data = (await response.json()) as typeof matricula
+
+        console.table(data)
+
+        // reiniciar todos los valores menos el del alumno
+        subjectSelected.value = null
+        teacherSelected.value = null
       }
-
-      const data = (await response.json()) as typeof matricula
-
-      console.table(data)
-
-      // reiniciar todos los valores menos el del alumno
-      subjectSelected.value = null
-      teacherSelected.value = null
+    } catch (error) {
+      console.error('Error en la solicitud:', error)
+      toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    } finally {
+      teachersBySubjectIdRefFromServer.value = null
+      onlyTeachersArray.value = []
+      formSubmitted.value = false;
     }
-  } catch (error) {
-    console.error('Error en la solicitud:', error)
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
-  } finally {
-    teachersBySubjectIdRefFromServer.value = null
-    onlyTeachersArray.value = []
-    formSubmitted.value = false;
   }
 }
 
@@ -284,73 +282,6 @@ const borrarDatosForm = () => {
   studentSelected.value = null
   teacherSelected.value = null
   subjectSelected.value = null
-}
-
-// COMPONENTE COMO POPUP PARA EDITAR
-const emit = defineEmits(['cerrarPopUp', 'obtenerMatriculas', 'resetearMatricula'])
-const props = defineProps<{
-  matriculaParaEditar: {
-    id: number
-    student: {
-      id: number
-      nombre: string
-      apellidos: string
-      dni: string
-    }
-    subject: {
-      id: number
-      nombre: string
-    }
-    teacher: {
-      id: number
-      nombre: string
-      apellidos: string
-    }
-  } | null
-  isEditing: boolean
-}>()
-
-let matriculaEditada = ref({ ...props.matriculaParaEditar })
-
-let popUpStyle: Ref<boolean> = ref(props.isEditing) // variable para activar el estilo popUp
-
-// FETCH PARA ACTUALIZAR MATRICULA:
-const actualizarMatricula = async () => {
-  try {
-    const response = await fetch(`http://localhost:3000/matricula/${matriculaEditada.value?.id}`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        newSubject: matriculaEditada.value?.subject,
-        newTeacher: matriculaEditada.value?.teacher
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    })
-    if (!response.ok) {
-      throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
-    } else {
-      alert('Matricula Editada')
-      // Imprimo los datos que he introducido
-      const matriculaAcualizada = [
-        matriculaEditada.value?.student?.nombre,
-        matriculaEditada.value?.student?.apellidos,
-        matriculaEditada.value?.student?.dni,
-        matriculaEditada.value?.subject?.nombre,
-        matriculaEditada.value?.teacher?.nombre,
-        matriculaEditada.value?.teacher?.apellidos
-      ]
-      console.table(matriculaAcualizada)
-      popUpStyle.value = false
-    }
-  } catch (error) {
-    console.error('Error en la solicitud:', error)
-    alert('Ha ocurrido un error')
-  } finally {
-    emit('cerrarPopUp')
-    emit('obtenerMatriculas')
-  }
 }
 
 </script>
@@ -385,7 +316,7 @@ const actualizarMatricula = async () => {
         <div class="field col-12 lg:col-4 md:col-12 sm:col-12 ">
           <label class="">Seleccionar asignatura</label>
           <Dropdown :disabled="!studentSelected" class="" :options="subjectsRefFromServer" checkmark :highlightOnSelect="false" optionLabel="nombre" showClear placeholder="Selecciona una asignatura"
-            v-model="subjectSelected" @change="getTeachersData()">
+            v-model="subjectSelected" @change="getTeachersBySubjectData()">
           </Dropdown>
           <InlineMessage v-if="!subjectSelected && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La asignatura es obligatoria</InlineMessage>
         </div>
@@ -409,7 +340,7 @@ const actualizarMatricula = async () => {
               </div>
             </template>
           </Dropdown>
-          <InlineMessage v-if="!subjectSelected && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La asignatura es obligatoria</InlineMessage>
+          <InlineMessage v-if="!teacherSelected && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El profesor es obligatorio</InlineMessage>
         </div>
 
         <!-- Tabla del alumno seleccionado -->
@@ -453,8 +384,6 @@ const actualizarMatricula = async () => {
       </div>
     </form>
   </div>
-
-
   <Toast :pt="{
       container: {
         class: 'align-items-center'

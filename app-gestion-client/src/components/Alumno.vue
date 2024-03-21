@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, type Ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useEditingStore } from '@/stores/editar'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -16,11 +15,11 @@ import { useToast } from "primevue/usetoast";
 import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from "primevue/useconfirm";
 import Dialog from 'primevue/dialog';
+import Tag from 'primevue/tag';
 
 
 const confirm = useConfirm();
 const toast = useToast();
-
 const router = useRouter()
 
 const studentDataFromServer: Ref<{
@@ -57,7 +56,7 @@ const getStudentData = async () => {
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
-      const data = (await response.json())
+      const data = await response.json()
       studentDataFromServer.value = data
       console.log(studentDataFromServer.value)
       // Para cambiar el permiso a string
@@ -130,6 +129,11 @@ const getMatriculasData = async (studentId: number) => {
       matriculaFromServer.value = data
       console.log(data)
       console.dir(matriculaFromServer.value)
+
+      // para cuando estemos editando la matricula
+      if (visibleDialogMatricula.value) {
+        studentWithMatriculasEditar.value = data
+      }
     }
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
@@ -282,7 +286,7 @@ const mostrarDialogEditarAlumno = async () => {
   await getStudentData()
   visibleDialogAlumno.value = true
   if (studentDataFromServer.value) {
-    alumnoEditar.value = studentDataFromServer.value
+    alumnoEditar.value = { ...studentDataFromServer.value }
   }
   console.table(alumnoEditar.value)
 }
@@ -493,7 +497,7 @@ const studentWithMatriculasEditar: Ref<typeof matriculaFromServer.value | undefi
 const mostrarDialogEditarMatricula = async (matricula: typeof matriculaEditar.value) => {
   visibleDialogMatricula.value = true
   getSubjectsData()
-  getTeachersData()
+  getTeachersBySubjectData()
   if (matricula) {
     await getMatriculaData(matricula.id)
   }
@@ -559,42 +563,84 @@ const getSubjectsData = async () => {
   }
 }
 
-// Obtener datos de todos los profesores
-let teachersRefFromServer: Ref<
-  {
+// obtener datos de los profesores que pueden impartir la nueva asignatura
+const teachersBySubjectIdRefFromServer: Ref<{
+  asignatura: {
     id: number
     nombre: string
-    apellidos: string
-    email: string
+  }
+  teachers: {
+    id: number
+    teacher: {
+      id: number
+      nombre: string
+      apellidos: string
+      email: string
+    }
   }[]
-> = ref([])
+} | null> = ref(null)
 
-const getTeachersData = async () => {
+// array para solo almacenar los profesores
+const onlyTeachersArray: Ref<{
+  id: number
+  nombre: string
+  apellidos: string
+  email: string
+}[]> = ref([])
+
+const getTeachersBySubjectData = async () => {
   try {
-    const response = await fetch('http://localhost:3000/teachers', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    })
+    if (!selectedSubject.value) {
+      // Manejar el caso en el que no haya una asignatura seleccionada
+      console.warn('No hay una asignatura seleccionada.')
+      return
+    }
+
+    const response = await fetch(
+      `http://localhost:3000/asignaturas_profesores/subject/${selectedSubject.value.id}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      }
+    )
+    if (response.status == 404) {
+      toast.add({ severity: 'info', summary: 'Error', detail: 'No hay profesores asignafos para esta signatura', life: 3000 });
+      resetearVariables()
+      return
+    }
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
       const data = (await response.json()) as {
-        id: number
-        usuario_id: string
-        nombre: string
-        apellidos: string
-        email: string
-      }[]
-      teachersRefFromServer.value = data
-      // console.log(data)
-      console.log(teachersRefFromServer.value)
+        asignatura: {
+          id: number
+          nombre: string
+        }
+        teachers: {
+          id: number
+          teacher: {
+            id: number
+            nombre: string
+            apellidos: string
+            email: string
+          }
+        }[]
+      }
+      teachersBySubjectIdRefFromServer.value = data
+      console.log(teachersBySubjectIdRefFromServer.value)
+
+      // mapeo los datos para solo almacenar los profesores
+      onlyTeachersArray.value = teachersBySubjectIdRefFromServer.value.teachers.map(teacher => teacher.teacher)
+
+      console.table(onlyTeachersArray.value)
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    teachersBySubjectIdRefFromServer.value = null
   }
 }
 
@@ -607,7 +653,11 @@ const editarMatricula = async () => {
       toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene alguno de los campos', life: 3000 });
       isValid = false;
     }
+    if (selectedSubject.value && onlyTeachersArray.value.length > 0 && !selectedTeacher.value) {
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, si modifica la asignatura, debe seleccionar a un profesor', life: 3000 });
 
+      isValid = false
+    }
     if (isValid && matriculaEditar.value) {
       await getMatriculasData(matriculaEditar.value.student.id);
     }
@@ -663,7 +713,7 @@ const fetchEditarMatricula = async (matriculaId: number, subjectSelected: typeof
     if (!response.ok) {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
-      toast.add({ severity: 'success', summary: 'Editado', detail: 'Asignación editada', life: 3000 });
+      toast.add({ severity: 'success', summary: 'Editado', detail: 'Matrícula editada', life: 3000 });
       const matriculaActualizada = {
         id: matriculaEditar.value?.id,
         student: {
@@ -689,6 +739,7 @@ const fetchEditarMatricula = async (matriculaId: number, subjectSelected: typeof
   } finally {
     visibleDialogMatricula.value = false
     getStudentData()
+    getMatriculasData(studentId)
     resetearVariables()
   }
 }
@@ -741,7 +792,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
         <Button class="w-auto" severity="secondary" @click="volver()">Volver</Button>
       </div>
       <div id="photo" class="card col-fixed flex align-items-center justify-content-center col-3 h-20rem w-20rem">
-        <i class="pi pi-user" style="font-size: 15rem;"></i>
+        <img src="../utils/img/user-profile-img.jpg" alt="Imagen de perfil" class="h-20rem w-20rem">
         <!--TODO Hay que añadir fotos a la base de datos -->
       </div>
       <div id="datos" class="card col ml-5">
@@ -821,8 +872,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
     </div>
 
     <div v-if="matriculaFromServer?.matriculas" class="card col-12">
-
-      <DataTable :value="matriculaFromServer?.matriculas" dataKey="matriculas.id" v-model:filters="filters" filterDisplay="menu"
+      <DataTable :value="matriculaFromServer?.matriculas" dataKey="id" v-model:filters="filters" filterDisplay="menu"
         :globalFilterFields="['subject.nombre', 'teacher.nombre', 'teacher.apellidos', 'teacher.email', 'year']" class="" removableSort sortField="matricula.subject.nombre" :sortOrder="1"
         :paginator="true" :rows="5" stripedRows selection-mode="single" :pt="{
           paginator: {
@@ -886,7 +936,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
             {{ slotProps.data.year }} / {{ slotProps.data.year + 1 }}
           </template>
         </Column>
-        <Column field="subject.nombre" h bodyClass="p-0 pl-1">
+        <Column field="subject.nombre" bodyClass="p-0 pl-1">
         </Column>
         <Column header="Nombre" sortable field="teacher.nombre" headerClass="h-2rem pl-1 bg-transparent">
         </Column>
@@ -991,7 +1041,10 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
   <Dialog v-model:visible="visibleDialogMatricula" modal header="Editar Matrícula" class="w-auto" :pt="{
           header: { class: 'flex align-items-baseline h-5rem' },
           title: { class: '' },
-          closeButtonIcon: { class: '' }
+          closeButtonIcon: { class: '' },
+          mask: {
+            style: 'backdrop-filter: blur(3px)'
+          }
         }
           ">
     <span class="p-text-secondary flex mb-5">Cambiar matrícula</span>
@@ -1020,7 +1073,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
     </div>
     <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12">
       <label class="text-xl text-800 font-bold pl-1">Selecciona nueva Asignatura</label>
-      <Dropdown class="w-max mt-2" :options="subjectsRefFromServer" optionLabel="nombre" display="chip" filter placeholder="Selecciona..." v-model="selectedSubject">
+      <Dropdown class="w-max mt-2" :options="subjectsRefFromServer" optionLabel="nombre" display="chip" filter placeholder="Selecciona..." v-model="selectedSubject"
+        @change="getTeachersBySubjectData()">
       </Dropdown>
     </div>
     <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12 pt-4">
@@ -1039,7 +1093,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
     </div>
     <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12">
       <label class="text-xl text-800 font-bold pl-1">Selecciona nuevo profesor</label>
-      <Dropdown class="w-max mt-2" :options="teachersRefFromServer" optionLabel="nombre" display="chip" filter placeholder="Selecciona..." v-model="selectedTeacher">
+      <Dropdown class="w-max mt-2" :options="onlyTeachersArray" optionLabel="nombre" display="chip" filter placeholder="Selecciona..." v-model="selectedTeacher">
         <template #option="slotProps">
           <div>
             {{ slotProps.option.nombre }}

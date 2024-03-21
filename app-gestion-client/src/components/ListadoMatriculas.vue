@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, ref, onMounted, watch } from 'vue'
+import { type Ref, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -168,6 +168,7 @@ const getMatriculasByStudentId = async (studentId: number) => {
       const data = await response.json()
       console.log(data);
 
+      // para cuando estemos editando la matricula
       if (visibleDialog.value) {
         studentWithMatriculasEditar.value = data
       }
@@ -742,7 +743,10 @@ const collapseAll = () => {
   <Dialog v-model:visible="visibleDialog" modal header="Editar Matrícula" class="w-auto" :pt="{
         header: { class: 'flex align-items-baseline h-5rem' },
         title: { class: '' },
-        closeButtonIcon: { class: '' }
+        closeButtonIcon: { class: '' },
+        mask: {
+          style: 'backdrop-filter: blur(3px)'
+        }
       }
         ">
     <span class="p-text-secondary flex mb-5">Cambiar matrícula</span>

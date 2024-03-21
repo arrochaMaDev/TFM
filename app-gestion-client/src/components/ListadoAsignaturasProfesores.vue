@@ -547,6 +547,7 @@ const collapseAll = () => {
             <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.teacher.id)"></Button>
           </template>
         </Column>
+
         <!-- Tabla asignaturas asignadas -->
         <template #expansion="slotProps">
           <DataTable :value="slotProps.data.asignaciones" v-model:filters="filters1" filterDisplay="menu" :globalFilterFields="['subject.nombre']" class="" removableSort selection-mode="single"

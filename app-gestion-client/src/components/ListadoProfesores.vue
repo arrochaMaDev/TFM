@@ -474,6 +474,7 @@ const getSeverity = (permiso: string) => {
       }
         "></ConfirmDialog>
 
+      <!-- Dialog editar Profesor-->
       <Dialog v-model:visible="visibleDialog" modal header="Editar Profesor" class="w-3" :pt="{
         header: { class: 'flex align-items-baseline h-5rem' },
         title: { class: '' },
