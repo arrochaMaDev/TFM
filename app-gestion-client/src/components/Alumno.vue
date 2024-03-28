@@ -121,7 +121,7 @@ const getMatriculasData = async (studentId: number) => {
       credentials: 'include'
     })
     if (response.status == 404 && !matriculaFromServer.value?.matriculas) {
-      toast.add({ severity: 'info', summary: 'Error', detail: 'EL alumno no tiene matrículas asignadas', life: 3000 });
+      toast.add({ severity: 'info', summary: 'Error', detail: 'El alumno no tiene matrículas asignadas', life: 3000 });
       return
     }
     if (response.ok) {
@@ -190,7 +190,7 @@ const borrarAlumno = async () => {
     console.error('Error en la solicitud:', error)
 
     if (error.message.includes('400')) {
-      toast.add({ severity: 'error', summary: 'Error', detail: 'No se puede borrar el alumno porque tiene matrículas asignadas', life: 3000 });
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'No se puede borrar el alumno porque tiene matrículas asignadas', life: 3000 });
     }
     else {
       toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error al borrar al alumno', life: 3000 });
@@ -485,11 +485,6 @@ const selectedTeacher: Ref<
   } | undefined
 > = ref(undefined)
 
-// watch(matriculaEditar, () => {
-//   selectedSubject.value = matriculaEditar.value?.subject
-//   selectedTeacher.value = matriculaEditar.value?.teacher
-// });
-
 const studentWithMatriculasEditar: Ref<typeof matriculaFromServer.value | undefined> = ref(undefined)
 
 
@@ -607,7 +602,7 @@ const getTeachersBySubjectData = async () => {
       }
     )
     if (response.status == 404) {
-      toast.add({ severity: 'info', summary: 'Error', detail: 'No hay profesores asignafos para esta signatura', life: 3000 });
+      toast.add({ severity: 'info', summary: 'Error', detail: 'No hay profesores asignados para esta asignatura', life: 3000 });
       resetearVariables()
       return
     }

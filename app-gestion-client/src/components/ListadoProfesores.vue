@@ -4,6 +4,8 @@ import { useRouter } from 'vue-router'
 import { useLoadingStore } from '@/stores/loading'
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import ColumnGroup from 'primevue/columngroup';
+import Row from 'primevue/row';
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Dropdown from 'primevue/dropdown';
@@ -140,9 +142,14 @@ const borrarProfesor = async (profesor: typeof teachersRefFromServer.value[0]) =
     } else {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error en la solicitud:', error)
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    if (error.message.includes('400')) {
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'No se puede borrar el profesor porque tiene asignaturas asignadas o alumnos matriculados', life: 3000 });
+    }
+    else {
+      toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error borrando', life: 3000 });
+    }
   }
   finally {
     getTeachersData()
@@ -411,45 +418,72 @@ const getSeverity = (permiso: string) => {
             <Button rounded icon="pi pi-users" label="" v-tooltip.top="'Mostrar Usuarios'" outlined @click="toogleMostrarUsuario()"></Button>
           </span>
         </div>
-        <Column field="nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
-          <template #filter="{ filterModel }">
-            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-          </template>
-        </Column>
-        <Column field="apellidos" header="Apellidos" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
-          <template #filter="{ filterModel }">
-            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-          </template>
-        </Column>
-        <Column field="email" header="Email" sortable headerStyle="width:40%; min-width:6rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
-          <template #filter="{ filterModel }">
-            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-          </template>
-        </Column>
+
+        <ColumnGroup type="header" class="">
+          <Row>
+            <Column :hidden="!mostrarUsuario" header="Profesor" :colspan="3" headerClass="h-3rem pl-1"></Column>
+            <Column :hidden="!mostrarUsuario" header="Usuario" :colspan="4" headerClass="h-3rem pl-1"></Column>
+          </Row>
+          <Row>
+            <Column field="nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <Column field="apellidos" header="Apellidos" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <Column field="email" header="Email" sortable headerStyle="width:40%; min-width:6rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <!-- columnas de ver usuario -->
+            <div v-if="mostrarUsuario">
+              <Column field="userId.username" header="Username" sortable headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+                <template #filter="{ filterModel }">
+                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                </template>
+              </Column>
+              <Column field="userId.email" header="Email de usuario" sortable headerStyle="width:40%; min-width:13rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5"
+                :show-filter-match-modes="false">
+                <template #filter="{ filterModel }">
+                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                </template>
+              </Column>
+              <Column field="userId.permiso" header="Permiso" headerStyle="width:40%; min-width:6rem" :show-filter-match-modes="false">
+                <template #body="{ data }">
+                  <Tag :value="data.userId.permiso" :severity="getSeverity(data.userId.permiso)" />
+                </template>
+                <template #filter="{ filterModel }">
+                  <Dropdown v-model="filterModel.value" :options="permisos" placeholder="Selecciona" class="p-column-filter" style="width: auto">
+                    <template #option="slotProps">
+                      <Tag :value="slotProps.option" :severity="getSeverity(slotProps.option)" />
+                    </template>
+                  </Dropdown>
+                </template>
+              </Column>
+            </div>
+            <Column field="" header=""></Column>
+          </Row>
+        </ColumnGroup>
+
+        <Column field="nombre"></Column>
+        <Column field="apellidos"></Column>
+        <Column field="email"></Column>
         <div v-if="mostrarUsuario">
-          <Column field="userId.username" header="Username" sortable headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
-            <template #filter="{ filterModel }">
-              <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-            </template>
-          </Column>
-          <Column field="userId.email" header="Email de usuario" sortable headerStyle="width:40%; min-width:13rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
-            <template #filter="{ filterModel }">
-              <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-            </template>
-          </Column>
-          <Column field="userId.permiso" header="Permiso" headerStyle="width:40%; min-width:6rem" :show-filter-match-modes="false">
+          <Column field="userId.username"></Column>
+          <Column field="userId.email"></Column>
+          <Column field="userId.permiso">
             <template #body="{ data }">
               <Tag :value="data.userId.permiso" :severity="getSeverity(data.userId.permiso)" />
             </template>
-            <template #filter="{ filterModel }">
-              <Dropdown v-model="filterModel.value" :options="permisos" placeholder="Selecciona" class="p-column-filter" style="width: auto">
-                <template #option="slotProps">
-                  <Tag :value="slotProps.option" :severity="getSeverity(slotProps.option)" />
-                </template>
-              </Dropdown>
-            </template>
           </Column>
         </div>
+
+
         <Column headerStyle="width:20%; min-width:8rem" bodyClass="flex p-1 pl-1">
           <template #body="slotProps">
             <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.id)"></Button>

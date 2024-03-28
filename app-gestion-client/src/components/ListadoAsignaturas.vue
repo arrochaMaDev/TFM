@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { type Ref, ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button'
@@ -14,6 +15,9 @@ import Dialog from 'primevue/dialog';
 
 const confirm = useConfirm();
 const toast = useToast();
+
+const router = useRouter() // router para ir al alumno cuando se clique en él
+
 
 // OBTENER LA LISTA DE ASIGNATURAS DEL SERVIDOR:
 let asignaturasRefFromServer: Ref<
@@ -88,9 +92,14 @@ const borrarAsignatura = async (asignatura: typeof asignaturasRefFromServer.valu
     } else {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error en la solicitud:', error)
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    if (error.message.includes('400')) {
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'No se puede borrar la asignatura porque está asignada a un profesor o tiene a un alumno matriculado en ella', life: 3000 });
+    }
+    else {
+      toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error borrando', life: 3000 });
+    }
   }
   finally {
     getAsignaturasData()
@@ -98,7 +107,6 @@ const borrarAsignatura = async (asignatura: typeof asignaturasRefFromServer.valu
 }
 
 // LÓGICA EDITAR ALUMNO
-
 const visibleDialog: Ref<boolean> = ref(false);
 
 const asignaturaEditar: Ref<
@@ -222,10 +230,66 @@ const getTeachersBySubjectId = async (subject: typeof asignaturasRefFromServer.v
   }
 }
 
+// LÓGICA BORRAR ASIGNACIÓN
+const confirmDeleteAsignacion = (asignacionId: number) => {
+  console.log(asignacionId)
+  confirm.require({
+    message: '¿Seguro que quiere borrar esta asignación?',
+    header: 'Borrar Asignación',
+    icon: 'pi pi-info-circle',
+    rejectLabel: 'Cancelar',
+    acceptLabel: 'Borrar',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-danger',
+    accept: () => {
+      borrarSubjectTeacher(asignacionId)
+    },
+    reject: () => {
+      toast.add({ severity: 'info', summary: 'Cancelado', detail: 'Se ha cancelado la operación', life: 3000 });
+    }
+  });
+};
+
+
+const borrarSubjectTeacher = async (asignacionId: number) => {
+  console.table(asignacionId)
+  // const idAsignacion = asignacion.id
+  try {
+    const response = await fetch(
+      `http://localhost:3000/asignatura_profesor/${asignacionId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      }
+    )
+    if (response.ok) {
+      toast.add({ severity: 'success', summary: 'Borrado', detail: 'Asignación borrada', life: 3000 });
+    } else {
+      throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+  } finally {
+    visibleDialogTeacher.value = false
+    getAsignaturasData()
+
+  }
+}
+
 const resetDataTeachers = () => {
   visibleDialogTeacher.value = false
   teachersBySubjectId.value = undefined
+}
 
+// Ir a la página idividual del profesor
+const goToTeacher = (id: number) => {
+  router.push({
+    path: `/profesor/${id}`
+  })
 }
 
 // Filtrar datos
@@ -324,8 +388,9 @@ onMounted(() => {
         </div>
         <Toast></Toast>
       </Dialog>
+
       <!-- Dialog profesores asignados -->
-      <Dialog v-model:visible="visibleDialogTeacher" @after-hide="resetDataTeachers()" modal header="Profesores asignados" class="w-4" :pt="{
+      <Dialog v-model:visible="visibleDialogTeacher" @after-hide="resetDataTeachers()" modal header="Profesores asignados" class="w-auto" :pt="{
         header: { class: 'flex align-items-baseline h-5rem' },
         title: { class: '' },
         closeButtonIcon: { class: '' },
@@ -333,15 +398,21 @@ onMounted(() => {
           style: 'backdrop-filter: blur(3px)'
         }
       }">
-        <DataTable :value="teachersBySubjectId?.teachers" dataKey="teachers.id" stripedRows selectionMode="single" sortField="teachers.teacher.id" :sortOrder="1" tableStyle="width: 40rem" :pt="{
+        <DataTable :value="teachersBySubjectId?.teachers" dataKey="teachers.id" stripedRows selectionMode="single" sortField="teachers.teacher.id" :sortOrder="1" :pt="{
         table: {
-          class: 'mt-0 mb-5',
+          class: 'mt-0 mb-5 w-max',
           style: { 'border': 'none' }
         }
       }">
-          <Column field="teacher.nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="h-3rem p-0 pl-1"> </Column>
-          <Column field="teacher.apellidos" header="Apellidos" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="h-3rem p-0 pl-1"></Column>
-          <Column field="teacher.email" header="Email" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="h-3rem p-0 pl-1"></Column>
+          <Column field="teacher.nombre" header="Nombre" sortable headerStyle="" headerClass="h-2rem pl-1 pr-3" bodyClass="h-3rem p-0 pl-1"> </Column>
+          <Column field="teacher.apellidos" header="Apellidos" sortable headerStyle="" headerClass="h-2rem pl-1 pr-3" bodyClass="h-3rem p-0 pl-1"></Column>
+          <Column field="teacher.email" header="Email" headerStyle="" headerClass="h-2rem pl-1" bodyClass="h-3rem p-0 pl-1 pr-3"></Column>
+          <Column headerStyle="" bodyClass="flex p-1 pl-1">
+            <template #body="slotProps">
+              <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.teacher.id)"></Button>
+              <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Asignación'" @click="confirmDeleteAsignacion(slotProps.data.id)"></Button>
+            </template>
+          </Column>
         </DataTable>
       </Dialog>
     </div>

@@ -193,7 +193,7 @@ const getMatriculasByStudentId = async (studentId: number) => {
 }
 
 // OBTENER TODOS LOS ESTUDIANTES CON SUS RESPECTIVAS MATRICULAS
-const studentsWithMatriculasRef: Ref<{
+const allStudentsWithMatriculasRef: Ref<{
   student: {
     id: number
     usuario_id: string
@@ -222,18 +222,18 @@ const studentsWithMatriculasRef: Ref<{
 }[]> = ref([])
 
 const getAllStudentsWithMatriculas = async () => {
-  studentsWithMatriculasRef.value = [] // reinicio la variable para permitir que se me actualice la vista en la tabla
+  allStudentsWithMatriculasRef.value = [] // reinicio la variable para permitir que se me actualice la vista en la tabla
   try {
     for (const student of studentsRefFromServer.value) {
       const data = await getMatriculasByStudentId(student.id)
       if (data != undefined)
-        studentsWithMatriculasRef.value.push(data)
+        allStudentsWithMatriculasRef.value.push(data)
     }
   } catch (error) {
     console.error('Error en la obtención de matriculas:', error);
     toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
   }
-  console.table(studentsWithMatriculasRef.value)
+  console.table(allStudentsWithMatriculasRef.value)
 }
 
 const fetchData = async () => {
@@ -347,12 +347,7 @@ const selectedTeacher: Ref<
   } | undefined
 > = ref(undefined)
 
-// watch(matriculaEditar, () => {
-//   selectedSubject.value = matriculaEditar.value?.subject
-//   selectedTeacher.value = matriculaEditar.value?.teacher
-// });
-
-const studentWithMatriculasEditar: Ref<typeof studentsWithMatriculasRef.value[0] | undefined> = ref(undefined)
+const studentWithMatriculasEditar: Ref<typeof allStudentsWithMatriculasRef.value[0] | undefined> = ref(undefined)
 
 
 // mostrar el dialog de editar
@@ -391,6 +386,87 @@ const getMatriculaData = async (matriculaId: number) => {
   }
 }
 
+// obtener datos de los profesores que pueden impartir la nueva asignatura
+const teachersBySubjectIdRefFromServer: Ref<{
+  asignatura: {
+    id: number
+    nombre: string
+  }
+  teachers: {
+    id: number
+    teacher: {
+      id: number
+      nombre: string
+      apellidos: string
+      email: string
+    }
+  }[]
+} | null> = ref(null)
+
+// array para solo almacenar los profesores
+const onlyTeachersArray: Ref<{
+  id: number
+  nombre: string
+  apellidos: string
+  email: string
+}[]> = ref([])
+
+const getTeachersBySubjectData = async () => {
+  try {
+    if (!selectedSubject.value) {
+      // Manejar el caso en el que no haya una asignatura seleccionada
+      console.warn('No hay una asignatura seleccionada.')
+      return
+    }
+
+    const response = await fetch(
+      `http://localhost:3000/asignaturas_profesores/subject/${selectedSubject.value.id}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      }
+    )
+    if (response.status == 404) {
+      toast.add({ severity: 'info', summary: 'Error', detail: 'No hay profesores asignados para esta asignatura', life: 3000 });
+      resetearVariables()
+      return
+    }
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      const data = (await response.json()) as {
+        asignatura: {
+          id: number
+          nombre: string
+        }
+        teachers: {
+          id: number
+          teacher: {
+            id: number
+            nombre: string
+            apellidos: string
+            email: string
+          }
+        }[]
+      }
+      teachersBySubjectIdRefFromServer.value = data
+      console.log(teachersBySubjectIdRefFromServer.value)
+
+      // mapeo los datos para solo almacenar los profesores
+      onlyTeachersArray.value = teachersBySubjectIdRefFromServer.value.teachers.map(teacher => teacher.teacher)
+
+      console.table(onlyTeachersArray.value)
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    teachersBySubjectIdRefFromServer.value = null
+  }
+}
+
 // Obtener datos de todas las asignaturas
 const subjectsRefFromServer: Ref<
   {
@@ -426,7 +502,7 @@ const getSubjectsData = async () => {
 }
 
 // Obtener datos de todos los profesores
-let teachersRefFromServer: Ref<
+const teachersRefFromServer: Ref<
   {
     id: number
     nombre: string
@@ -609,7 +685,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
 const expandedRows = ref<{ [key: number]: boolean }>({});
 
 const expandAll = () => {
-  expandedRows.value = studentsWithMatriculasRef.value.reduce<{ [key: number]: boolean }>((acc, p) => {
+  expandedRows.value = allStudentsWithMatriculasRef.value.reduce<{ [key: number]: boolean }>((acc, p) => {
     acc[p.student.id] = true;
     return acc;
   }, {});
@@ -626,7 +702,7 @@ const collapseAll = () => {
     <div class="card flex justify-content-center">
       <DataTable v-model:expandedRows="expandedRows" v-model:filters="filters" filterDisplay="menu"
         :globalFilterFields="['student.nombre', 'student.apellidos', 'student.dni', 'student.direccion', 'student.telefono', 'student.email', 'matriculas.subject.nombre', 'matriculas.teacher.nombre', 'matriculas.teacher.apellidos', 'matriculas.teacher.email']"
-        class="" removableSort removableSortstripedRows :value="studentsWithMatriculasRef" dataKey="student.id" sortField="student.id" :sortOrder="1" :paginator="true" :rows="10"
+        class="" removableSort removableSortstripedRows :value="allStudentsWithMatriculasRef" dataKey="student.id" sortField="student.id" :sortOrder="1" :paginator="true" :rows="10"
         tableStyle="width: 100%" :pt="{
         paginator: {
           paginatorWrapper: { class: 'col-12 flex justify-content-center' },
@@ -775,7 +851,8 @@ const collapseAll = () => {
     </div>
     <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12">
       <label class="text-xl text-800 font-bold pl-1">Selecciona nueva Asignatura</label>
-      <Dropdown class="w-max mt-2" :options="subjectsRefFromServer" optionLabel="nombre" display="chip" filter placeholder="Selecciona..." v-model="selectedSubject">
+      <Dropdown class="w-max mt-2" :options="subjectsRefFromServer" optionLabel="nombre" display="chip" filter placeholder="Selecciona..." v-model="selectedSubject"
+        @change="getTeachersBySubjectData()">
       </Dropdown>
     </div>
     <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12 pt-4">
@@ -794,7 +871,7 @@ const collapseAll = () => {
     </div>
     <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12">
       <label class="text-xl text-800 font-bold pl-1">Selecciona nuevo profesor</label>
-      <Dropdown class="w-max mt-2" :options="teachersRefFromServer" optionLabel="nombre" display="chip" filter placeholder="Selecciona..." v-model="selectedTeacher">
+      <Dropdown class="w-max mt-2" :options="onlyTeachersArray" optionLabel="nombre" display="chip" filter placeholder="Selecciona..." v-model="selectedTeacher">
         <template #option="slotProps">
           <div>
             {{ slotProps.option.nombre }}

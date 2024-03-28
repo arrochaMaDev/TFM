@@ -255,7 +255,7 @@ const borrarSubjectTeacher = async (asignacion: typeof subjectsTeachersRefFromSe
 }
 
 
-// LÓGICA EDITAR MATRICULA
+// LÓGICA EDITAR ASIGNACION
 const visibleDialog: Ref<boolean> = ref(false);
 
 const selectedSubject: Ref<
@@ -496,8 +496,7 @@ const collapseAll = () => {
   <div class="flex justify-content-start pt-2">
     <div class="card flex justify-content-center">
       <DataTable v-model:expandedRows="expandedRows" v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['teacher.nombre', 'teacher.apellidos', 'teacher.email', 'subject.nombre']"
-        class="" removableSort removableSortstripedRows :value="teachersWithSubjectsRef" dataKey="teacher.id" sortField="teacher.id" :sortOrder="1" :paginator="true" :rows="10"
-        tableStyle="width: fit-content" :pt="{
+        class="" removableSort removableSortstripedRows :value="teachersWithSubjectsRef" dataKey="teacher.id" sortField="teacher.id" :sortOrder="1" :paginator="true" :rows="10" :pt="{
         paginator: {
           paginatorWrapper: { class: 'col-12 flex justify-content-center' },
           firstPageButton: { class: 'w-auto' },
@@ -507,7 +506,7 @@ const collapseAll = () => {
           lastPageButton: { class: 'w-auto' },
         },
         table: {
-          class: 'mt-0',
+          class: 'mt-0 w-auto',
           style: { 'border': 'none' }
         }
       }">

@@ -109,7 +109,7 @@ const getSubjectsByTeacherData = async () => {
       }
     )
     if (response.status == 404) {
-      toast.add({ severity: 'info', summary: 'Error', detail: 'El profesor no tiene asignaturas asignadas', life: 3000 });
+      toast.add({ severity: 'info', summary: 'Error', detail: 'El profesor no tiene asignaturas asignadas', life: 1000 });
       return
     }
     if (!response.ok) {
@@ -168,7 +168,7 @@ const getMatriculasData = async () => {
       credentials: 'include'
     })
     if (response.status == 404) {
-      toast.add({ severity: 'info', summary: 'Error', detail: 'El profesor no tiene a ningún alumno matriculado', life: 3000 });
+      toast.add({ severity: 'info', summary: 'Error', detail: 'El profesor no tiene a ningún alumno matriculado', life: 1000 });
       return
     }
     if (!response.ok) {

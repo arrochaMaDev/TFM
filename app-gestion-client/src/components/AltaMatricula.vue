@@ -13,7 +13,7 @@ const toast = useToast();
 const loadingStore = useLoadingStore() // store del Spinner
 
 // OBTENER DATOS DE TODOS LOS ESTUDIANTES
-let studentsRefFromServer: Ref<
+const studentsRefFromServer: Ref<
   {
     id: number
     usuario_id: string
@@ -63,7 +63,7 @@ const getStudentsData = async () => {
 getStudentsData()
 
 // OBTENER DATOS DE TODAS LAS ASIGNATURAS
-let subjectsRefFromServer: Ref<
+const subjectsRefFromServer: Ref<
   {
     id: number
     nombre: string
@@ -199,9 +199,13 @@ const studentSelected: Ref<{
   email: string
 } | null> = ref(null)
 
-watch(studentSelected, () => {
+watch([studentSelected, subjectSelected], () => {
   if (!studentSelected.value) {
     subjectSelected.value = null
+    teacherSelected.value = null
+  }
+  if (!subjectSelected.value) {
+    teacherSelected.value = null
   }
 });
 
@@ -210,6 +214,7 @@ const formSubmitted = ref(false); // variable para avisos con InlineText
 
 // ENVIO DATOS POST A LA BD DE LA MATRICULA
 const crearMatricula = async () => {
+
   const fullDate = new Date()
   let añoEscolar = new Date().getFullYear() //2024
   if (fullDate.getMonth() < 7) {
@@ -225,56 +230,153 @@ const crearMatricula = async () => {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
     isValid = false;
   }
-  if (isValid) {
-    try {
-      const response = await fetch('http://localhost:3000/matricula', {
-        method: 'POST',
-        body: JSON.stringify({
-          alumno: studentSelected.value?.id,
-          asignatura: subjectSelected.value?.id,
-          profesor: teacherSelected.value?.id,
-          year: añoEscolar
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      })
-      if (!response.ok) {
-        throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
-      } else {
-        toast.add({ severity: 'success', summary: 'Creado', detail: 'Asignación creada', life: 3000 });
-
-        const matricula = {
-          alumno: {
-            nombre: studentSelected.value?.nombre,
-            apellidos: studentSelected.value?.apellidos
+  if (!existenDuplicados) {
+    if (isValid) {
+      try {
+        const response = await fetch('http://localhost:3000/matricula', {
+          method: 'POST',
+          body: JSON.stringify({
+            alumno: studentSelected.value?.id,
+            asignatura: subjectSelected.value?.id,
+            profesor: teacherSelected.value?.id,
+            year: añoEscolar
+          }),
+          headers: {
+            'Content-Type': 'application/json'
           },
-          asignatura: subjectSelected.value?.nombre,
-          profesor: {
-            nombre: teacherSelected.value?.nombre,
-            apellidos: teacherSelected.value?.apellidos
+          credentials: 'include'
+        })
+        if (!response.ok) {
+          throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+        } else {
+          toast.add({ severity: 'success', summary: 'Creado', detail: 'Matrícula creada', life: 3000 });
+
+          const matricula = {
+            alumno: {
+              nombre: studentSelected.value?.nombre,
+              apellidos: studentSelected.value?.apellidos
+            },
+            asignatura: subjectSelected.value?.nombre,
+            profesor: {
+              nombre: teacherSelected.value?.nombre,
+              apellidos: teacherSelected.value?.apellidos
+            }
           }
+
+          const data = (await response.json()) as typeof matricula
+
+          console.table(data)
+
+          // reiniciar todos los valores menos el del alumno
+          subjectSelected.value = null
+          teacherSelected.value = null
         }
-
-        const data = (await response.json()) as typeof matricula
-
-        console.table(data)
-
-        // reiniciar todos los valores menos el del alumno
-        subjectSelected.value = null
-        teacherSelected.value = null
+      } catch (error) {
+        console.error('Error en la solicitud:', error)
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+      } finally {
+        teachersBySubjectIdRefFromServer.value = null
+        onlyTeachersArray.value = []
+        formSubmitted.value = false;
       }
-    } catch (error) {
-      console.error('Error en la solicitud:', error)
-      toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
-    } finally {
-      teachersBySubjectIdRefFromServer.value = null
-      onlyTeachersArray.value = []
-      formSubmitted.value = false;
+    }
+  } else { // existenDuplicados == true
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'El alumno ya está matriculado en esa asignatura', life: 3000 });
+  }
+}
+
+// LÓGICA PARA EVITAR DUPLICADOS: obtener matriculas de todos y comprobar si ya existe esa asignatura
+
+// Obtener estudiantes
+const matriculasByStudentId: Ref<{
+  student: {
+    id: number
+    usuario_id: string
+    nombre: string
+    apellidos: string
+    dni: string
+    direccion: string
+    telefono: number
+    email: string
+  },
+  matriculas: {
+    id: number,
+    subject: {
+      id: number
+      nombre: string
+    }
+    teacher: {
+      id: number
+      usuario_id: string
+      nombre: string
+      apellidos: string
+      email: string
+    }
+    year: number
+  }[]
+} | undefined> = ref(undefined)
+
+const getMatriculasByStudentId = async (studentId: number) => {
+  // console.log(teacher)
+  try {
+    const response = await fetch(`http://localhost:3000/matriculas/student/${studentId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+
+    if (response.status === 404) {
+      console.warn(`El estudiante con id ${studentId} no tiene matrículas`);
+      return null;
+    }
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`);
+    }
+    else {
+      const data = await response.json()
+      console.log(data);
+
+      // Verificar si el array de asignaciones está vacío
+      if (data && data.matriculas && data.matriculas.length > 0) {
+        matriculasByStudentId.value = data;
+        console.table(matriculasByStudentId.value)
+        return data;
+      }
+
+    }
+  } catch (error: any) {
+    console.error('Error en la solicitud:', error)
+
+    if (error.message.includes('404')) {
+      return null;
+    } else {
+      toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error al obtener los datos de este estudiante', life: 3000 });
     }
   }
 }
+
+// Chequear si el alumno ya está matriculado en esa asignatura
+const existenDuplicados = () => {
+  if (studentSelected.value) {
+    getMatriculasByStudentId(studentSelected.value?.id)
+  }
+
+  if (matriculasByStudentId.value && subjectSelected) {
+    // recorro el array y extraigo todos los Ids de las asignaturas que haya
+    const subjectsIdsOfMatriculasOfStudent = matriculasByStudentId.value.matriculas.map(matricula => matricula.subject.id);
+    const selectedSubjectId = subjectSelected.value?.id
+    const duplicados = subjectsIdsOfMatriculasOfStudent.filter(subjectId => subjectId === selectedSubjectId); // filtro si esa asignatura ya se encuentra en las matriculas del alumno
+
+    if (duplicados.length > 0) {
+      return true
+    }
+    if (duplicados.length == 0) {
+      return false
+    }
+  }
+};
 
 // para resetear los datos del formulario y poner cada ref a vacío
 const borrarDatosForm = () => {

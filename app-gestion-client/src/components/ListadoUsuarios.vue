@@ -119,9 +119,14 @@ const borrarUsuario = async (usuario: typeof usersRefFromServer.value[0]) => {
     } else {
       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error en la solicitud:', error)
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    if (error.message.includes('400')) {
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'No se puede borrar el usuario porque está asignado a un profesor o alumno', life: 3000 });
+    }
+    else {
+      toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    }
   } finally {
     getUsersData()
   }
@@ -257,7 +262,7 @@ const getSeverity = (permiso: string) => {
       return 'success';
 
     case 'profesor':
-      return 'info';
+      return 'primary';
 
     case 'administrador':
       return 'warning';
