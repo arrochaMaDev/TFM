@@ -858,9 +858,9 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
             </li>
           </ul>
         </div>
-        <div>
+        <div class="ml-2">
           <!-- TODO mostrar solo si es admin -->
-          <Button class="w-max w-3rem" icon="pi pi-trash" severity="danger" v-tooltip.top="'Borrar Alumno'" @click="confirmDeleteAlumno()"></Button>
+          <Button class="w-max w-3rem mr-2" icon="pi pi-trash" severity="danger" v-tooltip.top="'Borrar Alumno'" @click="confirmDeleteAlumno()"></Button>
           <Button class="w-max w-3rem" icon="pi pi-pencil" severity="secondary" v-tooltip.top="'Editar Alumno'" @click="mostrarDialogEditarAlumno()"></Button>
         </div>
       </div>

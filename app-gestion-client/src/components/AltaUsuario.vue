@@ -8,6 +8,34 @@ import Button from 'primevue/button';
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
 
+
+/* TODO GENERAR USERNAME */
+const generarUsername = (nombre: string, apellido1: string, apellido2: string) => {
+
+  // Obtener las dos primeras letras de cada variable y convertirlas a minúsculas
+  const inicialesNombre: string = nombre.slice(0, 2).toLowerCase();
+  const inicialesApellido1: string = apellido1.slice(0, 2).toLowerCase();
+  const inicialesApellido2: string = apellido2.slice(0, 2).toLowerCase();
+
+  // Concatenar las iniciales
+  const username: string = inicialesNombre + inicialesApellido1 + inicialesApellido2;
+
+  return username;
+}
+
+const nombre: string = "Laura";
+const apellido1: string = "Pérez";
+const apellido2: string = "Pérez";
+
+const iniciales: string = generarUsername(nombre, apellido1, apellido2);
+console.log("Iniciales:", iniciales); // Salida esperada: "lapepe"
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+
 const toast = useToast();
 
 // REFERENCIAS DEL FORMULARIO

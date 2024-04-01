@@ -87,9 +87,9 @@ onMounted(() => {
 
 // LÓGICA BORRAR USUARIO
 const confirmDelete = (usuario: typeof usersRefFromServer.value[0]) => {
-  console.table(usuario) // al ser un array, le indico el valor de la casilla 0
+  console.table(usuario)
   confirm.require({
-    message: '¿Seguro que quiere borrar este profesor?',
+    message: '¿Seguro que quiere borrar este usuario?',
     header: 'Borrar Profesor',
     icon: 'pi pi-info-circle',
     rejectLabel: 'Cancelar',
@@ -125,7 +125,7 @@ const borrarUsuario = async (usuario: typeof usersRefFromServer.value[0]) => {
       toast.add({ severity: 'warn', summary: 'Error', detail: 'No se puede borrar el usuario porque está asignado a un profesor o alumno', life: 3000 });
     }
     else {
-      toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+      toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error al borrar al usuario', life: 3000 });
     }
   } finally {
     getUsersData()
@@ -181,7 +181,7 @@ const editarUsuario = async () => {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
     isValid = false
   }
-  if (!usuarioEditar.value.username || !usuarioEditar.value.email || !usuarioEditar.value.pass || !usuarioEditar.value.permiso) {
+  if (!usuarioEditar.value.username || !usuarioEditar.value.email || !usuarioEditar.value.pass || isNaN(Number(usuarioEditar.value.permiso))) {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
     isValid = false
   }
@@ -344,7 +344,7 @@ const getSeverity = (permiso: string) => {
         content: { class: 'pb-3 pt-1' }
       }"></ConfirmDialog>
 
-
+      <!-- Dialog Editar Usuario -->
       <Dialog v-model:visible="visibleDialog" modal header="Editar Usuario" class="w-3" :pt="{
         header: { class: 'flex align-items-baseline h-5rem' },
         title: { class: '' },
