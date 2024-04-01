@@ -307,7 +307,7 @@ const editarAlumno = async () => {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
     isValid = false
   }
-  if (!alumnoEditar.value.nombre || !alumnoEditar.value.apellidos || !alumnoEditar.value.dni || !alumnoEditar.value.direccion || !alumnoEditar.value.telefono || !alumnoEditar.value.email || !alumnoEditar.value.userId.id) {
+  if (!alumnoEditar.value.nombre || !alumnoEditar.value.apellidos || !alumnoEditar.value.dni || !alumnoEditar.value.direccion || !alumnoEditar.value.telefono || !alumnoEditar.value.email || isNaN(alumnoEditar.value.userId.id)) {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
     isValid = false
   }
@@ -520,7 +520,7 @@ const getMatriculaData = async (matriculaId: number) => {
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error obteniendo los datos de la matrícula', life: 3000 });
   }
 }
 

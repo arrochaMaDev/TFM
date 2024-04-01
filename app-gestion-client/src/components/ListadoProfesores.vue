@@ -196,7 +196,7 @@ getUsersData()
 const permisoString: Ref<string> = ref("")
 
 const getUser = async () => {
-  if (profesorEditar.value.userId.id != undefined) {
+  if (profesorEditar.value?.userId.id != undefined) {
     try {
       const response = await fetch(`http://localhost:3000/usuario/${profesorEditar.value.userId.id}`, {
         method: 'GET',
@@ -248,7 +248,7 @@ const getUser = async () => {
 const visibleDialog: Ref<boolean> = ref(false);
 
 const profesorEditar: Ref<
-  | {
+  {
     id: number
     nombre: string
     apellidos: string
@@ -272,8 +272,8 @@ const profesorEditar: Ref<
     }
   }); // lo inicializo para evitar problemas con null o undefined en v-model
 
-const mostrarDialog = (teacher: typeof teachersRefFromServer.value[0]) => {
-  getUser() //Obtener usuario
+const mostrarDialog = async (teacher: typeof teachersRefFromServer.value[0]) => {
+  await getUser() //Obtener usuario
   visibleDialog.value = true
   profesorEditar.value = { ...teacher } // spread crea un nuevo objeto y copia superficialmente el objeto
   console.table(profesorEditar.value)
@@ -289,7 +289,7 @@ const editarProfesor = async () => {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
     isValid = false
   }
-  if (!profesorEditar.value.nombre || !profesorEditar.value.apellidos || !profesorEditar.value.email || !profesorEditar.value.userId.id) {
+  if (!profesorEditar.value.nombre || !profesorEditar.value.apellidos || !profesorEditar.value.email || isNaN(profesorEditar.value.userId.id)) {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
     isValid = false
   }
@@ -555,7 +555,7 @@ const getSeverity = (permiso: string) => {
           </DataTable>
         </div>
         <div class="flex justify-content-center mb-3 pt-2">
-          <Button type="button" rounded label="Cancelar" severity="secondary" @click=" getTeachersData(), visibleDialog = false"></Button>
+          <Button type="button" rounded label="Cancelar" severity="secondary" @click="getTeachersData(), visibleDialog = false"></Button>
           <Button type="button" rounded label="Actualizar" @click="editarProfesor()"></Button>
         </div>
         <Toast></Toast>
