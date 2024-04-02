@@ -295,8 +295,8 @@ const getSeverity = (permiso: string) => {
           <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Usuarios</h5>
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
-            <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Buscar..." />
-            <Button rounded icon="pi pi-filter-slash" label="" v-tooltip.top="'Limpiar filtros'" outlined @click="clearFilter()"></Button>
+            <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscar..." />
+            <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" v-tooltip.top="'Limpiar filtros'" outlined @click="clearFilter()"></Button>
           </span>
         </div>
 
@@ -372,8 +372,8 @@ const getSeverity = (permiso: string) => {
           <Dropdown class="" id="permisos" :options="permisos" optionLabel="name" optionValue="code" checkmark :highlightOnSelect="false" showClear placeholder="Selecciona un permiso"
             v-model="usuarioEditar.permiso" :class="{ 'p-invalid': usuarioEditar.permiso == null }" />
         </div>
-        <div class=" flex justify-content-center mb-3 pt-2">
-          <Button type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialog = false"></Button>
+        <div class="flex justify-content-center mb-3 pt-2">
+          <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialog = false"></Button>
           <Button type="button" rounded label="Actualizar" @click="editarUsuario()"></Button>
         </div>
         <Toast></Toast>

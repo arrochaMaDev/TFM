@@ -434,9 +434,9 @@ const getSeverity = (permiso: string) => {
           <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Alumnos</h5>
           <span class="mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
-            <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Búsqueda global..." />
-            <Button rounded icon="pi pi-filter-slash" label="" v-tooltip.top="'Limpiar filtros'" outlined @click="clearFilter()"></Button>
-            <Button rounded icon="pi pi-users" label="" v-tooltip.top="'Mostrar Usuarios'" outlined @click="toogleMostrarUsuario()"></Button>
+            <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Búsqueda global..." />
+            <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" v-tooltip.top="'Limpiar filtros'" outlined @click="clearFilter()"></Button>
+            <Button class="mr-2" rounded icon="pi pi-users" label="" v-tooltip.top="'Mostrar Usuarios'" outlined @click="toogleMostrarUsuario()"></Button>
           </span>
         </div>
 
@@ -520,9 +520,9 @@ const getSeverity = (permiso: string) => {
 
         <Column headerStyle="min-width:rem" bodyClass="flex p-1 pl-0">
           <template #body="slotProps">
-            <Button class="m-0 p-0 h-4rem" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Alumno'" @click="goToStudent(slotProps.data.id)"></Button>
-            <Button class="m-0 p-0 h-4rem" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Alumno'" @click="mostrarDialog(slotProps.data)"></Button>
-            <Button class="m-0 p-0 h-4rem" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Alumno'" @click="confirmDelete(slotProps.data)"></Button>
+            <Button class="m-0 p-0 h-4rem w-4rem" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Alumno'" @click="goToStudent(slotProps.data.id)"></Button>
+            <Button class="m-0 p-0 h-4rem w-4rem" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Alumno'" @click="mostrarDialog(slotProps.data)"></Button>
+            <Button class="m-0 p-0 h-4rem w-4rem" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Alumno'" @click="confirmDelete(slotProps.data)"></Button>
           </template>
         </Column>
       </DataTable>
@@ -540,6 +540,7 @@ const getSeverity = (permiso: string) => {
         content: { class: 'pb-3 pt-1' }
       }"></ConfirmDialog>
 
+      <!-- Dialog editar alumno -->
       <Dialog v-model:visible="visibleDialog" modal header="Editar Alumno" class="w-3" :pt="{
         header: { class: 'flex align-items-baseline h-5rem' },
         title: { class: '' },
@@ -597,7 +598,7 @@ const getSeverity = (permiso: string) => {
           </DataTable>
         </div>
         <div class="flex justify-content-center mb-3 pt-2">
-          <Button type="button" rounded label="Cancelar" severity="secondary" @click="getStudentsData(), visibleDialog = false"></Button>
+          <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="getStudentsData(), visibleDialog = false"></Button>
           <Button type="button" rounded label="Actualizar" @click="editarAlumno()"></Button>
         </div>
         <Toast></Toast>

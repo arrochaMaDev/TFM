@@ -339,8 +339,8 @@ onMounted(() => {
           <h5 class="m-0 text-3xl text-800 font-bold pl-1 w-3">Listado Asignaturas</h5>
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
-            <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Buscar..." />
-            <Button rounded icon="pi pi-filter-slash" label="" v-tooltip.top="'Limpiar filtros'" outlined @click="clearFilter()"></Button>
+            <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscar..." />
+            <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" v-tooltip.top="'Limpiar filtros'" outlined @click="clearFilter()"></Button>
           </span>
         </div>
         <Column field="nombre" header="Nombre" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"> </Column>
@@ -383,7 +383,7 @@ onMounted(() => {
           <InputText id="nombre" class="w-full" v-model="asignaturaEditar.nombre" :class="{ 'p-invalid': !asignaturaEditar.nombre }" />
         </div>
         <div class="flex justify-content-center mb-3 pt-2">
-          <Button type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialog = false"></Button>
+          <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialog = false"></Button>
           <Button type="button" rounded label="Actualizar" @click="editarAsignatura()"></Button>
         </div>
         <Toast></Toast>

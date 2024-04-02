@@ -125,7 +125,7 @@ function borrarDatosForm() {
           <InlineMessage v-if="!asignaturaRef && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La asignatura es obligatoria</InlineMessage>
         </div>
         <div class="field col-12">
-          <Button class="justify-content-center w-auto h-auto" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
+          <Button class="justify-content-center w-auto h-auto mr-2" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
           <Button class="justify-content-center w-auto h-auto" severity="secondary" icon="pi pi-trash" iconPos="left" label="Borrar" @click="borrarDatosForm()"></Button>
         </div>
       </div>
@@ -133,13 +133,13 @@ function borrarDatosForm() {
   </div>
 
   <Toast :pt="{
-    container: {
-      class: 'align-items-center'
-    },
-    closeButton: {
-      class: 'border-1'
-    }
-  }">
+      container: {
+        class: 'align-items-center'
+      },
+      closeButton: {
+        class: 'border-1'
+      }
+    }">
   </Toast>
 </template>
 

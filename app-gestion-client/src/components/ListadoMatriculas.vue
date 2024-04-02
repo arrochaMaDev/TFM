@@ -719,7 +719,7 @@ const collapseAll = () => {
       }">
         <template #header>
           <div class="flex flex-wrap justify-content-end h-1rem align-content-center">
-            <Button class="w-auto" severity="secondary" text icon="pi pi-plus" label="Expandir" v-tooltip.top="'Expandir todo'" @click="expandAll"></Button>
+            <Button class="w-auto mr-2" severity="secondary" text icon="pi pi-plus" label="Expandir" v-tooltip.top="'Expandir todo'" @click="expandAll"></Button>
             <Button class="w-auto" severity="secondary" text icon="pi pi-minus" label="Colapsar" v-tooltip.top="'Colapsar todo'" @click="collapseAll"></Button>
           </div>
         </template>
@@ -727,8 +727,8 @@ const collapseAll = () => {
           <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Matrículas</h5>
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
-            <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Buscar..." />
-            <Button rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
+            <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscar..." />
+            <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
           </span>
         </div>
         <Column expander style="width: 1rem"></Column>
@@ -890,8 +890,8 @@ const collapseAll = () => {
       </Dropdown>
     </div>
     <div class="flex justify-content-center mb-3 pt-2">
-      <Button class="w-max" type="button" rounded label="Cancelar" severity="secondary" @click="getAllStudentsWithMatriculas(), resetearVariables(), visibleDialog = false"></Button>
-      <Button class="w-max" type="button" rounded label="Actualizar" @click="editarMatricula()"></Button>
+      <Button class="mr-2 " type="button" rounded label="Cancelar" severity="secondary" @click="getAllStudentsWithMatriculas(), resetearVariables(), visibleDialog = false"></Button>
+      <Button type="button" rounded label="Actualizar" @click="editarMatricula()"></Button>
     </div>
   </Dialog>
 </template>

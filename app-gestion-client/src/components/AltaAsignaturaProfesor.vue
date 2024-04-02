@@ -307,7 +307,7 @@ const getValueForDatatable = () => {
           <InlineMessage v-if="selectedSubjects.length == 0 && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">Las asignaturas son obligatorias</InlineMessage>
         </div>
         <div class="field col-12">
-          <Button class="justify-content-center w-auto h-auto" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
+          <Button class="justify-content-center w-auto h-auto mr-2" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
           <Button class="justify-content-center w-auto h-auto" severity="secondary" icon="pi pi-trash" iconPos="left" label="Borrar" @click="borrarDatosForm()"></Button>
         </div>
         <!-- Tabla del profesor seleccionado -->

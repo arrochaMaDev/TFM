@@ -413,9 +413,9 @@ const getSeverity = (permiso: string) => {
           <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Profesores</h5>
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
-            <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Búsqueda global..." />
-            <Button rounded icon="pi pi-filter-slash" label="" v-tooltip.top="'Limpiar filtros'" outlined @click="clearFilter()"></Button>
-            <Button rounded icon="pi pi-users" label="" v-tooltip.top="'Mostrar Usuarios'" outlined @click="toogleMostrarUsuario()"></Button>
+            <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Búsqueda global..." />
+            <Button class="mr-2" rounded icon="pi pi-users" label="" v-tooltip.top="'Mostrar Usuarios'" outlined @click="toogleMostrarUsuario()"></Button>
+            <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" v-tooltip.top="'Limpiar filtros'" outlined @click="clearFilter()"></Button>
           </span>
         </div>
 
@@ -460,7 +460,7 @@ const getSeverity = (permiso: string) => {
                 <template #filter="{ filterModel }">
                   <Dropdown v-model="filterModel.value" :options="permisos" placeholder="Selecciona" class="p-column-filter" style="width: auto">
                     <template #option="slotProps">
-                      <Tag :value="slotProps.option" :severity="getSeverity(slotProps.option)" />
+                      <Tag :value="slotProps.option" :severity="getSeverity(slotProps.option)" style="font-size: small"></Tag>
                     </template>
                   </Dropdown>
                 </template>
@@ -478,7 +478,7 @@ const getSeverity = (permiso: string) => {
           <Column field="userId.email"></Column>
           <Column field="userId.permiso">
             <template #body="{ data }">
-              <Tag :value="data.userId.permiso" :severity="getSeverity(data.userId.permiso)" />
+              <Tag :value="data.userId.permiso" :severity="getSeverity(data.userId.permiso)"></Tag>
             </template>
           </Column>
         </div>
@@ -555,7 +555,7 @@ const getSeverity = (permiso: string) => {
           </DataTable>
         </div>
         <div class="flex justify-content-center mb-3 pt-2">
-          <Button type="button" rounded label="Cancelar" severity="secondary" @click="getTeachersData(), visibleDialog = false"></Button>
+          <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="getTeachersData(), visibleDialog = false"></Button>
           <Button type="button" rounded label="Actualizar" @click="editarProfesor()"></Button>
         </div>
         <Toast></Toast>

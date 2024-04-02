@@ -1220,8 +1220,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           <h5 class="m-0 text-3xl text-800 font-bold pl-1">Asignaciones</h5>
           <span class="p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
-            <InputText class="h-auto" v-model="filters['global'].value" placeholder="Buscar..." />
-            <Button rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
+            <InputText class="h-auto mr-2" v-model="filters['global'].value" placeholder="Buscar..." />
+            <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
           </span>
         </div>
         <Column field="subject.nombre" header="Asignatura" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"> </Column>
@@ -1256,8 +1256,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           <h5 class="m-0 text-3xl text-800 font-bold pl-1">Matrículas</h5>
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
-            <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Buscar..." />
-            <Button rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
+            <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscar..." />
+            <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
           </span>
         </div>
 
@@ -1362,7 +1362,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
         </DataTable>
       </div>
       <div class="flex justify-content-center mb-3 pt-2">
-        <Button type="button" rounded label="Cancelar" severity="secondary" @click=" getTeacherData(teacherId), visibleDialogProfesor = false"></Button>
+        <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click=" getTeacherData(teacherId), visibleDialogProfesor = false"></Button>
         <Button type="button" rounded label="Actualizar" @click="editarProfesor()"></Button>
       </div>
       <Toast></Toast>
@@ -1401,7 +1401,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
         </Dropdown>
       </div>
       <div class="flex justify-content-center mb-3 pt-2">
-        <Button type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialogEditarAsignacion = false"></Button>
+        <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialogEditarAsignacion = false"></Button>
         <Button type="button" rounded label="Actualizar" @click="editarSubjectTeacher()"></Button>
       </div>
     </Dialog>
@@ -1481,8 +1481,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
         </Dropdown>
       </div>
       <div class="flex justify-content-center mb-3 pt-2">
-        <Button class="w-max" type="button" rounded label="Cancelar" severity="secondary" @click="getTeacherData(teacherId), resetearVariables(), visibleDialogEditarMatricula = false"></Button>
-        <Button class="w-max" type="button" rounded label="Actualizar" @click="editarMatricula()"></Button>
+        <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="getTeacherData(teacherId), resetearVariables(), visibleDialogEditarMatricula = false"></Button>
+        <Button type="button" rounded label="Actualizar" @click="editarMatricula()"></Button>
       </div>
     </Dialog>
 

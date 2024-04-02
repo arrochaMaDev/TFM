@@ -339,8 +339,10 @@ onMounted(async () => {
             </DataTable>
           </div>
         </div>
-        <Button class="justify-content-center w-auto h-auto" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
+        <div class="field col-12">
+        <Button class="justify-content-center w-auto h-auto mr-2" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
         <Button class="justify-content-center w-auto h-auto" severity="secondary" icon="pi pi-trash" iconPos="left" label="Borrar" @click="borrarDatosForm()"></Button>
+        </div>
       </div>
     </form>
   </div>

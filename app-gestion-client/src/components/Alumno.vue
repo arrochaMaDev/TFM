@@ -887,42 +887,44 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           <h5 class="m-0 text-3xl text-800 font-bold pl-1">Matrículas</h5>
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
-            <InputText class="h-3rem" v-model="filters['global'].value" placeholder="Buscar..." />
-            <Button rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
+            <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscar..." />
+            <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
           </span>
         </div>
 
         <ColumnGroup type="header">
           <Row>
-            <Column header="Curso escolar" field="year" :rowspan="2" headerClass="h-3rem pl-1 bg-transparent pr-3 " :show-filter-match-modes="false">
+            <Column header="Curso escolar" field="year" :rowspan="2" headerClass="h-3rem pl-1  pr-3 " :show-filter-match-modes="false">
               <template #filter="{ filterModel }">
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>
             </Column>
-            <Column header="Asignatura" field="subject.nombre" :rowspan="2" sortable headerClass="h-2rem pl-1 bg-transparent" :show-filter-match-modes="false">
+            <Column header="Asignatura" field="subject.nombre" :rowspan="2" sortable headerClass="h-2rem pl-1 " :show-filter-match-modes="false">
               <template #filter="{ filterModel }">
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>
             </Column>
-            <Column header="Profesor" :colspan="3" headerClass="h-3rem pl-1 bg-transparent"></Column>
+            <Column header="Profesor" :colspan="4" headerClass="h-3rem pl-1 "></Column>
           </Row>
           <Row>
-            <Column header="Nombre" sortable field="teacher.nombre" headerClass="h-2rem pl-1 bg-transparent pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+            <Column header="Nombre" sortable field="teacher.nombre" headerClass="h-2rem pl-1  pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
               <template #filter="{ filterModel }">
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>
             </Column>
 
-            <Column header="Apellidos" sortable field="teacher.apellidos" headerClass="h-2rem pl-1 bg-transparent pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+            <Column header="Apellidos" sortable field="teacher.apellidos" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
               <template #filter="{ filterModel }">
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>
             </Column>
-            <Column header="Email" sortable field="teacher.email" headerClass="h-2rem pl-1 bg-transparent pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+            <Column header="Email" sortable field="teacher.email" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
               <template #filter="{ filterModel }">
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>
             </Column>
+            <Column field="" header="" headerClass="h-2rem pl-1 pr-2"></Column>
+
           </Row>
         </ColumnGroup>
 
@@ -1026,7 +1028,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       </DataTable>
     </div>
     <div class="flex justify-content-center mb-3 pt-2">
-      <Button type="button" rounded label="Cancelar" severity="secondary" @click="getStudentData(), visibleDialogAlumno = false"></Button>
+      <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="getStudentData(), visibleDialogAlumno = false"></Button>
       <Button type="button" rounded label="Actualizar" @click="editarAlumno()"></Button>
     </div>
     <Toast></Toast>
@@ -1107,8 +1109,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       </Dropdown>
     </div>
     <div class="flex justify-content-center mb-3 pt-2">
-      <Button class="w-max" type="button" rounded label="Cancelar" severity="secondary" @click="getStudentData(), resetearVariables(), visibleDialogMatricula = false"></Button>
-      <Button class="w-max" type="button" rounded label="Actualizar" @click="editarMatricula()"></Button>
+      <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="getStudentData(), resetearVariables(), visibleDialogMatricula = false"></Button>
+      <Button type="button" rounded label="Actualizar" @click="editarMatricula()"></Button>
     </div>
   </Dialog>
 </template>

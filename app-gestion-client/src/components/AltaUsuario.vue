@@ -168,8 +168,10 @@ const borrarDatosForm = () => {
             v-model="userRef.permiso.value" />
           <InlineMessage v-if="userRef.permiso.value == undefined && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El permiso es obligatorio</InlineMessage>
         </div>
-        <Button class="justify-content-center w-auto h-auto" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
-        <Button class="justify-content-center w-auto h-auto" severity="secondary" icon="pi pi-trash" iconPos="left" label="Borrar" @click="borrarDatosForm()"></Button>
+        <div class="field col-12">
+          <Button class="justify-content-center w-auto h-auto mr-2" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
+          <Button class="justify-content-center w-auto h-auto" severity="secondary" icon="pi pi-trash" iconPos="left" label="Borrar" @click="borrarDatosForm()"></Button>
+        </div>
       </div>
     </form>
   </div>
