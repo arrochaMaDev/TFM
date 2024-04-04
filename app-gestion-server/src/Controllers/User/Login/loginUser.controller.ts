@@ -11,7 +11,8 @@ export class LoginUserController {
   async loginUser(@Res() response: Response, @Body() data: LoginUserDto) {
     const { email, pass } = data;
 
-    const { isValid, permiso } = await this.loginUserService.login(email, pass);
+    const { isValid, permiso, username, id } =
+      await this.loginUserService.login(email, pass);
 
     if (!isValid) {
       response.sendStatus(HttpStatus.FORBIDDEN);
@@ -19,8 +20,10 @@ export class LoginUserController {
     } else {
       const userObject = {
         email: email,
+        username,
         isValid: true,
         permiso,
+        id,
       };
       console.log('logged');
       response

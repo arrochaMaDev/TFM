@@ -14,7 +14,12 @@ export class LoginUserService {
   async login(
     email: string,
     pass: string,
-  ): Promise<{ isValid: boolean; permiso?: number }> {
+  ): Promise<{
+    isValid: boolean;
+    permiso?: number;
+    username?: string;
+    id?: number;
+  }> {
     const usuario: UserDb = await this.userRepository.findOne({
       where: { email },
     });
@@ -29,6 +34,11 @@ export class LoginUserService {
       return { isValid: false };
     }
 
-    return { isValid: true, permiso: usuario.permiso };
+    return {
+      isValid: true,
+      permiso: usuario.permiso,
+      username: usuario.username,
+      id: usuario.id,
+    };
   }
 }

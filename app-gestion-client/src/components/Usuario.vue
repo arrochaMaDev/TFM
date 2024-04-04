@@ -724,7 +724,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
 </script>
 
 <template>
-  <div class="col-10">
+  <div class="w-max">
     <div class="grid">
       <div id="header" class="flex col-12 justify-content-between h-auto mb-2">
         <h2 class="m-0 text-4xl text-800 font-bold">Perfil del Usuario</h2>
@@ -842,9 +842,9 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
   </Dialog>
 
   <!-- Tabla alumnos asignados -->
-  <div class="card col-9">
+  <div class="card w-max ">
     <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['nombre', 'apellidos', 'email', 'userId.username', 'userId.email', 'userId.permiso']" class="" removableSort
-      :value="studentsRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" :pt="{
+      :value="studentsRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="5" :pt="{
           paginator: {
             paginatorWrapper: { class: 'col-12 flex justify-content-center' },
             firstPageButton: { class: 'w-auto' },
@@ -950,11 +950,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           ">
           <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
           <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-          <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem">
-            <template #body="{ data }">
-              <Tag :value="data.permiso" :severity="getSeverity(data.permiso.toString())" style="font-size: small"> </Tag>
-            </template>
-          </Column>
+          <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
         </DataTable>
       </div>
       <div class="flex justify-content-center mb-3 pt-2">
@@ -966,9 +962,9 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
   </div>
 
   <!-- Tabla profesores asignados -->
-  <div class="card col-5">
+  <div class="card w-max">
     <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['nombre', 'apellidos', 'email', 'userId.username', 'userId.email', 'userId.permiso']" class="" removableSort
-      :value="teachersRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" :pt="{
+      :value="teachersRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="5" :pt="{
           paginator: {
             paginatorWrapper: { class: 'col-12 flex justify-content-center' },
             firstPageButton: { class: 'w-auto' },
@@ -985,7 +981,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           ">
 
       <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
-        <h5 class="m-0 text-3xl text-800 font-bold pl-1">Profesores asignados</h5>
+        <h5 class="m-0 text-3xl text-800 font-bold pl-1 mr-5">Profesores asignados</h5>
         <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
           <i class="pi pi-search"></i>
           <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Búsqueda global..." />
@@ -1059,11 +1055,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           ">
           <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
           <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-          <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem">
-            <template #body="{ data }">
-              <Tag :value="data.permiso" :severity="getSeverity(data.permiso.toString())" style="font-size: small"> </Tag>
-            </template>
-          </Column>
+          <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
         </DataTable>
       </div>
       <div div class=" flex justify-content-center mb-3 pt-2">
