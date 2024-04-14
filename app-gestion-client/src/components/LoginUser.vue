@@ -49,10 +49,11 @@ const loginUser = async () => {
         }
         throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
       } else {
-        if (userRef.email.value) {
-          localStorage.setItem('email', userRef.email.value);
-        }
-        // router.push({ path: '/about' })
+
+        // if (userRef.email.value) {
+        //   localStorage.setItem('email', userRef.email.value);
+        // }
+        router.push({ path: '/' })
       }
     } catch (error) {
       console.log('Error en la solicitud:', error)
@@ -73,7 +74,7 @@ const borrarDatosForm = () => {
         <h2 class="text-900 text-4xl mb-8">Login</h2>
       </div>
       <div id="formulario" class="col-6">
-        <form @submit.prevent="loginUser">
+        <form @submit.prevent="loginUser()">
 
           <label for="email" class="block text-900 text-xl font-medium mb-2">Email</label>
           <InputText id="email" type="text" placeholder="Email" class="w-full" style="padding: 1rem" v-model="userRef.email.value" />

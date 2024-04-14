@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { type Ref, ref, onMounted } from 'vue'
+import { type Ref, ref, onMounted, inject } from 'vue'
 import { useRouter } from 'vue-router'
-import { useLoadingStore } from '@/stores/loading'
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import ColumnGroup from 'primevue/columngroup';
@@ -17,14 +16,32 @@ import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
 import Tag from 'primevue/tag';
-
+import { useAdminStore } from '../stores/isAdmin'
+import type { VueCookies } from 'vue-cookies';
 
 
 const confirm = useConfirm();
 const toast = useToast();
 
 const router = useRouter() // router para ir al alumno cuando se clique en él
-const loadingStore = useLoadingStore() // store del Spinner
+
+// VERIFICAR SI SE ES ADMINISTRADOR
+const adminStore = useAdminStore()
+const $cookies = inject<VueCookies>('$cookies')
+const isAdmin = ref(adminStore.isAdmin)
+
+onMounted(() => {
+  const userCookie = $cookies?.get('user')
+  if (userCookie.permiso == '9') {
+    adminStore.isAdminTrue()
+  }
+  else {
+    toast.add({ severity: 'info', summary: 'No tienes permiso', detail: 'No tienes permiso de administrador para ver esta página', group: 'tc', life: 3000, });
+    setTimeout(() => {
+      router.push('/')
+    }, 3000)
+  }
+})
 
 // OBTENER DATOS DE TODOS LOS ESTUDIANTES
 const studentsRefFromServer: Ref<
@@ -92,8 +109,6 @@ const getStudentsData = async () => {
   } catch (error) {
     console.error('Error en la solicitud:', error)
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
-  } finally {
-    loadingStore.loadingFalse()
   }
 }
 
@@ -412,23 +427,32 @@ const getSeverity = (permiso: string) => {
 </script>
 
 <template>
-  <div class="flex justify-content-start pt-2 ">
+  <Toast position="top-center" group="tc" :pt="{
+    container: {
+      class: 'align-items-center m-8 w-max',
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }
+    "></Toast>
+  <div class="flex justify-content-start pt-2 " v-if="isAdmin == true">
     <div class="card flex justify-content-center">
       <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['nombre', 'apellidos', 'email', 'userId.username', 'userId.email', 'userId.permiso']" class="" removableSort
         :value="studentsRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" :pt="{
-        paginator: {
-          paginatorWrapper: { class: 'col-12 flex justify-content-center' },
-          firstPageButton: { class: 'w-auto' },
-          previousPageButton: { class: 'w-auto' },
-          pageButton: { class: 'w-auto' },
-          nextPageButton: { class: 'w-auto' },
-          lastPageButton: { class: 'w-auto' },
-        },
-        table: {
-          class: 'mt-0 w-auto',
-          style: { 'border': 'none' }
-        }
-      }">
+    paginator: {
+      paginatorWrapper: { class: 'col-12 flex justify-content-center' },
+      firstPageButton: { class: 'w-auto' },
+      previousPageButton: { class: 'w-auto' },
+      pageButton: { class: 'w-auto' },
+      nextPageButton: { class: 'w-auto' },
+      lastPageButton: { class: 'w-auto' },
+    },
+    table: {
+      class: 'mt-0 w-auto',
+      style: { 'border': 'none' }
+    }
+  }">
 
         <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
           <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Alumnos</h5>
@@ -528,27 +552,27 @@ const getSeverity = (permiso: string) => {
       </DataTable>
 
       <Toast :pt="{
-        container: {
-          class: 'align-items-center'
-        },
-        closeButton: {
-          class: 'border-1'
-        }
-      }"></Toast>
+    container: {
+      class: 'align-items-center'
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }"></Toast>
       <ConfirmDialog :pt="{
-        header: { class: 'pb-0 pt-2' },
-        content: { class: 'pb-3 pt-1' }
-      }"></ConfirmDialog>
+    header: { class: 'pb-0 pt-2' },
+    content: { class: 'pb-3 pt-1' }
+  }"></ConfirmDialog>
 
       <!-- Dialog editar alumno -->
       <Dialog v-model:visible="visibleDialog" modal header="Editar Alumno" class="w-3" :pt="{
-        header: { class: 'flex align-items-baseline h-5rem' },
-        title: { class: '' },
-        closeButtonIcon: { class: '' },
-        mask: {
-          style: 'backdrop-filter: blur(3px)'
-        }
-      }">
+    header: { class: 'flex align-items-baseline h-5rem' },
+    title: { class: '' },
+    closeButtonIcon: { class: '' },
+    mask: {
+      style: 'backdrop-filter: blur(3px)'
+    }
+  }">
 
         <span class="p-text-secondary flex mb-5">Actualizar información</span>
         <div class="flex align-items-center gap-3 mb-3">
@@ -582,12 +606,12 @@ const getSeverity = (permiso: string) => {
         </div>
         <div v-if="alumnoEditar.userId.id != undefined" class="">
           <DataTable :value="[alumnoEditar.userId]" class="pl-1" tableStyle="width: 30rem" :pt="{
-        table: {
-          class: 'mt-0',
-          style: { 'border': 'none' }
-        }
-      }
-        ">
+    table: {
+      class: 'mt-0',
+      style: { 'border': 'none' }
+    }
+  }
+    ">
             <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
             <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
             <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem">

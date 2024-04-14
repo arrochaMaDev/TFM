@@ -3,6 +3,42 @@ import * as Vue from 'vue';
 import AppSubmenu from '@/App/AppSubmenu.vue';
 import type { MenuItem } from 'primevue/menuitem';
 import { G } from "@/G";
+import type { VueCookies } from 'vue-cookies';
+import { inject, onMounted, ref, type Ref } from 'vue';
+import router from '@/router';
+
+//Obtener valor de la cookie
+const $cookies = inject<VueCookies>('$cookies');
+const user: Ref<{
+    email: string | undefined,
+    username: string | undefined,
+    isValid: string | undefined,
+    permiso: string | undefined,
+    id: string | undefined
+}> = ref({
+    email: undefined,
+    username: undefined,
+    isValid: undefined,
+    permiso: undefined,
+    id: undefined,
+})
+
+onMounted(() => {
+    user.value = $cookies?.get('user')
+    if (user.value) {
+        console.log('Cookie value:', user);
+    } else {
+        router.push('/login')
+        console.log('Cookie "user" no encontrada');
+    }
+})
+
+// Log-out
+const deleteCookie = async () => {
+    await $cookies?.remove('user')
+    router.push('/login')
+
+}
 
 const $emit = defineEmits(['menuitem-click']);
 
@@ -59,8 +95,13 @@ let menuArray: MenuItem[] = [
         label: 'Settings',
         items: [
             { label: 'Settings', icon: 'pi pi-cog' },
-            { label: 'Usuario', icon: 'pi pi-users', to: '/Users' },
-            { label: 'Log Out', icon: 'pi pi-fw pi-id-card' },
+            // { label: 'Usuario', icon: 'pi pi-users', to: `/usuario/${user.id}` },
+            {
+                label: 'Log Out', icon: 'pi pi-fw pi-id-card', command() {
+                    deleteCookie()
+                },
+                to: '/login'
+            },
         ]
     },
 

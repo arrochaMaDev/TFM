@@ -164,4 +164,3 @@ Vue.watch(() => $route, (newVal, oldVal) => {
 <style lang="scss">
 @import './App.scss';
 </style>
-
