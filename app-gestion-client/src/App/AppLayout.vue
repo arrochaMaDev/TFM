@@ -1,33 +1,36 @@
 <script setup lang="ts">
-import * as Vue from 'vue';
+// import * as Vue from 'vue';
 import { G } from "@/G";
 import { useRoute } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import AppTopBar from '@/App/AppTopbar.vue';
 import AppMenu from '@/App/AppMenu.vue';
+import Sidebar from '@/components/Sidebar.vue';
 import AppConfig from '@/App/AppConfig.vue';
 import AppFooter from '@/App/AppFooter.vue';
 import { RouterView } from 'vue-router';
 import router from '@/router';
-import type { Ref } from 'vue';
+import { computed, inject, onMounted, ref, type Ref } from 'vue';
 import type { VueCookies } from 'vue-cookies';
 import { useLoggedStore } from '@/stores/isLogged';
-
-
-const layoutMode = Vue.ref('static');
-const appConfig = Vue.ref<typeof AppConfig>();
-
-const staticMenuInactive = Vue.ref(false);
-const overlayMenuActive = Vue.ref(false);
-const mobileMenuActive = Vue.ref(false);
-const menuClick = Vue.ref(false);
-const menuActive = Vue.ref(false);
+import Button from 'primevue/button';
 
 
 
-const $this = Vue.getCurrentInstance()!.appContext.config.globalProperties as any;
+// const layoutMode = Vue.ref('static');
+// const appConfig = Vue.ref<typeof AppConfig>();
 
-let isLoggedIn = G.isUserLoggedin;
+const staticMenuInactive: Ref<boolean> = ref(false);
+const overlayMenuActive: Ref<boolean> = ref(false);
+const mobileMenuActive: Ref<boolean> = ref(false);
+const menuClick: Ref<boolean> = ref(false);
+// const menuActive = Vue.ref(false);
+
+
+
+// const $this = Vue.getCurrentInstance()!.appContext.config.globalProperties as any;
+
+// let isLoggedIn = G.isUserLoggedin;
 
 const onWrapperClick = () => {
     if (!menuClick.value) {
@@ -41,17 +44,17 @@ const onMenuToggle = (event: Event) => {
     menuClick.value = true;
 
     if (isDesktop()) {
-        if (layoutMode.value === 'overlay') {
-            if (mobileMenuActive.value === true) {
-                overlayMenuActive.value = true;
-            }
+        // if (layoutMode.value === 'overlay') {
+        //     if (mobileMenuActive.value === true) {
+        //         overlayMenuActive.value = true;
+        //     }
 
-            overlayMenuActive.value = !overlayMenuActive.value;
-            mobileMenuActive.value = false;
-        }
-        else if (layoutMode.value === 'static') {
-            staticMenuInactive.value = !staticMenuInactive.value;
-        }
+        //     overlayMenuActive.value = !overlayMenuActive.value;
+        //     mobileMenuActive.value = false;
+        // }
+        // else if (layoutMode.value === 'static') {
+        staticMenuInactive.value = !staticMenuInactive.value;
+        // }
     }
     else {
         mobileMenuActive.value = !mobileMenuActive.value;
@@ -60,96 +63,115 @@ const onMenuToggle = (event: Event) => {
     event.preventDefault();
 }
 
-const onSidebarClick = () => {
-    menuClick.value = true;
-}
-const onMenuItemClick = (event: any) => {
-    if (event.item && !event.item.items) {
-        overlayMenuActive.value = false;
-        mobileMenuActive.value = false;
-    }
-    switch (event.item.label) {
-        case 'Settings':
-            appConfig.value!.toggleConfigurator(event.originalEvent);
-            break;
-        case 'Cerrarn Sesión':
-            logout();
-            break;
-    }
+// const onSidebarClick = () => {
+//     menuClick.value = true;
+// }
+// const onMenuItemClick = (event: any) => {
+//     if (event.item && !event.item.items) {
+//         overlayMenuActive.value = false;
+//         mobileMenuActive.value = false;
+//     }
+//     switch (event.item.label) {
+//         case 'Settings':
+//             appConfig.value!.toggleConfigurator(event.originalEvent);
+//             break;
+//         case 'Cerrar Sesión':
+//             logout();
+//             break;
+//     }
 
-}
-const onLayoutChange = (l: string) => {
-    layoutMode.value = l;
-}
-const addClass = (element: HTMLElement, className: string) => {
-    if (element.classList)
-        element.classList.add(className);
-    else
-        element.className += ' ' + className;
-}
-const removeClass = (element: HTMLElement, className: string) => {
-    if (element.classList)
-        element.classList.remove(className);
-    else
-        element.className = element.className.replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
-}
+// }
+// const onLayoutChange = (l: string) => {
+//     layoutMode.value = l;
+// }
+// const addClass = (element: HTMLElement, className: string) => {
+//     if (element.classList)
+//         element.classList.add(className);
+//     else
+//         element.className += ' ' + className;
+// }
+// const removeClass = (element: HTMLElement, className: string) => {
+//     if (element.classList)
+//         element.classList.remove(className);
+//     else
+//         element.className = element.className.replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
+// }
 const isDesktop = () => {
     return window.innerWidth >= 992;
 }
-const isSidebarVisible = () => {
-    if (isDesktop()) {
-        if (layoutMode.value === 'static')
-            return !staticMenuInactive.value;
-        else if (layoutMode.value === 'overlay')
-            return overlayMenuActive.value;
-    }
+// const isSidebarVisible = () => {
+//     if (isDesktop()) {
+//         if (layoutMode.value === 'static')
+//             return !staticMenuInactive.value;
+//         else if (layoutMode.value === 'overlay')
+//             return overlayMenuActive.value;
+//     }
 
-    return true;
-}
+//     return true;
+// }
 
-const logout = async () => {
-    //await G.doAjaxAsync('/public/logout', null);
-    window.location.href = "/";
-}
+// const logout = async () => {
+//     //await G.doAjaxAsync('/public/logout', null);
+//     window.location.href = "/";
+// }
 
-const containerClass = Vue.computed(() => {
+const sidebarClass: Ref<{
+    layoutMode: string
+    showLeftSide: boolean
+}> = ref({
+    layoutMode: 'static',
+    showLeftSide: true
+})
+
+const containerClass = computed(() => {
     return ['layout-wrapper', {
-        'layout-overlay': G.userSettings.value.layoutMode === 'overlay',
-        'layout-static': G.userSettings.value.layoutMode === 'static',
-        'layout-static-sidebar-inactive': !G.showLeftSide.value || (staticMenuInactive.value && G.userSettings.value.layoutMode === 'static'),
-        'layout-overlay-sidebar-active': G.showLeftSide.value && overlayMenuActive.value && G.userSettings.value.layoutMode === 'overlay',
-        'layout-mobile-sidebar-active': G.showLeftSide.value && mobileMenuActive.value,
-        'p-input-filled': G.userSettings.value.inputStyle === 'filled',
-        'p-ripple-disabled': G.userSettings.value.rippleEffect === false,
-        'layout-theme-light': G.userSettings.value.theme.startsWith('saga')
+        // 'layout-overlay': G.userSettings.value.layoutMode === 'overlay',
+        'layout-static': sidebarClass.value.layoutMode === 'static',
+        'layout-static-sidebar-inactive': !sidebarClass.value.showLeftSide || (staticMenuInactive.value && sidebarClass.value.layoutMode === 'static'),
+        'layout-overlay-sidebar-active': sidebarClass.value.showLeftSide && overlayMenuActive.value && sidebarClass.value.layoutMode === 'overlay',
+        'layout-mobile-sidebar-active': sidebarClass.value.showLeftSide && mobileMenuActive.value,
+        // 'p-input-filled': G.userSettings.value.inputStyle === 'filled',
+        // 'p-ripple-disabled': G.userSettings.value.rippleEffect === false,
+        // 'layout-theme-light': G.userSettings.value.theme.startsWith('saga')
+
+        // // 'layout-overlay': G.userSettings.value.layoutMode === 'overlay',
+        // 'layout-static': G.userSettings.value.layoutMode === 'static',
+        // 'layout-static-sidebar-inactive': !G.showLeftSide.value || (staticMenuInactive.value && G.userSettings.value.layoutMode === 'static'),
+        // 'layout-overlay-sidebar-active': G.showLeftSide.value && overlayMenuActive.value && G.userSettings.value.layoutMode === 'overlay',
+        // 'layout-mobile-sidebar-active': G.showLeftSide.value && mobileMenuActive.value,
+        // // 'p-input-filled': G.userSettings.value.inputStyle === 'filled',
+        // // 'p-ripple-disabled': G.userSettings.value.rippleEffect === false,
+        // // 'layout-theme-light': G.userSettings.value.theme.startsWith('saga')
     }];
 });
 
-Vue.onBeforeUpdate(() => {
-    if (mobileMenuActive.value)
-        addClass(document.body, 'body-overflow-hidden');
-    else
-        removeClass(document.body, 'body-overflow-hidden');
-});
+// Vue.onBeforeUpdate(() => {
+//     if (mobileMenuActive.value)
+//         addClass(document.body, 'body-overflow-hidden');
+//     else
+//         removeClass(document.body, 'body-overflow-hidden');
+// });
 
-const $route = useRoute();
-const $toast = useToast();
-Vue.watch(() => $route, (newVal, oldVal) => {
-    menuActive.value = false;
-    $toast.removeAllGroups();
-});
+// const $route = useRoute();
+// const $toast = useToast();
+// Vue.watch(() => $route, (newVal, oldVal) => {
+//     menuActive.value = false;
+//     $toast.removeAllGroups();
+// });
+
+
 
 //Obtener valor de la cookie
 const loggedStore = useLoggedStore()
 
-const $cookies = Vue.inject<VueCookies>('$cookies');
+const $cookies = inject<VueCookies>('$cookies');
 const user: Ref<{
     email: string | undefined,
     username: string | undefined,
     isValid: string | undefined,
     permiso: string | undefined,
     id: string | undefined
-}> = Vue.ref({
+}> = ref({
     email: undefined,
     username: undefined,
     isValid: undefined,
@@ -157,9 +179,9 @@ const user: Ref<{
     id: undefined,
 })
 
-const isLogged: Ref<boolean> = Vue.ref(false)
+const isLogged: Ref<boolean> = ref(false)
 
-Vue.onMounted(() => {
+onMounted(() => {
     isLogged.value = loggedStore.isLogged
     user.value = $cookies?.get('user')
     if (user.value) {
@@ -177,24 +199,28 @@ Vue.onMounted(() => {
 
 <template>
     <div :class="containerClass" @click="onWrapperClick">
-        <AppTopBar :showIcon="!staticMenuInactive && (G.userSettings.value.layoutMode === 'static')" @menu-toggle="onMenuToggle" />
-        <div class="layout-sidebar" @click="onSidebarClick">
-            <AppMenu @menuitem-click="onMenuItemClick" v-if="G.showLeftSide" />
+        <AppTopBar @menu-toggle="onMenuToggle" />
+        <!-- <AppTopBar :showIcon="!staticMenuInactive && (G.userSettings.value.layoutMode === 'static')" @menu-toggle="onMenuToggle" /> -->
+        <!-- <div class="layout-sidebar" @click="onSidebarClick"> -->
+        <div>
+            <!-- <AppMenu @menuitem-click="onMenuItemClick" v-if="G.showLeftSide" /> -->
+            <sidebar class="layout-sidebar"></sidebar>
         </div>
 
-        <div class="layout-main-container" style="padding-left:0px;">
+        <div class="layout-main-container">
             <div class="layout-main">
                 <router-view />
             </div>
+
             <div>
                 <AppFooter />
             </div>
         </div>
 
-        <AppConfig ref="appConfig" :layoutMode="layoutMode" @layout-change="onLayoutChange" />
-        <transition name="layout-mask">
+        <!-- <AppConfig ref="appConfig" :layoutMode="layoutMode" @layout-change="onLayoutChange" /> -->
+        <!-- <transition name="layout-mask">
             <div class="layout-mask p-component-overlay" v-if="mobileMenuActive"></div>
-        </transition>
+        </transition> -->
     </div>
 </template>
 
