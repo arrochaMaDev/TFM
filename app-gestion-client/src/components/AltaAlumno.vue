@@ -5,14 +5,38 @@ import InputMask from 'primevue/inputmask';
 import Dropdown from 'primevue/dropdown';
 import InlineMessage from 'primevue/inlinemessage';
 import Button from 'primevue/button';
-import { onMounted, ref, watch, type Ref } from 'vue'
+import { inject, onMounted, ref, watch, type Ref } from 'vue'
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
 import DireccionService from '@/utils/direccion.service';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import router from '@/router';
+import { useAdminStore } from '@/stores/isAdmin';
+import type { VueCookies } from 'vue-cookies';
 
 const toast = useToast();
+
+// VERIFICAR SI SE ES ADMINISTRADOR
+const adminStore = useAdminStore()
+const $cookies = inject<VueCookies>('$cookies')
+const isAdmin = ref(adminStore.isAdmin)
+
+onMounted(() => {
+  const userCookie = $cookies?.get('user') // si no existe, userCookie es null
+  // console.log(userCookie)
+  if (userCookie?.permiso == '9') {
+    adminStore.isAdminTrue()
+  }
+  else if (!isAdmin.value || userCookie?.permiso == null || userCookie?.permiso != '9') {
+    adminStore.isAdminFalse()
+    toast.add({ severity: 'info', summary: 'No tienes permiso', detail: 'No tienes permiso de administrador para ver esta página', group: 'tc', life: 3000, });
+
+    setTimeout(() => {
+      router.push('/')
+    }, 3000)
+  }
+})
 
 // Referencias del formulario
 const studentRef = {
@@ -263,7 +287,16 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="card col-12 xl:col-9 lg:col-12 md:col-12 sm:col-12">
+  <Toast position="top-center" group="tc" :pt="{
+    container: {
+      class: 'align-items-center m-8 w-max',
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }
+    "></Toast>
+  <div class="card col-12 xl:col-9 lg:col-12 md:col-12 sm:col-12" v-if="isAdmin">
     <form @submit.prevent="crearAlumno()">
       <h2>Nuevo Alumno</h2>
       <div class="p-fluid formgrid grid">
@@ -324,11 +357,11 @@ onMounted(async () => {
           </div>
           <div v-if="selectedUserId" class="ml-1">
             <DataTable :value="[user]" class="pl-1" tableStyle="width: 30rem" :pt="{
-              table: {
-                class: 'mt-0',
-                style: { 'border': 'none' }
-              }
-            }">
+    table: {
+      class: 'mt-0',
+      style: { 'border': 'none' }
+    }
+  }">
               <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
               <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
               <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem">
@@ -340,8 +373,8 @@ onMounted(async () => {
           </div>
         </div>
         <div class="field col-12">
-        <Button class="justify-content-center w-auto h-auto mr-2" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
-        <Button class="justify-content-center w-auto h-auto" severity="secondary" icon="pi pi-trash" iconPos="left" label="Borrar" @click="borrarDatosForm()"></Button>
+          <Button class="justify-content-center w-auto h-auto mr-2" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
+          <Button class="justify-content-center w-auto h-auto" severity="secondary" icon="pi pi-trash" iconPos="left" label="Borrar" @click="borrarDatosForm()"></Button>
         </div>
       </div>
     </form>

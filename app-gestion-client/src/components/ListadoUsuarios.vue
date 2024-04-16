@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, ref, onMounted } from 'vue'
+import { type Ref, ref, onMounted, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -14,6 +14,8 @@ import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
 import Tag from 'primevue/tag';
+import { useAdminStore } from '@/stores/isAdmin';
+import type { VueCookies } from 'vue-cookies';
 
 
 
@@ -21,6 +23,28 @@ const confirm = useConfirm();
 const toast = useToast();
 
 const router = useRouter()
+
+// VERIFICAR SI SE ES ADMINISTRADOR
+const adminStore = useAdminStore()
+const $cookies = inject<VueCookies>('$cookies')
+const isAdmin = ref(adminStore.isAdmin)
+
+onMounted(() => {
+  const userCookie = $cookies?.get('user') // si no existe, userCookie es null
+  // console.log(userCookie)
+  if (userCookie?.permiso == '9') {
+    adminStore.isAdminTrue()
+  }
+  else if (!isAdmin.value || userCookie?.permiso == null || userCookie?.permiso != '9') {
+    adminStore.isAdminFalse()
+    toast.add({ severity: 'info', summary: 'No tienes permiso', detail: 'No tienes permiso de administrador para ver esta página', group: 'tc', life: 3000, });
+
+    setTimeout(() => {
+      router.push('/')
+    }, 3000)
+  }
+})
+
 
 // OBTENER DATOS DE TODOS LOS USUARIOS
 const usersRefFromServer: Ref<
@@ -273,23 +297,32 @@ const getSeverity = (permiso: string) => {
 };
 </script>
 <template>
-  <div class="flex justify-content-start pt-2">
+  <Toast position="top-center" group="tc" :pt="{
+    container: {
+      class: 'align-items-center m-8 w-max',
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }
+    "></Toast>
+  <div class="flex justify-content-start pt-2" v-if="isAdmin">
     <div class="card flex justify-content-center">
       <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['username', 'email', 'permiso']" class="" removableSort :value="usersRefFromServer" dataKey="id" stripedRows
         selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" tableStyle="width: auto" :pt="{
-        paginator: {
-          paginatorWrapper: { class: 'col-12 flex justify-content-center' },
-          firstPageButton: { class: 'w-auto' },
-          previousPageButton: { class: 'w-auto' },
-          pageButton: { class: 'w-auto' },
-          nextPageButton: { class: 'w-auto' },
-          lastPageButton: { class: 'w-auto' },
-        },
-        table: {
-          class: 'mt-0',
-          style: { 'border': 'none' }
-        }
-      }">
+    paginator: {
+      paginatorWrapper: { class: 'col-12 flex justify-content-center' },
+      firstPageButton: { class: 'w-auto' },
+      previousPageButton: { class: 'w-auto' },
+      pageButton: { class: 'w-auto' },
+      nextPageButton: { class: 'w-auto' },
+      lastPageButton: { class: 'w-auto' },
+    },
+    table: {
+      class: 'mt-0',
+      style: { 'border': 'none' }
+    }
+  }">
 
         <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
           <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Usuarios</h5>
@@ -332,27 +365,27 @@ const getSeverity = (permiso: string) => {
       </DataTable>
 
       <Toast :pt="{
-        container: {
-          class: 'align-items-center'
-        },
-        closeButton: {
-          class: 'border-1'
-        }
-      }"></Toast>
+    container: {
+      class: 'align-items-center'
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }"></Toast>
       <ConfirmDialog :pt="{
-        header: { class: 'pb-0 pt-2' },
-        content: { class: 'pb-3 pt-1' }
-      }"></ConfirmDialog>
+    header: { class: 'pb-0 pt-2' },
+    content: { class: 'pb-3 pt-1' }
+  }"></ConfirmDialog>
 
       <!-- Dialog Editar Usuario -->
       <Dialog v-model:visible="visibleDialog" modal header="Editar Usuario" class="w-3" :pt="{
-        header: { class: 'flex align-items-baseline h-5rem' },
-        title: { class: '' },
-        closeButtonIcon: { class: '' },
-        mask: {
-          style: 'backdrop-filter: blur(3px)'
-        }
-      }">
+    header: { class: 'flex align-items-baseline h-5rem' },
+    title: { class: '' },
+    closeButtonIcon: { class: '' },
+    mask: {
+      style: 'backdrop-filter: blur(3px)'
+    }
+  }">
 
         <span class="p-text-secondary flex mb-5">Actualizar información</span>
         <div class="flex align-items-center gap-3 mb-3">

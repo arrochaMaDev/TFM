@@ -30,13 +30,17 @@ const adminStore = useAdminStore()
 const $cookies = inject<VueCookies>('$cookies')
 const isAdmin = ref(adminStore.isAdmin)
 
+
 onMounted(() => {
-  const userCookie = $cookies?.get('user')
-  if (userCookie.permiso == '9') {
+  const userCookie = $cookies?.get('user') // si no existe, userCookie es null
+  // console.log(userCookie)
+  if (userCookie?.permiso == '9') {
     adminStore.isAdminTrue()
   }
-  else {
+  else if (!isAdmin.value || userCookie?.permiso == null || userCookie?.permiso != '9') {
+    adminStore.isAdminFalse()
     toast.add({ severity: 'info', summary: 'No tienes permiso', detail: 'No tienes permiso de administrador para ver esta página', group: 'tc', life: 3000, });
+
     setTimeout(() => {
       router.push('/')
     }, 3000)

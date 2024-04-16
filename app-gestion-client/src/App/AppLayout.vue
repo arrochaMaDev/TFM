@@ -8,6 +8,11 @@ import AppMenu from '@/App/AppMenu.vue';
 import AppConfig from '@/App/AppConfig.vue';
 import AppFooter from '@/App/AppFooter.vue';
 import { RouterView } from 'vue-router';
+import router from '@/router';
+import type { Ref } from 'vue';
+import type { VueCookies } from 'vue-cookies';
+import { useLoggedStore } from '@/stores/isLogged';
+
 
 const layoutMode = Vue.ref('static');
 const appConfig = Vue.ref<typeof AppConfig>();
@@ -67,7 +72,7 @@ const onMenuItemClick = (event: any) => {
         case 'Settings':
             appConfig.value!.toggleConfigurator(event.originalEvent);
             break;
-        case 'Log Out':
+        case 'Cerrarn Sesión':
             logout();
             break;
     }
@@ -134,15 +139,46 @@ Vue.watch(() => $route, (newVal, oldVal) => {
     $toast.removeAllGroups();
 });
 
+//Obtener valor de la cookie
+const loggedStore = useLoggedStore()
 
+const $cookies = Vue.inject<VueCookies>('$cookies');
+const user: Ref<{
+    email: string | undefined,
+    username: string | undefined,
+    isValid: string | undefined,
+    permiso: string | undefined,
+    id: string | undefined
+}> = Vue.ref({
+    email: undefined,
+    username: undefined,
+    isValid: undefined,
+    permiso: undefined,
+    id: undefined,
+})
+
+const isLogged: Ref<boolean> = Vue.ref(false)
+
+Vue.onMounted(() => {
+    isLogged.value = loggedStore.isLogged
+    user.value = $cookies?.get('user')
+    if (user.value) {
+        console.log('Cookie value:', user);
+        isLogged.value = loggedStore.isLoggedTrue()
+        isLogged.value = true
+    } else {
+        router.push('/login')
+        console.log('Cookie "user" no encontrada');
+    }
+})
 
 </script>
 
 
 <template>
     <div :class="containerClass" @click="onWrapperClick">
-        <AppTopBar :showIcon="!staticMenuInactive && (G.userSettings.value.layoutMode === 'static')" @menu-toggle="onMenuToggle" v-if="isLoggedIn" />
-        <div class="layout-sidebar" @click="onSidebarClick" v-if="isLoggedIn">
+        <AppTopBar :showIcon="!staticMenuInactive && (G.userSettings.value.layoutMode === 'static')" @menu-toggle="onMenuToggle" />
+        <div class="layout-sidebar" @click="onSidebarClick">
             <AppMenu @menuitem-click="onMenuItemClick" v-if="G.showLeftSide" />
         </div>
 
@@ -150,7 +186,9 @@ Vue.watch(() => $route, (newVal, oldVal) => {
             <div class="layout-main">
                 <router-view />
             </div>
-            <AppFooter />
+            <div>
+                <AppFooter />
+            </div>
         </div>
 
         <AppConfig ref="appConfig" :layoutMode="layoutMode" @layout-change="onLayoutChange" />
@@ -162,5 +200,5 @@ Vue.watch(() => $route, (newVal, oldVal) => {
 
 
 <style lang="scss">
-@import './App.scss';
+@import './App';
 </style>

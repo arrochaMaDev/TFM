@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, ref, watch } from 'vue'
+import { type Ref, ref, watch, inject, onMounted } from 'vue'
 import Dropdown from 'primevue/dropdown';
 import MultiSelect from 'primevue/multiselect';
 import InlineMessage from 'primevue/inlinemessage';
@@ -8,8 +8,32 @@ import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import router from '@/router';
+import { useAdminStore } from '@/stores/isAdmin';
+import type { VueCookies } from 'vue-cookies';
 
 const toast = useToast();
+
+// VERIFICAR SI SE ES ADMINISTRADOR
+const adminStore = useAdminStore()
+const $cookies = inject<VueCookies>('$cookies')
+const isAdmin = ref(adminStore.isAdmin)
+
+onMounted(() => {
+  const userCookie = $cookies?.get('user') // si no existe, userCookie es null
+  // console.log(userCookie)
+  if (userCookie?.permiso == '9') {
+    adminStore.isAdminTrue()
+  }
+  else if (!isAdmin.value || userCookie?.permiso == null || userCookie?.permiso != '9') {
+    adminStore.isAdminFalse()
+    toast.add({ severity: 'info', summary: 'No tienes permiso', detail: 'No tienes permiso de administrador para ver esta página', group: 'tc', life: 3000, });
+
+    setTimeout(() => {
+      router.push('/')
+    }, 3000)
+  }
+})
 
 // OBTENER DATOS DE TODAS LAS ASIGNATURAS
 const subjectsRefFromServer: Ref<
@@ -272,7 +296,16 @@ const getValueForDatatable = () => {
 </script>
 
 <template>
-  <div class="card col-12 xl:col-9 lg:col-12 md:col-12 sm:col-12">
+  <Toast position="top-center" group="tc" :pt="{
+    container: {
+      class: 'align-items-center m-8 w-max',
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }
+    "></Toast>
+  <div class="card col-12 xl:col-9 lg:col-12 md:col-12 sm:col-12" v-if="isAdmin">
     <form @submit.prevent="crearSubjectTeacher()">
       <h2>Nueva Asignación</h2>
       <div class="p-fluid formgrid grid">
@@ -314,12 +347,12 @@ const getValueForDatatable = () => {
         <div v-if="teacherSelected" class="field col-5">
           <label class="text-xl text-800 font-bold pl-1">Datos del profesor</label>
           <DataTable :value="[teacherSelected]" class="pt-1" tableStyle="width: 30rem" :pt="{
-      table: {
-        class: 'mt-0 pl-1',
-        style: { 'border': 'none' }
-      }
+    table: {
+      class: 'mt-0 pl-1',
+      style: { 'border': 'none' }
     }
-      ">
+  }
+    ">
             <Column field="nombre" header="Nombre" Class="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
             <Column field="apellidos" header=" Apellidos" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
             <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
@@ -328,20 +361,20 @@ const getValueForDatatable = () => {
         <div v-if="teacherSelected && existenAsignaciones" class="field col-5">
           <label class="text-xl text-800 font-bold pl-1">Asignaturas ya asignadas</label>
           <DataTable :value="getValueForDatatable()" class="pt-1" tableStyle="width: 30rem" :paginator="true" :rows="5" :pt="{
-      paginator: {
-        paginatorWrapper: { class: 'col-12 flex justify-content-center' },
-        firstPageButton: { class: 'w-auto' },
-        previousPageButton: { class: 'w-auto' },
-        pageButton: { class: 'w-auto' },
-        nextPageButton: { class: 'w-auto' },
-        lastPageButton: { class: 'w-auto' },
-      },
-      table: {
-        class: 'mt-0 pl-1',
-        style: { 'border': 'none' }
-      }
+    paginator: {
+      paginatorWrapper: { class: 'col-12 flex justify-content-center' },
+      firstPageButton: { class: 'w-auto' },
+      previousPageButton: { class: 'w-auto' },
+      pageButton: { class: 'w-auto' },
+      nextPageButton: { class: 'w-auto' },
+      lastPageButton: { class: 'w-auto' },
+    },
+    table: {
+      class: 'mt-0 pl-1',
+      style: { 'border': 'none' }
     }
-      ">
+  }
+    ">
             <Column field="subject.nombre" header="Asignaturas" Class="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
           </DataTable>
         </div>
@@ -352,13 +385,13 @@ const getValueForDatatable = () => {
     </form>
   </div>
   <Toast :pt="{
-      container: {
-        class: 'align-items-center'
-      },
-      closeButton: {
-        class: 'border-1'
-      }
-    }">
+    container: {
+      class: 'align-items-center'
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }">
   </Toast>
 </template>
 

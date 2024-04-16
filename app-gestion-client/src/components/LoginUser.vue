@@ -1,14 +1,48 @@
 <script setup lang="ts">
 import router from '@/router'
-import { ref, type Ref } from 'vue'
+import { inject, onMounted, ref, type Ref } from 'vue'
 import Password from 'primevue/password';
 import InputText from 'primevue/inputtext';
 import InlineMessage from 'primevue/inlinemessage';
 import Button from 'primevue/button';
 import Toast from 'primevue/toast';
 import { useToast } from "primevue/usetoast";
+import type { VueCookies } from 'vue-cookies';
+import { useLoggedStore } from '@/stores/isLogged';
+
 
 const toast = useToast();
+
+// Ver si está logeado
+const loggedStore = useLoggedStore()
+const $cookies = inject<VueCookies>('$cookies');
+const user: Ref<{
+  email: string | undefined,
+  username: string | undefined,
+  isValid: string | undefined,
+  permiso: string | undefined,
+  id: string | undefined
+}> = ref({
+  email: undefined,
+  username: undefined,
+  isValid: undefined,
+  permiso: undefined,
+  id: undefined,
+})
+const isLogged: Ref<boolean> = ref(false)
+
+onMounted(() => {
+  user.value = $cookies?.get('user')
+  if (user.value) {
+    console.log('Cookie value:', user);
+    loggedStore.isLoggedTrue()
+    isLogged.value = true
+    router.push('/')
+  } else {
+    router.push('/login')
+    console.log('Cookie "user" no encontrada');
+  }
+})
 
 //Referencias del formulario
 const userRef = {
@@ -53,6 +87,7 @@ const loginUser = async () => {
         // if (userRef.email.value) {
         //   localStorage.setItem('email', userRef.email.value);
         // }
+        loggedStore.isLoggedTrue()
         router.push({ path: '/' })
       }
     } catch (error) {
@@ -86,7 +121,7 @@ const borrarDatosForm = () => {
           <InlineMessage v-if="!userRef.pass.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La contraseña es obligatoria</InlineMessage>
 
           <div class="flex justify-content-end">
-            <a class="font-medium no-underline text-right cursor-pointer pt-" style="color: var(--primary-color)">Olvidé mi contraseña</a>
+            <a class="font-medium no-underline text-right cursor-pointer pt-1" style="color: var(--primary-color)">Olvidé mi contraseña</a>
           </div>
           <div id="button" class=" flex justify-content-center">
             <Button type="submit" label="Login" severity="primary" class="w-12rem h-3rem mt-5"></Button>
@@ -111,4 +146,8 @@ const borrarDatosForm = () => {
 
 </template>
 
-<style scoped></style>
+<style scoped>
+#container {
+  transform: translateX(-150px)
+}
+</style>

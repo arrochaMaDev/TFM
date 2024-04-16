@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, type Ref } from 'vue'
+import { computed, inject, onMounted, ref, type Ref } from 'vue'
 import InputText from 'primevue/inputtext';
 import InlineMessage from 'primevue/inlinemessage';
 import DataTable from 'primevue/datatable';
@@ -7,9 +7,32 @@ import Column from 'primevue/column';
 import Button from 'primevue/button';
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
+import router from '@/router';
+import { useAdminStore } from '@/stores/isAdmin';
+import type { VueCookies } from 'vue-cookies';
 
 const toast = useToast();
 
+// VERIFICAR SI SE ES ADMINISTRADOR
+const adminStore = useAdminStore()
+const $cookies = inject<VueCookies>('$cookies')
+const isAdmin = ref(adminStore.isAdmin)
+
+onMounted(() => {
+  const userCookie = $cookies?.get('user') // si no existe, userCookie es null
+  // console.log(userCookie)
+  if (userCookie?.permiso == '9') {
+    adminStore.isAdminTrue()
+  }
+  else if (!isAdmin.value || userCookie?.permiso == null || userCookie?.permiso != '9') {
+    adminStore.isAdminFalse()
+    toast.add({ severity: 'info', summary: 'No tienes permiso', detail: 'No tienes permiso de administrador para ver esta página', group: 'tc', life: 3000, });
+
+    setTimeout(() => {
+      router.push('/')
+    }, 3000)
+  }
+})
 
 //Referencias del formulario
 const asignaturaRef: Ref<string | undefined> = ref(undefined)
@@ -115,7 +138,16 @@ function borrarDatosForm() {
 </script>
 
 <template>
-  <div class="card col-12 xl:col-4 lg:col-6 md:col-12 sm:col-12">
+  <Toast position="top-center" group="tc" :pt="{
+    container: {
+      class: 'align-items-center m-8 w-max',
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }
+    "></Toast>
+  <div class="card col-12 xl:col-4 lg:col-6 md:col-12 sm:col-12" v-if="isAdmin">
     <form @submit.prevent="crearAsignatura()">
       <h2>Nueva Asignatura</h2>
       <div class="p-fluid formgrid grid">
@@ -133,13 +165,13 @@ function borrarDatosForm() {
   </div>
 
   <Toast :pt="{
-      container: {
-        class: 'align-items-center'
-      },
-      closeButton: {
-        class: 'border-1'
-      }
-    }">
+    container: {
+      class: 'align-items-center'
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }">
   </Toast>
 </template>
 

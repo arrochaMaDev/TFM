@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, ref, onMounted } from 'vue'
+import { type Ref, ref, onMounted, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -11,6 +11,8 @@ import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
+import { useAdminStore } from '@/stores/isAdmin';
+import type { VueCookies } from 'vue-cookies';
 
 
 const confirm = useConfirm();
@@ -18,9 +20,30 @@ const toast = useToast();
 
 const router = useRouter() // router para ir al alumno cuando se clique en él
 
+// VERIFICAR SI SE ES ADMINISTRADOR
+const adminStore = useAdminStore()
+const $cookies = inject<VueCookies>('$cookies')
+const isAdmin = ref(adminStore.isAdmin)
+
+onMounted(() => {
+  const userCookie = $cookies?.get('user') // si no existe, userCookie es null
+  // console.log(userCookie)
+  if (userCookie?.permiso == '9') {
+    adminStore.isAdminTrue()
+  }
+  else if (!isAdmin.value || userCookie?.permiso == null || userCookie?.permiso != '9') {
+    adminStore.isAdminFalse()
+    toast.add({ severity: 'info', summary: 'No tienes permiso', detail: 'No tienes permiso de administrador para ver esta página', group: 'tc', life: 3000, });
+
+    setTimeout(() => {
+      router.push('/')
+    }, 3000)
+  }
+})
+
 
 // OBTENER LA LISTA DE ASIGNATURAS DEL SERVIDOR:
-let asignaturasRefFromServer: Ref<
+const asignaturasRefFromServer: Ref<
   {
     id: number
     nombre: string
@@ -315,25 +338,34 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex justify-content-start pt-2">
+  <Toast position="top-center" group="tc" :pt="{
+    container: {
+      class: 'align-items-center m-8 w-max',
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }
+    "></Toast>
+  <div class="flex justify-content-start pt-2" v-if="isAdmin">
     <div class="card flex justify-content-center ">
       <DataTable v-model:filters="filters" class="" :value="asignaturasRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10"
         tableStyle="width: fit-content" :pt="{
-        paginator: {
-          paginatorWrapper: { class: 'col-12 flex justify-content-center' },
-          firstPageButton: { class: 'w-auto' },
-          previousPageButton: { class: 'w-auto' },
-          pageButton: { class: 'w-auto' },
-          nextPageButton: { class: 'w-auto' },
-          lastPageButton: { class: 'w-auto' },
-        },
-        table: {
-          class: 'mt-0',
-          style: { 'border': 'none' }
-        }
+    paginator: {
+      paginatorWrapper: { class: 'col-12 flex justify-content-center' },
+      firstPageButton: { class: 'w-auto' },
+      previousPageButton: { class: 'w-auto' },
+      pageButton: { class: 'w-auto' },
+      nextPageButton: { class: 'w-auto' },
+      lastPageButton: { class: 'w-auto' },
+    },
+    table: {
+      class: 'mt-0',
+      style: { 'border': 'none' }
+    }
 
 
-      }">
+  }">
 
         <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
           <h5 class="m-0 text-3xl text-800 font-bold pl-1 w-3">Listado Asignaturas</h5>
@@ -354,29 +386,29 @@ onMounted(() => {
       </DataTable>
 
       <Toast :pt="{
-        container: {
-          class: 'align-items-center'
-        },
-        closeButton: {
-          class: 'border-1'
-        }
-      }
-        "></Toast>
+    container: {
+      class: 'align-items-center'
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }
+    "></Toast>
       <ConfirmDialog :pt="{
-        header: { class: 'pb-0 pt-2' },
-        content: { class: 'pb-3 pt-1' }
-      }
-        "></ConfirmDialog>
+    header: { class: 'pb-0 pt-2' },
+    content: { class: 'pb-3 pt-1' }
+  }
+    "></ConfirmDialog>
       <!-- Dialog editar asignatura  -->
       <Dialog v-model:visible="visibleDialog" modal header="Editar Asignatura" class="w-2" :pt="{
-        header: { class: 'flex align-items-baseline h-5rem' },
-        title: { class: '' },
-        closeButtonIcon: { class: '' },
-        mask: {
-          style: 'backdrop-filter: blur(3px)'
-        }
-      }
-        ">
+    header: { class: 'flex align-items-baseline h-5rem' },
+    title: { class: '' },
+    closeButtonIcon: { class: '' },
+    mask: {
+      style: 'backdrop-filter: blur(3px)'
+    }
+  }
+    ">
         <span class="p-text-secondary flex mb-5">Actualizar información</span>
         <div class="flex align-items-center gap-3 mb-3">
           <label for="nombre" class="font-semibold w-6rem">Nombre</label>
@@ -391,19 +423,19 @@ onMounted(() => {
 
       <!-- Dialog profesores asignados -->
       <Dialog v-model:visible="visibleDialogTeacher" @after-hide="resetDataTeachers()" modal header="Profesores asignados" class="w-auto" :pt="{
-        header: { class: 'flex align-items-baseline h-5rem' },
-        title: { class: '' },
-        closeButtonIcon: { class: '' },
-        mask: {
-          style: 'backdrop-filter: blur(3px)'
-        }
-      }">
+    header: { class: 'flex align-items-baseline h-5rem' },
+    title: { class: '' },
+    closeButtonIcon: { class: '' },
+    mask: {
+      style: 'backdrop-filter: blur(3px)'
+    }
+  }">
         <DataTable :value="teachersBySubjectId?.teachers" dataKey="teachers.id" stripedRows selectionMode="single" sortField="teachers.teacher.id" :sortOrder="1" :pt="{
-        table: {
-          class: 'mt-0 mb-5 w-max',
-          style: { 'border': 'none' }
-        }
-      }">
+    table: {
+      class: 'mt-0 mb-5 w-max',
+      style: { 'border': 'none' }
+    }
+  }">
           <Column field="teacher.nombre" header="Nombre" sortable headerStyle="" headerClass="h-2rem pl-1 pr-3" bodyClass="h-3rem p-0 pl-1"> </Column>
           <Column field="teacher.apellidos" header="Apellidos" sortable headerStyle="" headerClass="h-2rem pl-1 pr-3" bodyClass="h-3rem p-0 pl-1"></Column>
           <Column field="teacher.email" header="Email" headerStyle="" headerClass="h-2rem pl-1" bodyClass="h-3rem p-0 pl-1 pr-3"></Column>

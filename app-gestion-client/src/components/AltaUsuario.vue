@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, type Ref } from 'vue'
+import { inject, onMounted, ref, watch, type Ref } from 'vue'
 import Password from 'primevue/password';
 import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
@@ -7,7 +7,31 @@ import InlineMessage from 'primevue/inlinemessage';
 import Button from 'primevue/button';
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
+import router from '@/router';
+import { useAdminStore } from '@/stores/isAdmin';
+import type { VueCookies } from 'vue-cookies';
 
+
+// VERIFICAR SI SE ES ADMINISTRADOR
+const adminStore = useAdminStore()
+const $cookies = inject<VueCookies>('$cookies')
+const isAdmin = ref(adminStore.isAdmin)
+
+onMounted(() => {
+  const userCookie = $cookies?.get('user') // si no existe, userCookie es null
+  // console.log(userCookie)
+  if (userCookie?.permiso == '9') {
+    adminStore.isAdminTrue()
+  }
+  else if (!isAdmin.value || userCookie?.permiso == null || userCookie?.permiso != '9') {
+    adminStore.isAdminFalse()
+    toast.add({ severity: 'info', summary: 'No tienes permiso', detail: 'No tienes permiso de administrador para ver esta página', group: 'tc', life: 3000, });
+
+    setTimeout(() => {
+      router.push('/')
+    }, 3000)
+  }
+})
 
 /* TODO GENERAR USERNAME */
 const generarUsername = (nombre: string, apellido1: string, apellido2: string) => {
@@ -137,7 +161,16 @@ const borrarDatosForm = () => {
 </script>
 
 <template>
-  <div class="card col-12 xl:col-9 lg:col-12 md:col-12 sm:col-12">
+  <Toast position="top-center" group="tc" :pt="{
+    container: {
+      class: 'align-items-center m-8 w-max',
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }
+    "></Toast>
+  <div class="card col-12 xl:col-9 lg:col-12 md:col-12 sm:col-12" v-if="isAdmin">
     <form @submit.prevent="crearUsuario()">
       <h2>Nuevo Usuario</h2>
       <div class="p-fluid formgrid grid">
@@ -176,13 +209,13 @@ const borrarDatosForm = () => {
     </form>
   </div>
   <Toast :pt="{
-      container: {
-        class: 'align-items-center'
-      },
-      closeButton: {
-        class: 'border-1'
-      }
-    }"></Toast>
+    container: {
+      class: 'align-items-center'
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }"></Toast>
 </template>
 
 <style scoped></style>

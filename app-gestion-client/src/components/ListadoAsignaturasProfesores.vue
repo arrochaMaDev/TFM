@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, ref, onMounted } from 'vue'
+import { type Ref, ref, onMounted, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -13,11 +13,34 @@ import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
 import Tag from 'primevue/tag';
+import { useAdminStore } from '@/stores/isAdmin';
+import type { VueCookies } from 'vue-cookies';
 
 const confirm = useConfirm();
 const toast = useToast();
 
 const router = useRouter() // router para ir al alumno cuando se clique en él
+
+// VERIFICAR SI SE ES ADMINISTRADOR
+const adminStore = useAdminStore()
+const $cookies = inject<VueCookies>('$cookies')
+const isAdmin = ref(adminStore.isAdmin)
+
+onMounted(() => {
+  const userCookie = $cookies?.get('user') // si no existe, userCookie es null
+  // console.log(userCookie)
+  if (userCookie?.permiso == '9') {
+    adminStore.isAdminTrue()
+  }
+  else if (!isAdmin.value || userCookie?.permiso == null || userCookie?.permiso != '9') {
+    adminStore.isAdminFalse()
+    toast.add({ severity: 'info', summary: 'No tienes permiso', detail: 'No tienes permiso de administrador para ver esta página', group: 'tc', life: 3000, });
+
+    setTimeout(() => {
+      router.push('/')
+    }, 3000)
+  }
+})
 
 // OBTENER DATOS DE TODOS LOS PROFESORES
 let teachersRefFromServer: Ref<
@@ -493,23 +516,32 @@ const collapseAll = () => {
 </script>
 
 <template>
-  <div class="flex justify-content-start pt-2">
+  <Toast position="top-center" group="tc" :pt="{
+    container: {
+      class: 'align-items-center m-8 w-max',
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }
+    "></Toast>
+  <div class="flex justify-content-start pt-2" v-if="isAdmin">
     <div class="card flex justify-content-center">
       <DataTable v-model:expandedRows="expandedRows" v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['teacher.nombre', 'teacher.apellidos', 'teacher.email', 'subject.nombre']"
         class="" removableSort removableSortstripedRows :value="teachersWithSubjectsRef" dataKey="teacher.id" sortField="teacher.id" :sortOrder="1" :paginator="true" :rows="10" :pt="{
-        paginator: {
-          paginatorWrapper: { class: 'col-12 flex justify-content-center' },
-          firstPageButton: { class: 'w-auto' },
-          previousPageButton: { class: 'w-auto' },
-          pageButton: { class: 'w-auto' },
-          nextPageButton: { class: 'w-auto' },
-          lastPageButton: { class: 'w-auto' },
-        },
-        table: {
-          class: 'mt-0 w-auto',
-          style: { 'border': 'none' }
-        }
-      }">
+    paginator: {
+      paginatorWrapper: { class: 'col-12 flex justify-content-center' },
+      firstPageButton: { class: 'w-auto' },
+      previousPageButton: { class: 'w-auto' },
+      pageButton: { class: 'w-auto' },
+      nextPageButton: { class: 'w-auto' },
+      lastPageButton: { class: 'w-auto' },
+    },
+    table: {
+      class: 'mt-0 w-auto',
+      style: { 'border': 'none' }
+    }
+  }">
         <template #header>
           <div class="flex flex-wrap justify-content-end h-1rem align-content-center">
             <Button class="w-auto mr-2" severity="secondary" text icon="pi pi-plus" label="Expandir" v-tooltip.top="'Expandir todo'" @click="expandAll"></Button>
@@ -551,14 +583,14 @@ const collapseAll = () => {
         <template #expansion="slotProps">
           <DataTable :value="slotProps.data.asignaciones" v-model:filters="filters1" filterDisplay="menu" :globalFilterFields="['subject.nombre']" class="" removableSort selection-mode="single"
             tableStyle="width: 10rem" :pt="{
-        table: {
-          class: 'mt-0 ml-7',
-          style: {
-            'border': 'none', 'background-color': 'transparent'
-          }
-        }
+    table: {
+      class: 'mt-0 ml-7',
+      style: {
+        'border': 'none', 'background-color': 'transparent'
       }
-        ">
+    }
+  }
+    ">
             <Column field="subject.nombre" header="Asignaturas" sortable headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
               <template #filter="{ filterModel }">
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
@@ -576,37 +608,37 @@ const collapseAll = () => {
     </div>
   </div>
   <Toast :pt="{
-        container: {
-          class: 'align-items-center'
-        },
-        closeButton: {
-          class: 'border-1'
-        }
-      }
-        "></Toast>
+    container: {
+      class: 'align-items-center'
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }
+    "></Toast>
   <ConfirmDialog :pt="{
-        header: { class: 'pb-0 pt-2' },
-        content: { class: 'pb-3 pt-1' }
-      }
-        "></ConfirmDialog>
+    header: { class: 'pb-0 pt-2' },
+    content: { class: 'pb-3 pt-1' }
+  }
+    "></ConfirmDialog>
 
   <!-- Dialog editar asignación -->
   <Dialog v-model:visible="visibleDialog" modal header="Editar Asignación" class="w-3" :pt="{
-        header: { class: 'flex align-items-baseline h-5rem' },
-        title: { class: '' },
-        closeButtonIcon: { class: '' }
-      }
-        ">
+    header: { class: 'flex align-items-baseline h-5rem' },
+    title: { class: '' },
+    closeButtonIcon: { class: '' }
+  }
+    ">
     <span class="p-text-secondary flex mb-5">Cambiar asignatura</span>
 
     <label class="text-xl text-800 font-bold">Datos del profesor</label>
     <DataTable :value="[asignacionEditar?.teacher]" class="pt-1" tableStyle="width: 30rem" :pt="{
-        table: {
-          class: 'mt-0',
-          style: { 'border': 'none' }
-        }
-      }
-        ">
+    table: {
+      class: 'mt-0',
+      style: { 'border': 'none' }
+    }
+  }
+    ">
       <Column field="nombre" header="Nombre" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
       <Column field="apellidos" header="Apellidos" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
       <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, type Ref } from 'vue'
+import { inject, onMounted, ref, type Ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable';
@@ -15,10 +15,29 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from "primevue/useconfirm";
 import Dialog from 'primevue/dialog';
 import Tag from 'primevue/tag';
+import { useAdminStore } from '@/stores/isAdmin';
+import type { VueCookies } from 'vue-cookies';
 
 const confirm = useConfirm();
 const toast = useToast();
 const router = useRouter()
+
+// VERIFICAR SI SE ES ADMINISTRADOR
+const adminStore = useAdminStore()
+const $cookies = inject<VueCookies>('$cookies')
+const isAdmin: Ref<boolean> = ref(adminStore.isAdmin)
+
+onMounted(() => {
+  const userCookie = $cookies?.get('user') // si no existe, userCookie es null
+  console.log(userCookie)
+  if (userCookie?.permiso == 9) {
+    adminStore.isAdminTrue()
+    isAdmin.value = true
+  }
+  else if (!isAdmin.value || userCookie?.permiso == null || userCookie?.permiso != '9') {
+    adminStore.isAdminFalse()
+  }
+})
 
 const teacherDataFromServer: Ref<{
   id: number
@@ -1158,8 +1177,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
             </li>
           </ul>
         </div>
-        <!-- TODO mostrar solo si es admin -->
-        <div id="datosUsuario" class="">
+        <!-- mostrar solo si es admin -->
+        <div id="datosUsuario" class="" v-if="isAdmin">
           <h6 class="text-xl text-800 font-bold"> Usuario asignado</h6>
           <ul id="datos-contacto" class="list-none p-0 flex align-items-center">
             <li class="flex mb-3">
@@ -1191,54 +1210,19 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
             </li>
           </ul>
         </div>
-        <div class="ml-2">
-          <!-- TODO mostrar solo si es admin -->
+        <div class="ml-2" v-if="isAdmin">
+          <!-- mostrar solo si es admin -->
           <Button class="w-max w-3rem mr-2" icon="pi pi-trash" severity="danger" v-tooltip.top="'Borrar Profesor'" @click="confirmDeleteProfesor()"></Button>
           <Button class="w-max w-3rem" icon="pi pi-pencil" severity="secondary" v-tooltip.top="'Editar Profesor'" @click="mostrarDialogEditarProfesor()"></Button>
         </div>
       </div>
     </div>
 
-    <!-- Tabla de asignaturas asignadas -->
-    <div v-if="subjectsByTeacherIdFromServer?.asignaciones" class="card w-max">
-      <DataTable :value="subjectsByTeacherIdFromServer.asignaciones" dataKey="id" v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['subject.nombre']" class="" removableSort
-        sortField="subject.nombre" :sortOrder="1" :paginator="true" :rows="5" stripedRows :showGridlines="false" selection-mode="single" :pt="{
-          paginator: {
-            paginatorWrapper: { class: 'flex justify-content-center' },
-            firstPageButton: { class: 'w-auto m-0' },
-            previousPageButton: { class: 'w-auto m-0' },
-            pageButton: { class: 'w-auto m-0' },
-            nextPageButton: { class: 'w-auto m-0' },
-            lastPageButton: { class: 'w-auto m-0' },
-          }, table: {
-            class: 'mt-0 w-max',
-            style: { 'border': 'none', 'background-color': 'transparent' }
-          }
-        }">
-
-        <div id="header" class="h-6rem border-round-top" style="background-color:  #f8f9fa">
-          <h5 class="m-0 text-3xl text-800 font-bold pl-1">Asignaciones</h5>
-          <span class="p-input-icon-left flex align-items-center">
-            <i class="pi pi-search"></i>
-            <InputText class="h-auto mr-2" v-model="filters['global'].value" placeholder="Buscar..." />
-            <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
-          </span>
-        </div>
-        <Column field="subject.nombre" header="Asignatura" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"> </Column>
-        <Column header="" headerStyle="" headerClass="h-2rem pl-1" bodyClass="flex p-1 pl-8">
-          <template #body="slotProps">
-            <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Asignación'" @click="confirmDeleteAsignacion(slotProps.data.id)"></Button>
-            <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Asignación'" @click="mostrarDialogEditarAsignacion(slotProps.data)"></Button>
-          </template>
-        </Column>
-      </DataTable>
-    </div>
-
-    <!-- Tabla de alumnos matriculados -->
-    <div v-if="matriculasRefFromServer?.matriculas" class="card w-12">
-      <DataTable :value="matriculasRefFromServer.matriculas" dataKey="id" v-model:filters="filters1" filterDisplay="menu"
-        :globalFilterFields="['student.nombre', 'student.apellidos', 'student.dni', 'student.direccion', 'student.telefono', 'student.email', 'subject.nombre']" class="" removableSort
-        sortField="subject.nombre" :sortOrder="1" :paginator="true" :rows="10" stripedRows :showGridlines="false" selection-mode="single" :pt="{
+    <div id="tablas" class="xl:flex mt-5 md:block">
+      <!-- Tabla de asignaturas asignadas -->
+      <div v-if="subjectsByTeacherIdFromServer?.asignaciones" class="card w-max mr-5 h-max">
+        <DataTable :value="subjectsByTeacherIdFromServer.asignaciones" dataKey="id" v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['subject.nombre']" class="" removableSort
+          sortField="subject.nombre" :sortOrder="1" :paginator="true" :rows="5" stripedRows :showGridlines="false" selection-mode="single" :pt="{
           paginator: {
             paginatorWrapper: { class: 'flex justify-content-center' },
             firstPageButton: { class: 'w-auto m-0' },
@@ -1252,67 +1236,106 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           }
         }">
 
-        <div id=" header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
-          <h5 class="m-0 text-3xl text-800 font-bold pl-1">Matrículas</h5>
-          <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
-            <i class="pi pi-search"></i>
-            <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscar..." />
-            <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
-          </span>
-        </div>
+          <div id="header" class="h-6rem border-round-top" style="background-color:  #f8f9fa">
+            <h5 class="m-0 text-3xl text-800 font-bold pl-1">Asignaciones</h5>
+            <span class="p-input-icon-left flex align-items-center mt-2">
+              <i class="pi pi-search"></i>
+              <InputText class="h-auto mr-2" v-model="filters['global'].value" placeholder="Buscar..." />
+              <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
+            </span>
+          </div>
+          <Column field="subject.nombre" header="Asignatura" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
+          <Column header="" headerStyle="" headerClass="h-2rem pl-1" bodyClass="flex p-1 pl-8 h-3rem">
+            <template #body="slotProps" v-if="isAdmin">
+              <Button class=" m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Asignación'" @click="confirmDeleteAsignacion(slotProps.data.id)"></Button>
+              <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Asignación'" @click="mostrarDialogEditarAsignacion(slotProps.data)"></Button>
+            </template>
+          </Column>
+        </DataTable>
+      </div>
 
-        <ColumnGroup type="header">
-          <Row>
-            <Column header="Curso escolar" field="year" :rowspan="2" headerClass="h-3rem pl-1 bg-transparent pr-3 " :show-filter-match-modes="false">
-              <template #filter="{ filterModel }">
-                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-              </template>
-            </Column>
-            <Column header="Asignatura" field="subject.nombre" :rowspan="2" sortable headerClass="h-2rem pl-1 bg-transparent" :show-filter-match-modes="false">
-              <template #filter="{ filterModel }">
-                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-              </template>
-            </Column>
-            <Column header="Alumno" :colspan="3" headerClass="h-3rem pl-1 bg-transparent"></Column>
-          </Row>
-          <Row>
-            <Column header="Nombre" sortable field="student.nombre" headerClass="h-2rem pl-1 bg-transparent pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-              <template #filter="{ filterModel }">
-                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-              </template>
-            </Column>
+      <!-- Tabla de alumnos matriculados -->
+      <div v-if="matriculasRefFromServer?.matriculas" class="card w-max">
+        <DataTable :value="matriculasRefFromServer.matriculas" dataKey="id" v-model:filters="filters1" filterDisplay="menu"
+          :globalFilterFields="['student.nombre', 'student.apellidos', 'student.dni', 'student.direccion', 'student.telefono', 'student.email', 'subject.nombre']" class="" removableSort
+          sortField="subject.nombre" :sortOrder="1" :paginator="true" :rows="10" stripedRows :showGridlines="false" selection-mode="single" :pt="{
+          paginator: {
+            paginatorWrapper: { class: 'flex justify-content-center' },
+            firstPageButton: { class: 'w-auto m-0' },
+            previousPageButton: { class: 'w-auto m-0' },
+            pageButton: { class: 'w-auto m-0' },
+            nextPageButton: { class: 'w-auto m-0' },
+            lastPageButton: { class: 'w-auto m-0' },
+          }, table: {
+            class: 'mt-0 w-12',
+            style: { 'border': 'none', 'background-color': 'transparent' }
+          }
+        }
+          ">
 
-            <Column header="Apellidos" sortable field="student.apellidos" headerClass="h-2rem pl-1 bg-transparent pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-              <template #filter="{ filterModel }">
-                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-              </template>
-            </Column>
-            <Column header="DNI" sortable field="student.dni" headerClass="h-2rem pl-1 bg-transparent pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-              <template #filter="{ filterModel }">
-                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-              </template>
-            </Column>
-          </Row>
-        </ColumnGroup>
+          <div id=" header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
+            <h5 class="m-0 text-3xl text-800 font-bold pl-1">Matrículas</h5>
+            <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+              <i class="pi pi-search"></i>
+              <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscar..." />
+              <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
+            </span>
+          </div>
 
-        <Column field="year" bodyClass="p-0 pl-1">
-          <template #body="slotProps">
-            {{ slotProps.data.year }} / {{ slotProps.data.year + 1 }}
-          </template>
-        </Column>
-        <Column field="subject.nombre" bodyClass="p-0 pl-1"></Column>
-        <Column field="student.nombre" bodyClass="p-0 pl-1"></Column>
-        <Column field="student.apellidos" bodyClass="p-0 pl-1"></Column>
-        <Column field="student.dni" bodyClass="p-0 pl-1"></Column>
-        <Column header="" headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="flex p-1 pl-1">
-          <!-- TODO mostrar solo si es admin -->
-          <template #body="slotProps">
-            <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Alumno'" @click="goToStudent(slotProps.data.student.id)"></Button>
-            <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Matrícula'" @click="confirmDeleteMatricula(slotProps.data.id)"></Button>
-            <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Matrícula'" @click="mostrarDialogEditarMatricula(slotProps.data)"></Button>
-          </template>
-        </Column>
-      </DataTable>
+          <ColumnGroup type="header">
+            <Row>
+              <Column header="Curso escolar" field="year" :rowspan="2" headerClass="h-3rem pl-1 bg-transparent pr-3 " :show-filter-match-modes="false">
+                <template #filter="{ filterModel }">
+                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                </template>
+              </Column>
+              <Column header="Asignatura" field="subject.nombre" :rowspan="2" sortable headerClass="h-2rem pl-1 bg-transparent" :show-filter-match-modes="false">
+                <template #filter="{ filterModel }">
+                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                </template>
+              </Column>
+              <Column header="Alumno" :colspan="4" headerClass="h-3rem pl-1 bg-transparent"></Column>
+            </Row>
+            <Row>
+              <Column header="Nombre" sortable field="student.nombre" headerClass="h-2rem pl-1 bg-transparent pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                <template #filter="{ filterModel }">
+                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                </template>
+              </Column>
+
+              <Column header="Apellidos" sortable field="student.apellidos" headerClass="h-2rem pl-1 bg-transparent pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                <template #filter="{ filterModel }">
+                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                </template>
+              </Column>
+              <Column header="DNI" sortable field="student.dni" headerClass="h-2rem pl-1 bg-transparent pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                <template #filter="{ filterModel }">
+                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                </template>
+              </Column>
+              <Column header="" headerClass="h-2rem pl-1 bg-transparent pr-2"></Column>
+            </Row>
+          </ColumnGroup>
+
+          <Column field="year" bodyClass="p-0 pl-1">
+            <template #body="slotProps">
+              {{ slotProps.data.year }} / {{ slotProps.data.year + 1 }}
+            </template>
+          </Column>
+          <Column field="subject.nombre" bodyClass="p-0 pl-1"></Column>
+          <Column field="student.nombre" bodyClass="p-0 pl-1"></Column>
+          <Column field="student.apellidos" bodyClass="p-0 pl-1"></Column>
+          <Column field="student.dni" bodyClass="p-0 pl-1"></Column>
+          <Column header="" headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="flex p-1 pl-1 h-3rem">
+            <!-- mostrar solo si es admin -->
+            <template #body="slotProps" v-if="isAdmin">
+              <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Alumno'" @click="goToStudent(slotProps.data.student.id)"></Button>
+              <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Matrícula'" @click="confirmDeleteMatricula(slotProps.data.id)"></Button>
+              <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Matrícula'" @click="mostrarDialogEditarMatricula(slotProps.data)"></Button>
+            </template>
+          </Column>
+        </DataTable>
+      </div>
     </div>
 
     <!-- Dialog editar Profesor-->

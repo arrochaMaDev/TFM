@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, type Ref } from 'vue'
+import { inject, onBeforeMount, onMounted, ref, type Ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable';
@@ -16,10 +16,30 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from "primevue/useconfirm";
 import Dialog from 'primevue/dialog';
 import Tag from 'primevue/tag';
+import { useAdminStore } from '@/stores/isAdmin';
+import type { VueCookies } from 'vue-cookies';
 
 const confirm = useConfirm();
 const toast = useToast();
 const router = useRouter()
+
+// VERIFICAR SI SE ES ADMINISTRADOR
+const adminStore = useAdminStore()
+const $cookies = inject<VueCookies>('$cookies')
+const isAdmin: Ref<boolean> = ref(adminStore.isAdmin)
+
+onMounted(() => {
+  const userCookie = $cookies?.get('user') // si no existe, userCookie es null
+  console.log(userCookie)
+  if (userCookie?.permiso == 9) {
+    adminStore.isAdminTrue()
+    isAdmin.value = true
+  }
+  else if (!isAdmin.value || userCookie?.permiso == null || userCookie?.permiso != '9') {
+    adminStore.isAdminFalse()
+  }
+})
+
 
 const userDataFromServer: Ref<{
   id: number
@@ -173,6 +193,16 @@ const permisoToNumber = (permiso: string) => {
   }
 }
 
+const cambiarContraseña: Ref<boolean> = ref(false);
+const cambiarEmail: Ref<boolean> = ref(false);
+
+const cambioContraseña = async () => {
+  cambiarContraseña.value = true
+}
+const cambioEmail = async () => {
+  cambiarEmail.value = true
+}
+
 const mostrarDialogEditarUsuario = async () => {
   visibleDialogEditarUsuario.value = true
   if (userDataFromServer.value) {
@@ -227,6 +257,8 @@ const editarUsuario = async () => {
       toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
     } finally {
       visibleDialogEditarUsuario.value = false
+      cambiarContraseña.value = false
+      cambiarEmail.value = false
       getUserData()
     }
   }
@@ -640,18 +672,6 @@ const editarAlumno = async () => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 // Ir a la página idividual del alumno
 const goToStudent = (id: number) => {
   router.push({
@@ -744,25 +764,27 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
                 <span class="flex justify-content-start "> {{ userDataFromServer?.username }}</span>
               </div>
             </li>
-            <li class="flex mb-3">
+            <li class="flex align-items-center mb-3">
               <div class="bg-blue-50 flex justify-content-center align-items-center border-circle w-4rem h-4rem mr-2">
                 <i class="pi pi-envelope text-blue-500" style="font-size: 1.5rem"></i>
               </div>
-              <div class="flex-column align-self-center">
-                <span class="flex justify-content-start align-self-center font-bold mb-1">Email</span>
-                <a :href="'mailto:' + userDataFromServer?.email" class="flex justify-content-start"> {{ userDataFromServer?.email }}</a>
+              <div class="flex align-self-center">
+                <span class="flex justify-content-start align-self-center font-bold">Email</span>
+                <a :href="'mailto:' + userDataFromServer?.email" class="ml-2 flex justify-content-start align-self-center"> {{ userDataFromServer?.email }}</a>
+                <Button v-if="!isAdmin" class="ml-5 w-max w-3rem" icon="pi pi-envelope" severity="info" v-tooltip.top="'Cambiar email'" @click="cambioEmail(), mostrarDialogEditarUsuario()"></Button>
               </div>
             </li>
             <li class="flex mb-3">
               <div class="bg-pink-50 flex justify-content-center align-items-center border-circle w-4rem h-4rem mr-2">
                 <i class="pi pi-key text-pink-500" style="font-size: 1.5rem"></i>
               </div>
-              <div class="flex-column align-self-center">
-                <span class="flex justify-content-start align-self-center font-bold mb-1">Pass</span>
+              <div class="flex align-self-center">
+                <span class="flex justify-content-start align-self-center font-bold">Pass</span>
                 <!-- <span class="flex justify-content-start "> {{ userDataFromServer?.pass }}</span> -->
                 <!-- <span class="flex justify-content-start "> {{ ocultarContraseña() }}</span> -->
-                <span class="flex justify-content-start "> ******************** </span>
-
+                <span class="ml-2 flex justify-content-start align-self-center  "> ******************** </span>
+                <Button v-if="!isAdmin" class="ml-5 w-max w-3rem" icon="pi pi-key" severity="danger" v-tooltip.top="'Cambiar contraseña'"
+                  @click="cambioContraseña(), mostrarDialogEditarUsuario()"></Button>
               </div>
             </li>
             <li class="flex mb-3">
@@ -779,8 +801,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           </ul>
         </div>
 
-        <div class="ml-2">
-          <!-- TODO mostrar solo si es admin -->
+        <div class="ml-2" v-if="isAdmin">
+          <!--  mostrar solo si es admin -->
           <Button class="w-max w-3rem mr-2" icon="pi pi-trash" severity="danger" v-tooltip.top="'Borrar Usuario'" @click="confirmDeleteUsuario()"></Button>
           <Button class="w-max w-3rem" icon="pi pi-pencil" severity="secondary" v-tooltip.top="'Editar Usuario'" @click="mostrarDialogEditarUsuario()"></Button>
         </div>
@@ -815,19 +837,19 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           ">
 
     <span class="p-text-secondary flex mb-5">Actualizar información</span>
-    <div class="flex align-items-center gap-3 mb-3">
+    <div class="flex align-items-center gap-3 mb-3" v-if="!cambiarContraseña && !cambiarEmail">
       <label for="username" class="font-semibold w-6rem">Username</label>
       <InputText id="username" class="w-7" v-model="usuarioEditar.username" :class="{ 'p-invalid': !usuarioEditar.username }" />
     </div>
-    <div class="flex align-items-center gap-3 mb-3">
+    <div class="flex align-items-center gap-3 mb-3" v-if="cambiarEmail && !cambiarContraseña || isAdmin">
       <label for="email" class="font-semibold w-6rem">Email</label>
       <InputText id="email" class="w-7" v-model="usuarioEditar.email" :class="{ 'p-invalid': !usuarioEditar.email }" />
     </div>
-    <div class="flex align-items-center gap-3 mb-3">
+    <div class="flex align-items-center gap-3 mb-3" v-if="cambiarContraseña && !cambiarEmail || isAdmin">
       <label for="pass" class="font-semibold w-6rem">Contraseña</label>
       <Password id="pass" class="w-7" :feedback="false" v-model="usuarioEditar.pass" :class="{ 'p-invalid': !usuarioEditar.pass }" />
     </div>
-    <div class="flex align-items-center gap-3 mb-3">
+    <div class="flex align-items-center gap-3 mb-3" v-if="isAdmin && !cambiarContraseña && !cambiarEmail">
       <label for="permiso" class="font-semibold w-6rem">Permiso</label>
       <Dropdown class="" id="permisos" :options="permisos" optionLabel="name" optionValue="code" checkmark :highlightOnSelect="false" showClear placeholder="Selecciona un permiso"
         v-model="usuarioEditar.permiso" :class="{ 'p-invalid': usuarioEditar.permiso == null }">
@@ -835,7 +857,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       </Dropdown>
     </div>
     <div class=" flex justify-content-center mb-3 pt-2">
-      <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialogEditarUsuario = false"></Button>
+      <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialogEditarUsuario = false, cambiarContraseña = false, cambiarEmail = false"></Button>
       <Button type="button" rounded label="Actualizar" @click="editarUsuario()"></Button>
     </div>
     <Toast></Toast>
@@ -917,8 +939,9 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
         <template #body="slotProps">
           <Button class="m-0 p-0 h-4rem w-4rem" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Alumno'" @click="goToStudent(slotProps.data.id)"></Button>
 
-          <!-- TODO Solo si es ADMIN -->
-          <Button class="m-0 p-0 h-4rem w-4rem" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Alumno'" @click="mostrarDialogEditarAlumno(slotProps.data)"></Button>
+          <!-- mostrar solo si es ADMIN -->
+          <Button v-if="isAdmin" class="m-0 p-0 h-4rem w-4rem" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Alumno'"
+            @click="mostrarDialogEditarAlumno(slotProps.data)"></Button>
         </template>
       </Column>
     </DataTable>
@@ -1021,8 +1044,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
         <template #body="slotProps">
           <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.id)"></Button>
 
-          <!-- TODO Solo si es ADMIN -->
-          <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Profesor'" @click="mostrarDialogEditarProfesor(slotProps.data)"></Button>
+          <!-- mostrar solo si es ADMIN -->
+          <Button v-if="isAdmin" class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Profesor'" @click="mostrarDialogEditarProfesor(slotProps.data)"></Button>
         </template>
       </Column>
     </DataTable>

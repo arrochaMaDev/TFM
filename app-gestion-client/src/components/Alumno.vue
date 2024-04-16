@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, type Ref } from 'vue'
+import { inject, onMounted, ref, type Ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable';
@@ -16,11 +16,30 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from "primevue/useconfirm";
 import Dialog from 'primevue/dialog';
 import Tag from 'primevue/tag';
+import { useAdminStore } from '@/stores/isAdmin';
+import type { VueCookies } from 'vue-cookies';
 
 
 const confirm = useConfirm();
 const toast = useToast();
 const router = useRouter()
+
+// VERIFICAR SI SE ES ADMINISTRADOR
+const adminStore = useAdminStore()
+const $cookies = inject<VueCookies>('$cookies')
+const isAdmin: Ref<boolean> = ref(adminStore.isAdmin)
+
+onMounted(() => {
+  const userCookie = $cookies?.get('user') // si no existe, userCookie es null
+  console.log(userCookie)
+  if (userCookie?.permiso == 9) {
+    adminStore.isAdminTrue()
+    isAdmin.value = true
+  }
+  else if (!isAdmin.value || userCookie?.permiso == null || userCookie?.permiso != '9') {
+    adminStore.isAdminFalse()
+  }
+})
 
 const studentDataFromServer: Ref<{
   id: number
@@ -825,8 +844,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
             </li>
           </ul>
         </div>
-        <!-- TODO mostrar solo si es admin -->
-        <div id="datosUsuario" class="">
+        <!-- mostrar solo si es admin -->
+        <div id="datosUsuario" class="" v-if="isAdmin">
           <h6 class="text-xl text-800 font-bold"> Usuario asignado</h6>
           <ul id="datos-contacto" class="list-none p-0 flex align-items-center">
             <li class="flex mb-3">
@@ -858,8 +877,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
             </li>
           </ul>
         </div>
-        <div class="ml-2">
-          <!-- TODO mostrar solo si es admin -->
+        <div class="ml-2" v-if="isAdmin">
+          <!-- mostrar solo si es admin -->
           <Button class="w-max w-3rem mr-2" icon="pi pi-trash" severity="danger" v-tooltip.top="'Borrar Alumno'" @click="confirmDeleteAlumno()"></Button>
           <Button class="w-max w-3rem" icon="pi pi-pencil" severity="secondary" v-tooltip.top="'Editar Alumno'" @click="mostrarDialogEditarAlumno()"></Button>
         </div>
@@ -944,8 +963,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           </template>
         </Column>
         <Column header="" headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="flex p-1 pl-1">
-          <!-- TODO mostrar solo si es admin -->
-          <template #body="slotProps">
+          <!-- mostrar solo si es admin -->
+          <template #body="slotProps" v-if="isAdmin">
             <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.teacher.id)"></Button>
             <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Matrícula'" @click="confirmDeleteMatricula(slotProps.data.id)"></Button>
             <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Matrícula'" @click="mostrarDialogEditarMatricula(slotProps.data)"></Button>
