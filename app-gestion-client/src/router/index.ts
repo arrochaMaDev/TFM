@@ -4,9 +4,7 @@ import AltaUsuario from '../components/AltaUsuario.vue'
 import AltaAlumno from '../components/AltaAlumno.vue'
 import AltaProfesor from '@/components/AltaProfesor.vue'
 import AltaAsignatura from '@/components/AltaAsignatura.vue'
-////////
-import BuscadorAlumno from '@/components/Sidebar.vue'
-/////////
+import BuscadorAlumno from '@/components/BuscadorAlumno.vue'
 import ListadoAlumnos from '@/components/ListadoAlumnos.vue'
 import ListadoAsignaturas from '@/components/ListadoAsignaturas.vue'
 import Alumno from '@/components/Alumno.vue'

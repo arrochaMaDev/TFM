@@ -29,14 +29,14 @@ const user: Ref<{
   permiso: undefined,
   id: undefined,
 })
-const isLogged: Ref<boolean> = ref(false)
+// const isLogged: Ref<boolean> = ref(false)
 
 onMounted(() => {
   user.value = $cookies?.get('user')
   if (user.value) {
     console.log('Cookie value:', user);
     loggedStore.isLoggedTrue()
-    isLogged.value = true
+    // isLogged.value = true
     router.push('/')
   } else {
     router.push('/login')
@@ -95,11 +95,11 @@ const loginUser = async () => {
     }
 }
 
-const borrarDatosForm = () => {
-  userRef.email.value = undefined
-  userRef.pass.value = undefined
-  formSubmitted.value = false
-}
+// const borrarDatosForm = () => {
+//   userRef.email.value = undefined
+//   userRef.pass.value = undefined
+//   formSubmitted.value = false
+// }
 </script>
 
 <template>

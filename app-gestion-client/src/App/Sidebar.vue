@@ -1,9 +1,41 @@
 <script setup lang="ts">
 import Menu from 'primevue/menu';
-import { ref } from 'vue';
+import { inject, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router'
+import type { VueCookies } from 'vue-cookies';
+import { useLoggedStore } from '@/stores/isLogged';
+import { useAdminStore } from '@/stores/isAdmin';
+
+const loggedStore = useLoggedStore()
+
+const router = useRouter()
+const $cookies = inject<VueCookies>('$cookies');
+
+// VERIFICAR SI SE ES ADMINISTRADOR
+const adminStore = useAdminStore()
+
+onMounted(() => {
+  const userCookie = $cookies?.get('user') // si no existe, userCookie es null
+  // console.log(userCookie)
+  if (userCookie?.permiso == '9') {
+    adminStore.isAdminTrue()
+  }
+  else if (userCookie?.permiso == null || userCookie?.permiso != '9') {
+    adminStore.isAdminFalse()
+  }
+})
 
 
-const menuItems = ref([
+
+// Log-out
+const deleteCookie = () => {
+  $cookies?.remove('user')
+  loggedStore.isLoggedFalse()
+  router.push('/login')
+
+}
+
+const menuItems1 = ref([
   {
     label: 'HOME',
     items: [{
@@ -49,7 +81,31 @@ const menuItems = ref([
     label: 'SETTINGS',
     items: [
 
-      { label: 'Cerrar Sesión', icon: 'pi pi-fw pi-id-card', to: '/login' },
+      {
+        label: 'Cerrar Sesión', icon: 'pi pi-fw pi-id-card', to: '/login', command: () => {
+          deleteCookie()
+        }
+      },
+    ]
+  },
+])
+
+const menuItems2 = ref([
+  {
+    label: 'HOME',
+    items: [{
+      label: 'Dashboard', icon: 'pi pi-home', to: '/'
+    }]
+  },
+  {
+    label: 'SETTINGS',
+    items: [
+
+      {
+        label: 'Cerrar Sesión', icon: 'pi pi-fw pi-id-card', to: '/login', command: () => {
+          deleteCookie()
+        }
+      },
     ]
   },
 ])
@@ -57,7 +113,7 @@ const menuItems = ref([
 </script>
 
 <template>
-  <Menu :model="menuItems" class="">
+  <Menu :model="adminStore.isAdmin ? menuItems1 : menuItems2" class="">
     <template #item="{ item, props }">
       <RouterLink :to="item.to" :class="[item.class, 'p-ripple', { 'p-disabled': item.disabled }]" :style="item.style" role="">
         <a v-ripple class="flex align-items-center" v-bind="props.action">

@@ -1,21 +1,20 @@
 <script setup lang="ts">
 // import * as Vue from 'vue';
 import { G } from "@/G";
-import { useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import AppTopBar from '@/App/AppTopbar.vue';
 import AppMenu from '@/App/AppMenu.vue';
-import Sidebar from '@/components/Sidebar.vue';
+import Sidebar from '@/App/Sidebar.vue';
 import AppConfig from '@/App/AppConfig.vue';
 import AppFooter from '@/App/AppFooter.vue';
 import { RouterView } from 'vue-router';
-import router from '@/router';
-import { computed, inject, onMounted, ref, type Ref } from 'vue';
+import { computed, inject, onMounted, ref, watch, type Ref } from 'vue';
 import type { VueCookies } from 'vue-cookies';
 import { useLoggedStore } from '@/stores/isLogged';
 import Button from 'primevue/button';
 
-
+const router = useRouter()
 
 // const layoutMode = Vue.ref('static');
 // const appConfig = Vue.ref<typeof AppConfig>();
@@ -179,30 +178,34 @@ const user: Ref<{
     id: undefined,
 })
 
-const isLogged: Ref<boolean> = ref(false)
+// const isLogged = ref(false)
 
 onMounted(() => {
-    isLogged.value = loggedStore.isLogged
+    // isLogged.value = loggedStore.isLogged
+    // console.log(isLogged)
     user.value = $cookies?.get('user')
     if (user.value) {
         console.log('Cookie value:', user);
-        isLogged.value = loggedStore.isLoggedTrue()
-        isLogged.value = true
+        // isLogged.value = loggedStore.isLoggedTrue()
+        // console.log(isLogged)
     } else {
         router.push('/login')
         console.log('Cookie "user" no encontrada');
     }
 })
 
+
+
+
 </script>
 
 
 <template>
     <div :class="containerClass" @click="onWrapperClick">
-        <AppTopBar @menu-toggle="onMenuToggle" />
+        <AppTopBar @menu-toggle="onMenuToggle" v-if="loggedStore.isLogged" />
         <!-- <AppTopBar :showIcon="!staticMenuInactive && (G.userSettings.value.layoutMode === 'static')" @menu-toggle="onMenuToggle" /> -->
         <!-- <div class="layout-sidebar" @click="onSidebarClick"> -->
-        <div>
+        <div v-if="loggedStore.isLogged">
             <!-- <AppMenu @menuitem-click="onMenuItemClick" v-if="G.showLeftSide" /> -->
             <sidebar class="layout-sidebar"></sidebar>
         </div>
@@ -212,7 +215,7 @@ onMounted(() => {
                 <router-view />
             </div>
 
-            <div>
+            <div v-if="loggedStore.isLogged">
                 <AppFooter />
             </div>
         </div>
