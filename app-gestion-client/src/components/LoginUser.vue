@@ -106,7 +106,7 @@ const loginUser = async () => {
   <div id="container" class="w-full flex justify-content-center align-items-center h-screen">
     <div class="card w-auto grid p-8">
       <div id="header" class="col-6 col-offset-3 text-center ">
-        <h2 class="text-900 text-4xl mb-8">Login</h2>
+        <h2 class="text-900 text-4xl mb-3">Login</h2>
       </div>
       <div id="formulario" class="col-6">
         <form @submit.prevent="loginUser()">
@@ -120,16 +120,16 @@ const loginUser = async () => {
           </Password>
           <InlineMessage v-if="!userRef.pass.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La contraseña es obligatoria</InlineMessage>
 
-          <div class="flex justify-content-end">
+          <!-- <div class="flex justify-content-end">
             <a class="font-medium no-underline text-right cursor-pointer pt-1" style="color: var(--primary-color)">Olvidé mi contraseña</a>
-          </div>
+          </div> -->
           <div id="button" class=" flex justify-content-center">
             <Button type="submit" label="Login" severity="primary" class="w-12rem h-3rem mt-5"></Button>
           </div>
         </form>
       </div>
       <div id="logo" class="col-6 flex justify-content-center">
-        <img src="../utils/img/loading.png" class="mb-5 w-30rem" />
+        <img src="../utils/img/logo.png" class="w-30rem" />
       </div>
     </div>
   </div>

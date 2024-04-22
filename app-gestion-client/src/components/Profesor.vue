@@ -25,11 +25,13 @@ const router = useRouter()
 // VERIFICAR SI SE ES ADMINISTRADOR
 const adminStore = useAdminStore()
 const $cookies = inject<VueCookies>('$cookies')
+const userCookie = $cookies?.get('user') // si no existe, userCookie es null
+const isUser: Ref<boolean> = ref(true)
 const isAdmin: Ref<boolean> = ref(adminStore.isAdmin)
 
-onMounted(() => {
-  const userCookie = $cookies?.get('user') // si no existe, userCookie es null
+onMounted(async () => {
   console.log(userCookie)
+
   if (userCookie?.permiso == 9) {
     adminStore.isAdminTrue()
     isAdmin.value = true
@@ -37,6 +39,21 @@ onMounted(() => {
   else if (!isAdmin.value || userCookie?.permiso == null || userCookie?.permiso != '9') {
     adminStore.isAdminFalse()
   }
+
+  // VERIFICAR SI PUEDE VER LA PÁGINA
+  const teacherId = Number(router.currentRoute.value.params.id)
+
+  await getTeacherData(teacherId)
+
+  if (!isAdmin.value && userCookie && teacherDataFromServer.value?.userId.id != userCookie.id) {
+    isUser.value = false
+    // alert("no tiene permiso para ver esta pagina")
+    toast.add({ severity: 'info', summary: 'No tiene permiso', detail: 'No tiene permiso para ver esta página', group: 'tc', life: 3000, });
+    setTimeout(() => {
+      router.push('/')
+    }, 3000)
+  }
+
 })
 
 const teacherDataFromServer: Ref<{
@@ -55,7 +72,7 @@ const teacherDataFromServer: Ref<{
 
 const teacherId = Number(router.currentRoute.value.params.id)
 console.log(teacherId)
-console.log(router.currentRoute.value.params['id'])
+// console.log(router.currentRoute.value.params['id'])
 
 // OBTENER DATOS DEL PROFESOR
 const getTeacherData = async (teacherId: number) => {
@@ -1128,7 +1145,16 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
 </script>
 
 <template>
-  <div class="col-10">
+  <Toast position="top-center" group="tc" :pt="{
+    container: {
+      class: 'align-items-center m-8 w-max',
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }
+    "></Toast>
+  <div class="col-10" v-if="isUser">
     <div class="grid">
       <div id="header" class="flex col-12 justify-content-between h-auto mb-2">
         <h2 class="m-0 text-4xl text-800 font-bold">Perfil del Profesor</h2>
@@ -1223,18 +1249,18 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       <div v-if="subjectsByTeacherIdFromServer?.asignaciones" class="card w-max mr-5 h-max">
         <DataTable :value="subjectsByTeacherIdFromServer.asignaciones" dataKey="id" v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['subject.nombre']" class="" removableSort
           sortField="subject.nombre" :sortOrder="1" :paginator="true" :rows="5" stripedRows :showGridlines="false" selection-mode="single" :pt="{
-          paginator: {
-            paginatorWrapper: { class: 'flex justify-content-center' },
-            firstPageButton: { class: 'w-auto m-0' },
-            previousPageButton: { class: 'w-auto m-0' },
-            pageButton: { class: 'w-auto m-0' },
-            nextPageButton: { class: 'w-auto m-0' },
-            lastPageButton: { class: 'w-auto m-0' },
-          }, table: {
-            class: 'mt-0 w-12',
-            style: { 'border': 'none', 'background-color': 'transparent' }
-          }
-        }">
+    paginator: {
+      paginatorWrapper: { class: 'flex justify-content-center' },
+      firstPageButton: { class: 'w-auto m-0' },
+      previousPageButton: { class: 'w-auto m-0' },
+      pageButton: { class: 'w-auto m-0' },
+      nextPageButton: { class: 'w-auto m-0' },
+      lastPageButton: { class: 'w-auto m-0' },
+    }, table: {
+      class: 'mt-0 w-12',
+      style: { 'border': 'none', 'background-color': 'transparent' }
+    }
+  }">
 
           <div id="header" class="h-6rem border-round-top" style="background-color:  #f8f9fa">
             <h5 class="m-0 text-3xl text-800 font-bold pl-1">Asignaciones</h5>
@@ -1259,19 +1285,19 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
         <DataTable :value="matriculasRefFromServer.matriculas" dataKey="id" v-model:filters="filters1" filterDisplay="menu"
           :globalFilterFields="['student.nombre', 'student.apellidos', 'student.dni', 'student.direccion', 'student.telefono', 'student.email', 'subject.nombre']" class="" removableSort
           sortField="subject.nombre" :sortOrder="1" :paginator="true" :rows="10" stripedRows :showGridlines="false" selection-mode="single" :pt="{
-          paginator: {
-            paginatorWrapper: { class: 'flex justify-content-center' },
-            firstPageButton: { class: 'w-auto m-0' },
-            previousPageButton: { class: 'w-auto m-0' },
-            pageButton: { class: 'w-auto m-0' },
-            nextPageButton: { class: 'w-auto m-0' },
-            lastPageButton: { class: 'w-auto m-0' },
-          }, table: {
-            class: 'mt-0 w-12',
-            style: { 'border': 'none', 'background-color': 'transparent' }
-          }
-        }
-          ">
+    paginator: {
+      paginatorWrapper: { class: 'flex justify-content-center' },
+      firstPageButton: { class: 'w-auto m-0' },
+      previousPageButton: { class: 'w-auto m-0' },
+      pageButton: { class: 'w-auto m-0' },
+      nextPageButton: { class: 'w-auto m-0' },
+      lastPageButton: { class: 'w-auto m-0' },
+    }, table: {
+      class: 'mt-0 w-12',
+      style: { 'border': 'none', 'background-color': 'transparent' }
+    }
+  }
+    ">
 
           <div id=" header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
             <h5 class="m-0 text-3xl text-800 font-bold pl-1">Matrículas</h5>
@@ -1340,14 +1366,14 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
 
     <!-- Dialog editar Profesor-->
     <Dialog v-model:visible="visibleDialogProfesor" modal header="Editar Profesor" class="w-3" :pt="{
-          header: { class: 'flex align-items-baseline h-5rem' },
-          title: { class: '' },
-          closeButtonIcon: { class: '' },
-          mask: {
-            style: 'backdrop-filter: blur(3px)'
-          }
-        }
-          ">
+    header: { class: 'flex align-items-baseline h-5rem' },
+    title: { class: '' },
+    closeButtonIcon: { class: '' },
+    mask: {
+      style: 'backdrop-filter: blur(3px)'
+    }
+  }
+    ">
 
       <span class="p-text-secondary flex mb-5">Actualizar información</span>
       <div class="flex align-items-center gap-3 mb-3">
@@ -1369,12 +1395,12 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       </div>
       <div v-if="profesorEditar.userId.id != undefined" class="">
         <DataTable :value="[profesorEditar.userId]" class="pl-1" tableStyle="width: 30rem" :pt="{
-          table: {
-            class: 'mt-0',
-            style: { 'border': 'none' }
-          }
-        }
-          ">
+    table: {
+      class: 'mt-0',
+      style: { 'border': 'none' }
+    }
+  }
+    ">
           <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
           <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
           <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem">
@@ -1393,21 +1419,21 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
 
     <!-- Dialog editar asignación -->
     <Dialog v-model:visible="visibleDialogEditarAsignacion" modal header="Editar Asignación" class="w-3" :pt="{
-          header: { class: 'flex align-items-baseline h-5rem' },
-          title: { class: '' },
-          closeButtonIcon: { class: '' }
-        }
-          ">
+    header: { class: 'flex align-items-baseline h-5rem' },
+    title: { class: '' },
+    closeButtonIcon: { class: '' }
+  }
+    ">
       <span class="p-text-secondary flex mb-5">Cambiar asignatura</span>
 
       <label class="text-xl text-800 font-bold">Datos del profesor</label>
       <DataTable :value="[asignacionEditar?.teacher]" class="pt-1" tableStyle="width: 30rem" :pt="{
-          table: {
-            class: 'mt-0',
-            style: { 'border': 'none' }
-          }
-        }
-          ">
+    table: {
+      class: 'mt-0',
+      style: { 'border': 'none' }
+    }
+  }
+    ">
         <Column field="nombre" header="Nombre" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
         <Column field="apellidos" header="Apellidos" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
         <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
@@ -1431,25 +1457,25 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
 
     <!-- Dialog editar matricula -->
     <Dialog v-model:visible="visibleDialogEditarMatricula" modal header="Editar Matrícula" class="w-auto" :pt="{
-          header: { class: 'flex align-items-baseline h-5rem' },
-          title: { class: '' },
-          closeButtonIcon: { class: '' },
-          mask: {
-            style: 'backdrop-filter: blur(3px)'
-          }
-        }
-          ">
+    header: { class: 'flex align-items-baseline h-5rem' },
+    title: { class: '' },
+    closeButtonIcon: { class: '' },
+    mask: {
+      style: 'backdrop-filter: blur(3px)'
+    }
+  }
+    ">
       <span class="p-text-secondary flex mb-5">Cambiar matrícula</span>
 
       <label class="text-xl text-800 font-bold">Datos del estudiante</label>
 
       <DataTable :value="[matriculaEditar]" class="pt-1" tableStyle="width: auto" :pt="{
-          table: {
-            class: 'mt-0',
-            style: { 'border': 'none' }
-          }
-        }
-          ">
+    table: {
+      class: 'mt-0',
+      style: { 'border': 'none' }
+    }
+  }
+    ">
 
         <Column field="student.nombre" header="Nombre" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
         <Column field="student.apellidos" header="Apellidos" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
@@ -1472,12 +1498,12 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12 pt-4">
         <label class="text-xl text-800 font-bold">Profesor a editar</label>
         <DataTable :value="[matriculaEditar]" class="pt-1" tableStyle="width: auto" :pt="{
-          table: {
-            class: 'mt-0',
-            style: { 'border': 'none' }
-          }
-        }
-          ">
+    table: {
+      class: 'mt-0',
+      style: { 'border': 'none' }
+    }
+  }
+    ">
           <Column field="teacher.nombre" header="Nombre" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
           <Column field="teacher.apellidos" header="Apellidos" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
           <Column field="teacher.email" header="Email" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
@@ -1509,21 +1535,22 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       </div>
     </Dialog>
 
+    <Toast :pt="{
+    container: {
+      class: 'align-items-center'
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }
+    "></Toast>
+    <ConfirmDialog :pt="{
+    header: { class: 'pb-0 pt-2' },
+    content: { class: 'pb-3 pt-1' }
+  }
+    "></ConfirmDialog>
   </div>
-  <Toast :pt="{
-          container: {
-            class: 'align-items-center'
-          },
-          closeButton: {
-            class: 'border-1'
-          }
-        }
-          "></Toast>
-  <ConfirmDialog :pt="{
-          header: { class: 'pb-0 pt-2' },
-          content: { class: 'pb-3 pt-1' }
-        }
-          "></ConfirmDialog>
+
 </template>
 
 <style scoped></style>

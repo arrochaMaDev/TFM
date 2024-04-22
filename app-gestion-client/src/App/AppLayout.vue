@@ -12,6 +12,7 @@ import { RouterView } from 'vue-router';
 import { computed, inject, onMounted, ref, watch, type Ref } from 'vue';
 import type { VueCookies } from 'vue-cookies';
 import { useLoggedStore } from '@/stores/isLogged';
+import { useDashboardStore } from '@/stores/isDashboard';
 import Button from 'primevue/button';
 
 const router = useRouter()
@@ -162,6 +163,8 @@ const containerClass = computed(() => {
 
 //Obtener valor de la cookie
 const loggedStore = useLoggedStore()
+const dashboardStore = useDashboardStore()
+
 
 const $cookies = inject<VueCookies>('$cookies');
 const user: Ref<{
@@ -216,7 +219,7 @@ onMounted(() => {
                 <router-view />
             </div>
 
-            <div v-if="loggedStore.isLogged">
+            <div v-if="loggedStore.isLogged && !dashboardStore.isDashboard">
                 <AppFooter />
             </div>
         </div>

@@ -23,14 +23,17 @@ const confirm = useConfirm();
 const toast = useToast();
 const router = useRouter()
 
-// VERIFICAR SI SE ES ADMINISTRADOR
+
+// VERIFICAR SI SE ES ADMINISTRADOR 
 const adminStore = useAdminStore()
 const $cookies = inject<VueCookies>('$cookies')
+const userCookie = $cookies?.get('user') // si no existe, userCookie es null
+const isUser: Ref<boolean> = ref(true)
 const isAdmin: Ref<boolean> = ref(adminStore.isAdmin)
 
 onMounted(() => {
-  const userCookie = $cookies?.get('user') // si no existe, userCookie es null
   console.log(userCookie)
+
   if (userCookie?.permiso == 9) {
     adminStore.isAdminTrue()
     isAdmin.value = true
@@ -38,7 +41,20 @@ onMounted(() => {
   else if (!isAdmin.value || userCookie?.permiso == null || userCookie?.permiso != '9') {
     adminStore.isAdminFalse()
   }
+
+  // VERIFICAR SI PUEDE VER LA PÁGINA
+  const userId = Number(router.currentRoute.value.params.id)
+
+  if (!isAdmin.value && userCookie && userId != userCookie.id) {
+    isUser.value = false
+    // alert("no tiene permiso para ver esta pagina")
+    toast.add({ severity: 'info', summary: 'No tiene permiso', detail: 'No tiene permiso para ver esta página', group: 'tc', life: 3000, });
+    setTimeout(() => {
+      router.push('/')
+    }, 3000)
+  }
 })
+
 
 
 const userDataFromServer: Ref<{
@@ -51,7 +67,7 @@ const userDataFromServer: Ref<{
 
 const userId = Number(router.currentRoute.value.params.id)
 console.log(userId)
-console.log(router.currentRoute.value.params['id'])
+// console.log(router.currentRoute.value.params['id'])
 
 
 // OBTENER DATOS DEL USUARIO
@@ -83,6 +99,8 @@ const getUserData = async () => {
   }
 }
 
+getUserData()
+
 const PermisoToString = (permiso: number) => {
   switch (permiso) {
     case 0:
@@ -96,7 +114,6 @@ const PermisoToString = (permiso: number) => {
   }
 }
 
-getUserData()
 
 // Función para ocultar la contraseña
 const ocultarContraseña = () => {
@@ -743,353 +760,363 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
 </script>
 
 <template>
-  <div class="w-max">
-    <div class="grid">
-      <div id="header" class="flex col-12 justify-content-between h-auto mb-2">
-        <h2 class="m-0 text-4xl text-800 font-bold">Perfil del Usuario</h2>
-        <Button class="w-auto" severity="secondary" @click="volver()">Volver</Button>
-      </div>
-
-      <div id="datos" class="card col-12">
-        <div id="datos-usuario" class="mb-5">
-
-          <ul id="datos-usuario" class="list-none p-0">
-            <li class="flex mb-3">
-              <div class="bg-green-50 flex justify-content-center align-items-center border-circle w-4rem h-4rem mr-2">
-                <i class="pi pi-user text-green-500" style="font-size: 2rem"></i>
-              </div>
-              <div class="flex-column align-self-center">
-                <span class="flex justify-content-start align-self-center font-bold mb-1">Username</span>
-                <span class="flex justify-content-start "> {{ userDataFromServer?.username }}</span>
-              </div>
-            </li>
-            <li class="flex align-items-center mb-3">
-              <div class="bg-blue-50 flex justify-content-center align-items-center border-circle w-4rem h-4rem mr-2">
-                <i class="pi pi-envelope text-blue-500" style="font-size: 1.5rem"></i>
-              </div>
-              <div class="flex align-self-center">
-                <span class="flex justify-content-start align-self-center font-bold">Email</span>
-                <a :href="'mailto:' + userDataFromServer?.email" class="ml-2 flex justify-content-start align-self-center"> {{ userDataFromServer?.email }}</a>
-                <Button v-if="!isAdmin" class="ml-5 w-max w-3rem" icon="pi pi-envelope" severity="info" v-tooltip.top="'Cambiar email'" @click="cambioEmail(), mostrarDialogEditarUsuario()"></Button>
-              </div>
-            </li>
-            <li class="flex mb-3">
-              <div class="bg-pink-50 flex justify-content-center align-items-center border-circle w-4rem h-4rem mr-2">
-                <i class="pi pi-key text-pink-500" style="font-size: 1.5rem"></i>
-              </div>
-              <div class="flex align-self-center">
-                <span class="flex justify-content-start align-self-center font-bold">Pass</span>
-                <!-- <span class="flex justify-content-start "> {{ userDataFromServer?.pass }}</span> -->
-                <!-- <span class="flex justify-content-start "> {{ ocultarContraseña() }}</span> -->
-                <span class="ml-2 flex justify-content-start align-self-center  "> ******************** </span>
-                <Button v-if="!isAdmin" class="ml-5 w-max w-3rem" icon="pi pi-key" severity="danger" v-tooltip.top="'Cambiar contraseña'"
-                  @click="cambioContraseña(), mostrarDialogEditarUsuario()"></Button>
-              </div>
-            </li>
-            <li class="flex mb-3">
-              <div class="bg-bluegray-50 flex justify-content-center align-items-center border-circle w-4rem h-4rem mr-2">
-                <i class="pi pi-verified text-bluegray-500" style="font-size: 1.5rem"></i>
-              </div>
-              <div class="flex-column align-self-center">
-                <span class="flex justify-content-start align-self-center font-bold mb-1">Permiso</span>
-                <!-- <span class="flex justify-content-start "> {{ userDataFromServer?.permiso }}</span> -->
-                <Tag v-if="userDataFromServer" :severity="getSeverity(userDataFromServer?.permiso.toString())" style="font-size: small;"> {{ userDataFromServer?.permiso }} </Tag>
-
-              </div>
-            </li>
-          </ul>
+  <Toast position="top-center" group="tc" :pt="{
+    container: {
+      class: 'align-items-center m-8 w-max',
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }
+    "></Toast>
+  <div id="container" v-if="isUser">
+    <div class="w-max">
+      <div class="grid">
+        <div id="header" class="flex col-12 justify-content-between h-auto mb-2">
+          <h2 class="m-0 text-4xl text-800 font-bold">Perfil del Usuario</h2>
+          <Button class="w-auto" severity="secondary" @click="volver()">Volver</Button>
         </div>
 
-        <div class="ml-2" v-if="isAdmin">
-          <!--  mostrar solo si es admin -->
-          <Button class="w-max w-3rem mr-2" icon="pi pi-trash" severity="danger" v-tooltip.top="'Borrar Usuario'" @click="confirmDeleteUsuario()"></Button>
-          <Button class="w-max w-3rem" icon="pi pi-pencil" severity="secondary" v-tooltip.top="'Editar Usuario'" @click="mostrarDialogEditarUsuario()"></Button>
+        <div id="datos" class="card col-12">
+          <div id="datos-usuario" class="mb-5">
+
+            <ul id="datos-usuario" class="list-none p-0">
+              <li class="flex mb-3">
+                <div class="bg-green-50 flex justify-content-center align-items-center border-circle w-4rem h-4rem mr-2">
+                  <i class="pi pi-user text-green-500" style="font-size: 2rem"></i>
+                </div>
+                <div class="flex-column align-self-center">
+                  <span class="flex justify-content-start align-self-center font-bold mb-1">Username</span>
+                  <span class="flex justify-content-start "> {{ userDataFromServer?.username }}</span>
+                </div>
+              </li>
+              <li class="flex align-items-center mb-3">
+                <div class="bg-blue-50 flex justify-content-center align-items-center border-circle w-4rem h-4rem mr-2">
+                  <i class="pi pi-envelope text-blue-500" style="font-size: 1.5rem"></i>
+                </div>
+                <div class="flex align-self-center">
+                  <span class="flex justify-content-start align-self-center font-bold">Email</span>
+                  <a :href="'mailto:' + userDataFromServer?.email" class="ml-2 flex justify-content-start align-self-center"> {{ userDataFromServer?.email }}</a>
+                  <Button v-if="!isAdmin" class="ml-5 w-max w-3rem" icon="pi pi-envelope" severity="info" v-tooltip.top="'Cambiar email'" @click="cambioEmail(), mostrarDialogEditarUsuario()"></Button>
+                </div>
+              </li>
+              <li class="flex mb-3">
+                <div class="bg-pink-50 flex justify-content-center align-items-center border-circle w-4rem h-4rem mr-2">
+                  <i class="pi pi-key text-pink-500" style="font-size: 1.5rem"></i>
+                </div>
+                <div class="flex align-self-center">
+                  <span class="flex justify-content-start align-self-center font-bold">Pass</span>
+                  <!-- <span class="flex justify-content-start "> {{ userDataFromServer?.pass }}</span> -->
+                  <!-- <span class="flex justify-content-start "> {{ ocultarContraseña() }}</span> -->
+                  <span class="ml-2 flex justify-content-start align-self-center  "> ******************** </span>
+                  <Button v-if="!isAdmin" class="ml-5 w-max w-3rem" icon="pi pi-key" severity="danger" v-tooltip.top="'Cambiar contraseña'"
+                    @click="cambioContraseña(), mostrarDialogEditarUsuario()"></Button>
+                </div>
+              </li>
+              <li class="flex mb-3">
+                <div class="bg-bluegray-50 flex justify-content-center align-items-center border-circle w-4rem h-4rem mr-2">
+                  <i class="pi pi-verified text-bluegray-500" style="font-size: 1.5rem"></i>
+                </div>
+                <div class="flex-column align-self-center">
+                  <span class="flex justify-content-start align-self-center font-bold mb-1">Permiso</span>
+                  <!-- <span class="flex justify-content-start "> {{ userDataFromServer?.permiso }}</span> -->
+                  <Tag v-if="userDataFromServer" :severity="getSeverity(userDataFromServer?.permiso.toString())" style="font-size: small;"> {{ userDataFromServer?.permiso }} </Tag>
+
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="ml-2" v-if="isAdmin">
+            <!--  mostrar solo si es admin -->
+            <Button class="w-max w-3rem mr-2" icon="pi pi-trash" severity="danger" v-tooltip.top="'Borrar Usuario'" @click="confirmDeleteUsuario()"></Button>
+            <Button class="w-max w-3rem" icon="pi pi-pencil" severity="secondary" v-tooltip.top="'Editar Usuario'" @click="mostrarDialogEditarUsuario()"></Button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <Toast :pt="{
-          container: {
-            class: 'align-items-center'
-          },
-          closeButton: {
-            class: 'border-1'
-          }
-        }
-          "></Toast>
-  <ConfirmDialog :pt="{
-          header: { class: 'pb-0 pt-2' },
-          content: { class: 'pb-3 pt-1' }
-        }
-          "></ConfirmDialog>
+    <Toast :pt="{
+    container: {
+      class: 'align-items-center'
+    },
+    closeButton: {
+      class: 'border-1'
+    }
+  }
+    "></Toast>
+    <ConfirmDialog :pt="{
+    header: { class: 'pb-0 pt-2' },
+    content: { class: 'pb-3 pt-1' }
+  }
+    "></ConfirmDialog>
 
-  <!-- Dialog Editar Usuario -->
-  <Dialog v-model:visible="visibleDialogEditarUsuario" modal header="Editar Usuario" class="w-3" :pt="{
-          header: { class: 'flex align-items-baseline h-5rem' },
-          title: { class: '' },
-          closeButtonIcon: { class: '' },
-          mask: {
-            style: 'backdrop-filter: blur(3px)'
-          }
-        }
-          ">
-
-    <span class="p-text-secondary flex mb-5">Actualizar información</span>
-    <div class="flex align-items-center gap-3 mb-3" v-if="!cambiarContraseña && !cambiarEmail">
-      <label for="username" class="font-semibold w-6rem">Username</label>
-      <InputText id="username" class="w-7" v-model="usuarioEditar.username" :class="{ 'p-invalid': !usuarioEditar.username }" />
-    </div>
-    <div class="flex align-items-center gap-3 mb-3" v-if="cambiarEmail && !cambiarContraseña || isAdmin">
-      <label for="email" class="font-semibold w-6rem">Email</label>
-      <InputText id="email" class="w-7" v-model="usuarioEditar.email" :class="{ 'p-invalid': !usuarioEditar.email }" />
-    </div>
-    <div class="flex align-items-center gap-3 mb-3" v-if="cambiarContraseña && !cambiarEmail || isAdmin">
-      <label for="pass" class="font-semibold w-6rem">Contraseña</label>
-      <Password id="pass" class="w-7" :feedback="false" v-model="usuarioEditar.pass" :class="{ 'p-invalid': !usuarioEditar.pass }" />
-    </div>
-    <div class="flex align-items-center gap-3 mb-3" v-if="isAdmin && !cambiarContraseña && !cambiarEmail">
-      <label for="permiso" class="font-semibold w-6rem">Permiso</label>
-      <Dropdown class="" id="permisos" :options="permisos" optionLabel="name" optionValue="code" checkmark :highlightOnSelect="false" showClear placeholder="Selecciona un permiso"
-        v-model="usuarioEditar.permiso" :class="{ 'p-invalid': usuarioEditar.permiso == null }">
-
-      </Dropdown>
-    </div>
-    <div class=" flex justify-content-center mb-3 pt-2">
-      <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialogEditarUsuario = false, cambiarContraseña = false, cambiarEmail = false"></Button>
-      <Button type="button" rounded label="Actualizar" @click="editarUsuario()"></Button>
-    </div>
-    <Toast></Toast>
-  </Dialog>
-
-  <!-- Tabla alumnos asignados -->
-  <!-- v-if="studentsRefFromServer.length > 0" -->
-  <div class="card w-max " >
-    <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['nombre', 'apellidos', 'email', 'userId.username', 'userId.email', 'userId.permiso']" class="" removableSort
-      :value="studentsRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="5" :pt="{
-          paginator: {
-            paginatorWrapper: { class: 'col-12 flex justify-content-center' },
-            firstPageButton: { class: 'w-auto' },
-            previousPageButton: { class: 'w-auto' },
-            pageButton: { class: 'w-auto' },
-            nextPageButton: { class: 'w-auto' },
-            lastPageButton: { class: 'w-auto' },
-          },
-          table: {
-            class: 'mt-0 w-auto',
-            style: { 'border': 'none' }
-          }
-        }
-          ">
-
-      <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
-        <h5 class="m-0 text-3xl text-800 font-bold pl-1">Alumnos asignados</h5>
-        <span class="mt-2 md:mt-0 p-input-icon-left flex align-items-center">
-          <i class="pi pi-search"></i>
-          <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Búsqueda global..." />
-          <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" v-tooltip.top="'Limpiar filtros'" outlined @click="clearFilter()"></Button>
-        </span>
-      </div>
-
-      <ColumnGroup type="header" class="">
-        <Row>
-          <Column field="nombre" header="Nombre" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-            <template #filter="{ filterModel }">
-              <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-            </template>
-          </Column>
-          <Column field="apellidos" header="Apellidos" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-            <template #filter="{ filterModel }">
-              <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-            </template>
-          </Column>
-          <Column field="dni" header="DNI" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-            <template #filter="{ filterModel }">
-              <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-            </template>
-          </Column>
-          <Column field="direccion" header="Dirección" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-            <template #filter="{ filterModel }">
-              <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-            </template>
-          </Column>
-          <Column field="telefono" header="Teléfono" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-            <template #filter="{ filterModel }">
-              <InputText v-model="filterModel.value" type="number" class="p-column-filter" placeholder="Buscar..." />
-            </template>
-          </Column>
-          <Column field="email" header="Email" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-            <template #filter="{ filterModel }">
-              <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-            </template>
-          </Column>
-          <Column field="" header=""></Column>
-
-        </Row>
-      </ColumnGroup>
-
-      <Column field="nombre"></Column>
-      <Column field="apellidos"></Column>
-      <Column field="dni"></Column>
-      <Column field="direccion"></Column>
-      <Column field="telefono"></Column>
-      <Column field="email"></Column>
-
-      <Column headerStyle="min-width:rem" bodyClass="flex p-1 pl-0">
-        <template #body="slotProps">
-          <Button class="m-0 p-0 h-4rem w-4rem" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Alumno'" @click="goToStudent(slotProps.data.id)"></Button>
-
-          <!-- mostrar solo si es ADMIN -->
-          <Button v-if="isAdmin" class="m-0 p-0 h-4rem w-4rem" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Alumno'"
-            @click="mostrarDialogEditarAlumno(slotProps.data)"></Button>
-        </template>
-      </Column>
-    </DataTable>
-
-    <!-- Dialog editar alumno -->
-    <Dialog v-model:visible="visibleDialogEditarAlumno" modal header="Editar Alumno" class="w-3" :pt="{
-          header: { class: 'flex align-items-baseline h-5rem' },
-          title: { class: '' },
-          closeButtonIcon: { class: '' },
-          mask: {
-            style: 'backdrop-filter: blur(3px)'
-          }
-        }">
+    <!-- Dialog Editar Usuario -->
+    <Dialog v-model:visible="visibleDialogEditarUsuario" modal header="Editar Usuario" class="w-3" :pt="{
+    header: { class: 'flex align-items-baseline h-5rem' },
+    title: { class: '' },
+    closeButtonIcon: { class: '' },
+    mask: {
+      style: 'backdrop-filter: blur(3px)'
+    }
+  }
+    ">
 
       <span class="p-text-secondary flex mb-5">Actualizar información</span>
-
-      <div class="flex align-items-center gap-3 mb-3">
-        <label for="usuario" class="font-semibold w-6rem">Usuario</label>
-        <Dropdown class="" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput" placeholder="Selecciona un usuario"
-          v-model="alumnoEditar.userId.id" @change="getUser(alumnoEditar.userId.id)" :class="{ 'p-invalid': alumnoEditar.userId.id == undefined }" />
+      <div class="flex align-items-center gap-3 mb-3" v-if="!cambiarContraseña && !cambiarEmail">
+        <label for="username" class="font-semibold w-6rem">Username</label>
+        <InputText id="username" class="w-7" v-model="usuarioEditar.username" :class="{ 'p-invalid': !usuarioEditar.username }" />
       </div>
-      <div v-if="alumnoEditar.userId.id != undefined" class="">
-        <DataTable :value="[alumnoEditar.userId]" class="pl-1" tableStyle="width: 30rem" :pt="{
-          table: {
-            class: 'mt-0',
-            style: { 'border': 'none' }
-          }
-        }
-          ">
-          <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-          <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-          <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        </DataTable>
+      <div class="flex align-items-center gap-3 mb-3" v-if="cambiarEmail && !cambiarContraseña || isAdmin">
+        <label for="email" class="font-semibold w-6rem">Email</label>
+        <InputText id="email" class="w-7" v-model="usuarioEditar.email" :class="{ 'p-invalid': !usuarioEditar.email }" />
       </div>
-      <div class="flex justify-content-center mb-3 pt-2">
-        <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="getStudentsData(), visibleDialogEditarAlumno = false"></Button>
-        <Button type="button" rounded label="Actualizar" @click="editarAlumno()"></Button>
+      <div class="flex align-items-center gap-3 mb-3" v-if="cambiarContraseña && !cambiarEmail || isAdmin">
+        <label for="pass" class="font-semibold w-6rem">Contraseña</label>
+        <Password id="pass" class="w-7" :feedback="false" v-model="usuarioEditar.pass" :class="{ 'p-invalid': !usuarioEditar.pass }" />
       </div>
-      <Toast></Toast>
-    </Dialog>
-  </div>
+      <div class="flex align-items-center gap-3 mb-3" v-if="isAdmin && !cambiarContraseña && !cambiarEmail">
+        <label for="permiso" class="font-semibold w-6rem">Permiso</label>
+        <Dropdown class="" id="permisos" :options="permisos" optionLabel="name" optionValue="code" checkmark :highlightOnSelect="false" showClear placeholder="Selecciona un permiso"
+          v-model="usuarioEditar.permiso" :class="{ 'p-invalid': usuarioEditar.permiso == null }">
 
-  <!-- Tabla profesores asignados -->
-  <!-- v-if="teachersRefFromServer.length > 0" -->
-  <div class="card w-max" >
-    <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['nombre', 'apellidos', 'email', 'userId.username', 'userId.email', 'userId.permiso']" class="" removableSort
-      :value="teachersRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="5" :pt="{
-          paginator: {
-            paginatorWrapper: { class: 'col-12 flex justify-content-center' },
-            firstPageButton: { class: 'w-auto' },
-            previousPageButton: { class: 'w-auto' },
-            pageButton: { class: 'w-auto' },
-            nextPageButton: { class: 'w-auto' },
-            lastPageButton: { class: 'w-auto' },
-          },
-          table: {
-            class: 'mt-0 w-auto',
-            style: { 'border': 'none' }
-          }
-        }
-          ">
-
-      <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
-        <h5 class="m-0 text-3xl text-800 font-bold pl-1 mr-5">Profesores asignados</h5>
-        <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
-          <i class="pi pi-search"></i>
-          <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Búsqueda global..." />
-          <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" v-tooltip.top="'Limpiar filtros'" outlined @click="clearFilter()"></Button>
-        </span>
+        </Dropdown>
       </div>
-
-      <ColumnGroup type="header" class="">
-        <Row>
-          <Column field="nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
-            <template #filter="{ filterModel }">
-              <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-            </template>
-          </Column>
-          <Column field="apellidos" header="Apellidos" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
-            <template #filter="{ filterModel }">
-              <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-            </template>
-          </Column>
-          <Column field="email" header="Email" sortable headerStyle="width:40%; min-width:6rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
-            <template #filter="{ filterModel }">
-              <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-            </template>
-          </Column>
-
-          <Column field="" header=""></Column>
-        </Row>
-      </ColumnGroup>
-
-      <Column field="nombre"></Column>
-      <Column field="apellidos"></Column>
-      <Column field="email"></Column>
-
-
-
-      <Column headerStyle="width:20%; min-width:8rem" bodyClass="flex p-1 pl-1">
-        <template #body="slotProps">
-          <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.id)"></Button>
-
-          <!-- mostrar solo si es ADMIN -->
-          <Button v-if="isAdmin" class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Profesor'" @click="mostrarDialogEditarProfesor(slotProps.data)"></Button>
-        </template>
-      </Column>
-    </DataTable>
-
-    <!-- Dialog editar Profesor-->
-    <Dialog v-model:visible="visibleDialogEditarProfesor" modal header="Editar Profesor" class="w-3" :pt="{
-          header: { class: 'flex align-items-baseline h-5rem' },
-          title: { class: '' },
-          closeButtonIcon: { class: '' },
-          mask: {
-            style: 'backdrop-filter: blur(3px)'
-          }
-        }
-          ">
-
-      <span class="p-text-secondary flex mb-5">Actualizar asignación</span>
-
-      <div class="flex align-items-center gap-3 mb-3">
-        <label for="usuario" class="font-semibold w-6rem">Usuario</label>
-        <Dropdown class="" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput" placeholder="Selecciona un usuario"
-          v-model="profesorEditar.userId.id" @change="getUser(profesorEditar.userId.id)" :class="{ 'p-invalid': profesorEditar.userId.id == undefined }" />
-      </div>
-      <div v-if="profesorEditar.userId.id != undefined" class="">
-        <DataTable :value="[profesorEditar.userId]" class="pl-1" tableStyle="width: 30rem" :pt="{
-          table: {
-            class: 'mt-0',
-            style: { 'border': 'none' }
-          }
-        }
-          ">
-          <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-          <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-          <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        </DataTable>
-      </div>
-      <div div class=" flex justify-content-center mb-3 pt-2">
-        <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="getTeachersData(), visibleDialogEditarProfesor = false"></Button>
-        <Button type="button" rounded label="Actualizar" @click="editarProfesor()"></Button>
+      <div class=" flex justify-content-center mb-3 pt-2">
+        <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialogEditarUsuario = false, cambiarContraseña = false, cambiarEmail = false"></Button>
+        <Button type="button" rounded label="Actualizar" @click="editarUsuario()"></Button>
       </div>
       <Toast></Toast>
     </Dialog>
-  </div>
 
+    <!-- Tabla alumnos asignados -->
+    <!-- v-if="studentsRefFromServer.length > 0" -->
+    <div class="card w-max ">
+      <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['nombre', 'apellidos', 'email', 'userId.username', 'userId.email', 'userId.permiso']" class="" removableSort
+        :value="studentsRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="5" :pt="{
+    paginator: {
+      paginatorWrapper: { class: 'col-12 flex justify-content-center' },
+      firstPageButton: { class: 'w-auto' },
+      previousPageButton: { class: 'w-auto' },
+      pageButton: { class: 'w-auto' },
+      nextPageButton: { class: 'w-auto' },
+      lastPageButton: { class: 'w-auto' },
+    },
+    table: {
+      class: 'mt-0 w-auto',
+      style: { 'border': 'none' }
+    }
+  }
+    ">
+
+        <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
+          <h5 class="m-0 text-3xl text-800 font-bold pl-1">Alumnos asignados</h5>
+          <span class="mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+            <i class="pi pi-search"></i>
+            <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Búsqueda global..." />
+            <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" v-tooltip.top="'Limpiar filtros'" outlined @click="clearFilter()"></Button>
+          </span>
+        </div>
+
+        <ColumnGroup type="header" class="">
+          <Row>
+            <Column field="nombre" header="Nombre" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <Column field="apellidos" header="Apellidos" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <Column field="dni" header="DNI" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <Column field="direccion" header="Dirección" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <Column field="telefono" header="Teléfono" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="number" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <Column field="email" header="Email" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <Column field="" header=""></Column>
+
+          </Row>
+        </ColumnGroup>
+
+        <Column field="nombre"></Column>
+        <Column field="apellidos"></Column>
+        <Column field="dni"></Column>
+        <Column field="direccion"></Column>
+        <Column field="telefono"></Column>
+        <Column field="email"></Column>
+
+        <Column headerStyle="min-width:rem" bodyClass="flex p-1 pl-0">
+          <template #body="slotProps">
+            <Button class="m-0 p-0 h-4rem w-4rem" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Alumno'" @click="goToStudent(slotProps.data.id)"></Button>
+
+            <!-- mostrar solo si es ADMIN -->
+            <Button v-if="isAdmin" class="m-0 p-0 h-4rem w-4rem" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Alumno'"
+              @click="mostrarDialogEditarAlumno(slotProps.data)"></Button>
+          </template>
+        </Column>
+      </DataTable>
+
+      <!-- Dialog editar alumno -->
+      <Dialog v-model:visible="visibleDialogEditarAlumno" modal header="Editar Alumno" class="w-3" :pt="{
+    header: { class: 'flex align-items-baseline h-5rem' },
+    title: { class: '' },
+    closeButtonIcon: { class: '' },
+    mask: {
+      style: 'backdrop-filter: blur(3px)'
+    }
+  }">
+
+        <span class="p-text-secondary flex mb-5">Actualizar información</span>
+
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="usuario" class="font-semibold w-6rem">Usuario</label>
+          <Dropdown class="" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput"
+            placeholder="Selecciona un usuario" v-model="alumnoEditar.userId.id" @change="getUser(alumnoEditar.userId.id)" :class="{ 'p-invalid': alumnoEditar.userId.id == undefined }" />
+        </div>
+        <div v-if="alumnoEditar.userId.id != undefined" class="">
+          <DataTable :value="[alumnoEditar.userId]" class="pl-1" tableStyle="width: 30rem" :pt="{
+    table: {
+      class: 'mt-0',
+      style: { 'border': 'none' }
+    }
+  }
+    ">
+            <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+            <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+            <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+          </DataTable>
+        </div>
+        <div class="flex justify-content-center mb-3 pt-2">
+          <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="getStudentsData(), visibleDialogEditarAlumno = false"></Button>
+          <Button type="button" rounded label="Actualizar" @click="editarAlumno()"></Button>
+        </div>
+        <Toast></Toast>
+      </Dialog>
+    </div>
+
+    <!-- Tabla profesores asignados -->
+    <!-- v-if="teachersRefFromServer.length > 0" -->
+    <div class="card w-max">
+      <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['nombre', 'apellidos', 'email', 'userId.username', 'userId.email', 'userId.permiso']" class="" removableSort
+        :value="teachersRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="5" :pt="{
+    paginator: {
+      paginatorWrapper: { class: 'col-12 flex justify-content-center' },
+      firstPageButton: { class: 'w-auto' },
+      previousPageButton: { class: 'w-auto' },
+      pageButton: { class: 'w-auto' },
+      nextPageButton: { class: 'w-auto' },
+      lastPageButton: { class: 'w-auto' },
+    },
+    table: {
+      class: 'mt-0 w-auto',
+      style: { 'border': 'none' }
+    }
+  }
+    ">
+
+        <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
+          <h5 class="m-0 text-3xl text-800 font-bold pl-1 mr-5">Profesores asignados</h5>
+          <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+            <i class="pi pi-search"></i>
+            <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Búsqueda global..." />
+            <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" v-tooltip.top="'Limpiar filtros'" outlined @click="clearFilter()"></Button>
+          </span>
+        </div>
+
+        <ColumnGroup type="header" class="">
+          <Row>
+            <Column field="nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <Column field="apellidos" header="Apellidos" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <Column field="email" header="Email" sortable headerStyle="width:40%; min-width:6rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+
+            <Column field="" header=""></Column>
+          </Row>
+        </ColumnGroup>
+
+        <Column field="nombre"></Column>
+        <Column field="apellidos"></Column>
+        <Column field="email"></Column>
+
+
+
+        <Column headerStyle="width:20%; min-width:8rem" bodyClass="flex p-1 pl-1">
+          <template #body="slotProps">
+            <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.id)"></Button>
+
+            <!-- mostrar solo si es ADMIN -->
+            <Button v-if="isAdmin" class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Profesor'" @click="mostrarDialogEditarProfesor(slotProps.data)"></Button>
+          </template>
+        </Column>
+      </DataTable>
+
+      <!-- Dialog editar Profesor-->
+      <Dialog v-model:visible="visibleDialogEditarProfesor" modal header="Editar Profesor" class="w-3" :pt="{
+    header: { class: 'flex align-items-baseline h-5rem' },
+    title: { class: '' },
+    closeButtonIcon: { class: '' },
+    mask: {
+      style: 'backdrop-filter: blur(3px)'
+    }
+  }
+    ">
+
+        <span class="p-text-secondary flex mb-5">Actualizar asignación</span>
+
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="usuario" class="font-semibold w-6rem">Usuario</label>
+          <Dropdown class="" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput"
+            placeholder="Selecciona un usuario" v-model="profesorEditar.userId.id" @change="getUser(profesorEditar.userId.id)" :class="{ 'p-invalid': profesorEditar.userId.id == undefined }" />
+        </div>
+        <div v-if="profesorEditar.userId.id != undefined" class="">
+          <DataTable :value="[profesorEditar.userId]" class="pl-1" tableStyle="width: 30rem" :pt="{
+    table: {
+      class: 'mt-0',
+      style: { 'border': 'none' }
+    }
+  }
+    ">
+            <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+            <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+            <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+          </DataTable>
+        </div>
+        <div div class=" flex justify-content-center mb-3 pt-2">
+          <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="getTeachersData(), visibleDialogEditarProfesor = false"></Button>
+          <Button type="button" rounded label="Actualizar" @click="editarProfesor()"></Button>
+        </div>
+        <Toast></Toast>
+      </Dialog>
+    </div>
+  </div>
 
 </template>
 

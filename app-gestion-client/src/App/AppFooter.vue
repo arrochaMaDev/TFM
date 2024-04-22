@@ -6,7 +6,7 @@
 <template>
 	<div>
 		<div class="layout-footer">
-			<img alt="Logo" src="../utils/img/loading.png" width="200" class="mr-2" />
+			<img alt="Logo" src="../utils/img/logo.png" width="200" class="mr-2" />
 		</div>
 
 	</div>
