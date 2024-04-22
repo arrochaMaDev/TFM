@@ -7,6 +7,7 @@ import InlineMessage from 'primevue/inlinemessage';
 import Button from 'primevue/button';
 import { useToast } from "primevue/usetoast";
 import Toast from 'primevue/toast';
+import Dialog from 'primevue/dialog';
 import router from '@/router';
 import { useAdminStore } from '@/stores/isAdmin';
 import type { VueCookies } from 'vue-cookies';
@@ -33,32 +34,34 @@ onMounted(() => {
   }
 })
 
-/* TODO GENERAR USERNAME */
-const generarUsername = (nombre: string, apellido1: string, apellido2: string) => {
+/* GENERAR USERNAME */
 
-  // Obtener las dos primeras letras de cada variable y convertirlas a minúsculas
-  const inicialesNombre: string = nombre.slice(0, 2).toLowerCase();
-  const inicialesApellido1: string = apellido1.slice(0, 2).toLowerCase();
-  const inicialesApellido2: string = apellido2.slice(0, 2).toLowerCase();
+const visibleDialogUsername = ref(false)
 
-  // Concatenar las iniciales
-  const username: string = inicialesNombre + inicialesApellido1 + inicialesApellido2;
-
-  return username;
+const usernameGenerated = {
+  nombre: ref<string>(""),
+  // nombre2: ref<string>(""),
+  apellido1: ref<string>(""),
+  apellido2: ref<string>(""),
+  DNI: ref<string>(""),
 }
 
-const nombre: string = "Laura";
-const apellido1: string = "Pérez";
-const apellido2: string = "Pérez";
+const generarUsername = (nombre: string, apellido1: string, apellido2: string, DNI: string) => {
 
-const iniciales: string = generarUsername(nombre, apellido1, apellido2);
-console.log("Iniciales:", iniciales); // Salida esperada: "lapepe"
+  // Obtener las primeras letras de cada variable y convertirlas a minúsculas
+  const inicialesNombre: string = nombre.slice(0, 1).toLowerCase();
+  // const segundoNombre: string = nombre2.slice(0, 1).toLowerCase();
+  const inicialesApellido1: string = apellido1.slice(0, 3).toLowerCase();
+  const inicialesApellido2: string = apellido2.slice(0, 3).toLowerCase();
+  const letraDNI: string = DNI.substring(DNI.length - 1).toLowerCase()
 
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
+  visibleDialogUsername.value = false
 
+  // Concatenar las iniciales
+  const username: string = inicialesNombre + inicialesApellido1 + inicialesApellido2 + letraDNI;
+
+  userRef.username.value = username
+}
 
 const toast = useToast();
 
@@ -176,7 +179,10 @@ const borrarDatosForm = () => {
       <div class="p-fluid formgrid grid">
         <div class="field col-12 lg:col-6 md:col-12 sm:col-12">
           <label class="">Username</label>
-          <InputText class="" id="username" v-model="userRef.username.value" />
+          <span class="flex align-items-center">
+            <Button class="justify-content-center w-auto mr-3" severity="primary" icon="pi pi-user" iconPos="left" label="Generar" @click="visibleDialogUsername = true"></Button>
+            <InputText class="" id="username" v-model="userRef.username.value" />
+          </span>
           <InlineMessage v-if="!userRef.username.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El username es obligatorio</InlineMessage>
         </div>
         <div class="field col-12 lg:col-6 md:col-12 sm:col-12">
@@ -207,6 +213,43 @@ const borrarDatosForm = () => {
         </div>
       </div>
     </form>
+    <Dialog v-model:visible="visibleDialogUsername" modal header="Generar Username" class="w-2" :pt="{
+    header: { class: 'flex align-items-baseline h-5rem' },
+    title: { class: '' },
+    closeButtonIcon: { class: '' },
+    mask: {
+      style: 'backdrop-filter: blur(3px)'
+    }
+  }
+    ">
+      <span class="p-text-secondary flex mb-5">Añadir información del usuario</span>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="nombre" class="font-semibold w-6rem">Nombre</label>
+        <InputText id="nombre" class="w-full" v-model="usernameGenerated.nombre.value" />
+      </div>
+      <!-- <div class="flex align-items-center gap-3 mb-3">
+        <label for="nombre" class="font-semibold w-6rem">Segundo Nombre</label>
+        <InputText id="nombre" class="w-full" v-model="usernameGenerated.nombre2.value" />
+      </div> -->
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="nombre" class="font-semibold w-6rem">Primer Apellido</label>
+        <InputText id="nombre" class="w-full" v-model="usernameGenerated.apellido1.value" />
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="nombre" class="font-semibold w-6rem">Segundo Apellido</label>
+        <InputText id="nombre" class="w-full" v-model="usernameGenerated.apellido2.value" />
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="nombre" class="font-semibold w-6rem">DNI</label>
+        <InputText id="nombre" class="w-full" v-model="usernameGenerated.DNI.value" />
+      </div>
+      <div class="flex justify-content-center mb-3 pt-2">
+        <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialogUsername = false"></Button>
+        <Button type="button" rounded label="Generar"
+          @click="generarUsername(usernameGenerated.nombre.value, usernameGenerated.apellido1.value, usernameGenerated.apellido2.value, usernameGenerated.DNI.value)"></Button>
+      </div>
+      <Toast></Toast>
+    </Dialog>
   </div>
   <Toast :pt="{
     container: {

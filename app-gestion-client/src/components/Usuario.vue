@@ -126,7 +126,6 @@ const confirmDeleteUsuario = () => {
   });
 };
 
-// LÓGICA BORRAR USUARIO
 const borrarUsuario = async () => {
   try {
     const response = await fetch(`http://localhost:3000/usuario/${userId}`, {
@@ -393,7 +392,7 @@ const getTeachersData = async () => {
 
 getTeachersData()
 
-// LÓGINCA EDITAR ASGNACIÓN USUARIO
+// LÓGICA EDITAR ASGNACIÓN USUARIO
 
 // Obtener todos los usuarios 
 const usersRefFromServer: Ref<{
@@ -864,7 +863,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
   </Dialog>
 
   <!-- Tabla alumnos asignados -->
-  <div class="card w-max ">
+  <!-- v-if="studentsRefFromServer.length > 0" -->
+  <div class="card w-max " >
     <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['nombre', 'apellidos', 'email', 'userId.username', 'userId.email', 'userId.permiso']" class="" removableSort
       :value="studentsRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="5" :pt="{
           paginator: {
@@ -985,7 +985,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
   </div>
 
   <!-- Tabla profesores asignados -->
-  <div class="card w-max">
+  <!-- v-if="teachersRefFromServer.length > 0" -->
+  <div class="card w-max" >
     <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['nombre', 'apellidos', 'email', 'userId.username', 'userId.email', 'userId.permiso']" class="" removableSort
       :value="teachersRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="5" :pt="{
           paginator: {

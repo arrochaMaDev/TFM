@@ -49,13 +49,14 @@ onMounted(() => {
   }
 })
 
-
 </script>
 
 <template>
-  <div class="flex justify-content-center">
+  <div id="container" class="flex justify-content-center">
     <img src="../utils/img/loading.png" class="w-8" />
+    <div class="flex align-items-center justify-content-center overflow-hidden">
+    </div>
   </div>
 </template>
 
-<style></style>
+<style scoped></style>

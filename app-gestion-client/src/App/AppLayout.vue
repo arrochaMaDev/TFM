@@ -186,6 +186,7 @@ onMounted(() => {
     user.value = $cookies?.get('user')
     if (user.value) {
         console.log('Cookie value:', user);
+        loggedStore.isLoggedTrue()
         // isLogged.value = loggedStore.isLoggedTrue()
         // console.log(isLogged)
     } else {
