@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { inject, onMounted, ref, watch, type Ref } from 'vue'
 import InputText from 'primevue/inputtext';
+import InputNumber from 'primevue/inputnumber';
+import InputMask from 'primevue/inputmask';
 import MultiSelect from 'primevue/multiselect';
 import Dropdown from 'primevue/dropdown';
 import InlineMessage from 'primevue/inlinemessage';
@@ -40,8 +42,10 @@ onMounted(() => {
 const teacherRef = {
   nombre: ref<string | undefined>(undefined),
   apellidos: ref<string | undefined>(undefined),
+  dni: ref<string | undefined>(undefined),
+  direccion: ref<string | undefined>(undefined),
+  telefono: ref<string | undefined>(undefined),
   email: ref<string | undefined>(undefined),
-  asignaturas: ref<string[]>([])
 }
 const formSubmitted = ref(false); // variable para avisos con InlineText
 
@@ -50,45 +54,44 @@ const borrarDatosForm = () => {
   teacherRef.nombre.value = undefined
   teacherRef.apellidos.value = undefined
   teacherRef.email.value = undefined
-  teacherRef.asignaturas.value = []
   selectedUserId.value = undefined
   formSubmitted.value = false;
   user.value = undefined
 }
 
-// OBTENER ASIGNATURAS DE LA BD
-let asignaturas: Ref<
-  {
-    id: number
-    nombre: string
-  }[]
-> = ref([])
+// // OBTENER ASIGNATURAS DE LA BD
+// let asignaturas: Ref<
+//   {
+//     id: number
+//     nombre: string
+//   }[]
+// > = ref([])
 
-const getSubjectsData = async () => {
-  try {
-    const response = await fetch('http://localhost:3000/asignaturas', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    })
-    if (!response.ok) {
-      throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
-    } else {
-      const data = (await response.json()) as {
-        id: number
-        nombre: string
-      }[]
-      asignaturas.value = data
-      console.log(data)
-    }
-  } catch (error) {
-    alert('Hay un error' + error)
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error obteniendo las asignaturas', life: 3000 });
-  }
-}
-getSubjectsData()
+// const getSubjectsData = async () => {
+//   try {
+//     const response = await fetch('http://localhost:3000/asignaturas', {
+//       method: 'GET',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       },
+//       credentials: 'include'
+//     })
+//     if (!response.ok) {
+//       throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+//     } else {
+//       const data = (await response.json()) as {
+//         id: number
+//         nombre: string
+//       }[]
+//       asignaturas.value = data
+//       console.log(data)
+//     }
+//   } catch (error) {
+//     alert('Hay un error' + error)
+//     toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error obteniendo las asignaturas', life: 3000 });
+//   }
+// }
+// getSubjectsData()
 
 //OBTENER USUARIOS
 const usersRefFromServer: Ref<{
@@ -203,7 +206,7 @@ const crearProfesor = async () => {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
     isValid = false
   }
-  if (!teacherRef.nombre.value || !teacherRef.apellidos.value || !teacherRef.email.value || teacherRef.asignaturas.value.length == 0) {
+  if (!teacherRef.nombre.value || !teacherRef.apellidos.value || !teacherRef.email.value) {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
     isValid = false
   }
@@ -214,8 +217,10 @@ const crearProfesor = async () => {
         body: JSON.stringify({
           nombre: teacherRef.nombre.value,
           apellidos: teacherRef.apellidos.value,
+          dni: teacherRef.dni.value,
+          direccion: teacherRef.direccion.value,
+          telefono: Number(teacherRef.telefono.value),
           email: teacherRef.email.value,
-          asignaturas: teacherRef.asignaturas.value.toString(),
           userId: user.value?.id
         }),
         headers: {
@@ -231,8 +236,10 @@ const crearProfesor = async () => {
         const datosProfesor = [
           teacherRef.nombre.value,
           teacherRef.apellidos.value,
+          teacherRef.dni.value,
+          teacherRef.direccion.value,
+          teacherRef.telefono.value,
           teacherRef.email.value,
-          teacherRef.asignaturas.value
         ]
         console.table(datosProfesor)
 
@@ -258,33 +265,49 @@ const crearProfesor = async () => {
     }
   }
     "></Toast>
-  <div class="card col-12 xl:col-6 lg:col-12 md:col-12 sm:col-12" v-if="isAdmin">
+  <div class="card col-12 xl:col-9 lg:col-12 md:col-12 sm:col-12" v-if="isAdmin">
     <form @submit.prevent="crearProfesor()">
       <h2>Nuevo Profesor</h2>
       <div class="p-fluid formgrid grid">
-        <div class="field col-12 lg:col-4 md:col-12 sm:col-12">
+        <div class="field col-12 lg:col-6 md:col-12 sm:col-12">
           <label class="">Nombre</label>
           <InputText class="" id="nombreInput" v-model="teacherRef.nombre.value" />
           <InlineMessage v-if="!teacherRef.nombre.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El nombre es obligatorio</InlineMessage>
         </div>
-        <div class="field col-12 lg:col-4 md:col-12 sm:col-12">
+        <div class="field col-12 lg:col-6 md:col-12 sm:col-12">
           <label class="">Apellidos</label>
           <InputText class="" id="apellidosInput" v-model="teacherRef.apellidos.value" />
           <InlineMessage v-if="!teacherRef.apellidos.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El apellido es obligatorio</InlineMessage>
+        </div>
+        <div class="field col-12 lg:col-4 md:col-4 sm:col-12">
+          <label class="">Dni</label>
+          <InputText class="" id="dniInput" v-model="teacherRef.dni.value" />
+          <InlineMessage v-if="!teacherRef.dni.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El DNI es obligatorio</InlineMessage>
+        </div>
+        <div class="field col-12 lg:col-4 md:col-4 sm:col-12">
+          <label class="">Teléfono</label>
+          <!-- <InputNumber class="" id="telefonoInput" :useGrouping="false" required v-model="studentRef.telefono.value" /> -->
+          <InputMask class="" id="telefonoInput" mask="999999999" slotChar="" v-model="teacherRef.telefono.value" />
+          <InlineMessage v-if="!teacherRef.telefono.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El teléfono es obligatorio</InlineMessage>
         </div>
         <div class="field col-12 lg:col-4 md:col-12 sm:col-12">
           <label class="">Email</label>
           <InputText class="" id="emailInput" v-model="teacherRef.email.value" />
           <InlineMessage v-if="!teacherRef.email.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El email es obligatorio</InlineMessage>
         </div>
-        <div class="field col-12">
+        <div class="field col-12 lg:col-12 md:col-12 sm:col-12">
+          <label class="">Dirección</label>
+          <InputText class="" id="direcciónInput" v-model="teacherRef.direccion.value" />
+          <InlineMessage v-if="!teacherRef.direccion.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La dirección es obligatoria</InlineMessage>
+        </div>
+        <!-- <div class="field col-12">
           <label class="">Seleccionar asignaturas</label>
 
           <MultiSelect id="asignaturas" class="w-max" :style="{ 'max-width': '100%' }" :options="asignaturas" display="chip" filter optionLabel="nombre" placeholder="Seleccionar asignaturas"
             v-model="teacherRef.asignaturas.value">
           </MultiSelect>
           <InlineMessage v-if="teacherRef.asignaturas.value.length == 0 && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">Las asignaturas son obligatorias</InlineMessage>
-        </div>
+        </div> -->
         <div class="field col-12 mt-2 pl-0 mb-0 ">
           <div class="field col-12 lg:col-4 md:col-12 sm:col-12 ">
             <label class="">Seleccionar usuario</label>

@@ -25,7 +25,8 @@ export class RegisterTeacherService {
     // userId: UserDb,
   ) {
     try {
-      const { nombre, apellidos, email, asignaturas, userId } = data;
+      const { nombre, apellidos, dni, direccion, telefono, email, userId } =
+        data;
 
       const usuario_uuid = await uuidv4();
       console.log(usuario_uuid);
@@ -39,8 +40,10 @@ export class RegisterTeacherService {
         usuario_uuid,
         nombre,
         apellidos,
+        dni,
+        direccion,
+        telefono,
         email,
-        asignaturas,
         usuario_id,
       );
       console.log(teacher);
@@ -50,8 +53,10 @@ export class RegisterTeacherService {
         usuario_id: teacher.getUsuario_id(),
         nombre: teacher.getNombre(),
         apellidos: teacher.getApellidos(),
+        dni: teacher.getDni(),
+        direccion: teacher.getDireccion(),
+        telefono: teacher.getTelefono(),
         email: teacher.getEmail(),
-        asignaturas: teacher.getAsignaturas(),
         userId: teacher.getUserId(),
       };
       console.log(teacherDb);

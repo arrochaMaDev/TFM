@@ -52,7 +52,7 @@ export class UpdateMatriculaController {
           id: updatedMatricula.teacher.id,
           nombre: updatedMatricula.teacher.nombre,
           apellidos: updatedMatricula.teacher.apellidos,
-          asignaturas: updatedMatricula.teacher.asignaturas,
+          dni: updatedMatricula.teacher.dni,
         },
         year: updatedMatricula.year,
       };

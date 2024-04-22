@@ -129,7 +129,7 @@ const borrarAsignatura = async (asignatura: typeof asignaturasRefFromServer.valu
   }
 }
 
-// LÓGICA EDITAR ALUMNO
+// LÓGICA EDITAR ASIGNATURA
 const visibleDialog: Ref<boolean> = ref(false);
 
 const asignaturaEditar: Ref<
@@ -214,6 +214,9 @@ const teachersBySubjectId: Ref<{
       id: number
       nombre: string
       apellidos: string
+      dni: string
+      direccion: string
+      telefono: number
       email: string
     }
   }[]
@@ -421,7 +424,7 @@ onMounted(() => {
         <Toast></Toast>
       </Dialog>
 
-      <!-- Dialog profesores asignados -->
+      <!-- Dialog ver profesores asignados -->
       <Dialog v-model:visible="visibleDialogTeacher" @after-hide="resetDataTeachers()" modal header="Profesores asignados" class="w-auto" :pt="{
     header: { class: 'flex align-items-baseline h-5rem' },
     title: { class: '' },
@@ -438,6 +441,9 @@ onMounted(() => {
   }">
           <Column field="teacher.nombre" header="Nombre" sortable headerStyle="" headerClass="h-2rem pl-1 pr-3" bodyClass="h-3rem p-0 pl-1"> </Column>
           <Column field="teacher.apellidos" header="Apellidos" sortable headerStyle="" headerClass="h-2rem pl-1 pr-3" bodyClass="h-3rem p-0 pl-1"></Column>
+          <Column field="teacher.dni" header="DNI" sortable headerStyle="" headerClass="h-2rem pl-1 pr-3" bodyClass="h-3rem p-0 pl-1"></Column>
+          <Column field="teacher.direccion" header="Dirección" sortable headerStyle="" headerClass="h-2rem pl-1 pr-3" bodyClass="h-3rem p-0 pl-1"></Column>
+          <Column field="teacher.telefono" header="Teléfono" sortable headerStyle="" headerClass="h-2rem pl-1 pr-3" bodyClass="h-3rem p-0 pl-1"></Column>
           <Column field="teacher.email" header="Email" headerStyle="" headerClass="h-2rem pl-1" bodyClass="h-3rem p-0 pl-1 pr-3"></Column>
           <Column headerStyle="" bodyClass="flex p-1 pl-1">
             <template #body="slotProps">

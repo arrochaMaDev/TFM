@@ -520,7 +520,7 @@ const getSeverity = (permiso: string) => {
                 <template #filter="{ filterModel }">
                   <Dropdown v-model="filterModel.value" :options="permisos" placeholder="Selecciona" class="p-column-filter" style="width: auto">
                     <template #option="slotProps">
-                      <Tag :value="slotProps.option" :severity="getSeverity(slotProps.option)" />
+                      <Tag :value="slotProps.option" :severity="getSeverity(slotProps.option)" style="font-size: small" />
                     </template>
                   </Dropdown>
                 </template>

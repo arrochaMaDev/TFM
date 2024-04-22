@@ -16,8 +16,10 @@ export class GetTeacherController {
       //   usuario_id: teacher.usuario_id,
       //   nombre: teacher.nombre,
       //   apellidos: teacher.apellidos,
+      //   dni: teacher.dni,
+      //   direccion: teacher.direccion,
+      //   telefono, teacher.telefono,
       //   email: teacher.email,
-      //   asignaturas: teacher.asignaturas,
       //   usuario: {
       //     id: teacher.userId.id,
       //     username: teacher.userId.username,

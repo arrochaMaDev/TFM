@@ -18,8 +18,10 @@ export class RegisterTeacherController {
         id: teacherData.id,
         nombre: teacherData.nombre,
         apellidos: teacherData.apellidos,
+        dni: teacherData.dni,
+        direccion: teacherData.direccion,
+        telefono: teacherData.telefono,
         email: teacherData.email,
-        asignaturas: teacherData.asignaturas,
         usuario: {
           id: teacherData.userId.id,
           username: teacherData.userId.username,
@@ -27,6 +29,7 @@ export class RegisterTeacherController {
           permiso: teacherData.userId.permiso,
         },
       };
+      // return teacherData;
       return teacher;
     } catch (error) {
       console.error('Error al crear el profesor:', error);

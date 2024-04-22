@@ -1,4 +1,3 @@
-import { IsEmail, IsNumber } from 'class-validator';
 import {
   Column,
   Entity,
@@ -10,6 +9,7 @@ import {
 import { SubjectDb } from '../Subject/subjectDb';
 import { TeacherDb } from '../Teacher/teacherDb';
 import { UserDb } from '../User/userDb';
+import { IsEmail, IsNumber } from 'class-validator';
 
 @Entity({ name: 'alumno' })
 export class StudentDb {

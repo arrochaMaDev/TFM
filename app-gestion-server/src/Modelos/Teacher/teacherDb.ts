@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { StudentDb } from '../Student/studentDb';
 import { UserDb } from '../User/userDb';
+import { IsEmail, IsNumber } from 'class-validator';
 
 @Entity({ name: 'profesor' })
 export class TeacherDb {
@@ -24,10 +25,18 @@ export class TeacherDb {
   apellidos: string;
 
   @Column()
-  email: string;
+  dni: string;
 
   @Column()
-  asignaturas: string;
+  direccion: string;
+
+  @Column()
+  @IsNumber()
+  telefono: number;
+
+  @Column()
+  @IsEmail()
+  email: string;
 
   // @ManyToOne(() => StudentDb, (student: StudentDb) => student.teachers)
   @ManyToOne(() => StudentDb)

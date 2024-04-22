@@ -7,6 +7,7 @@ import ColumnGroup from 'primevue/columngroup';
 import Row from 'primevue/row';
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
+import InputNumber from 'primevue/inputnumber'
 import Dropdown from 'primevue/dropdown';
 import { FilterMatchMode } from 'primevue/api';
 import ConfirmDialog from 'primevue/confirmdialog';
@@ -53,6 +54,9 @@ const teachersRefFromServer: Ref<
     usuario_id: string
     nombre: string
     apellidos: string
+    dni: string
+    direccion: string
+    telefono: number
     email: string
     userId: {
       id: number
@@ -81,6 +85,9 @@ const getTeachersData = async () => {
         usuario_id: string;
         nombre: string;
         apellidos: string;
+        dni: string
+        direccion: string
+        telefono: number
         email: string;
         userId: {
           id: number;
@@ -269,6 +276,9 @@ const profesorEditar: Ref<
     id: number
     nombre: string
     apellidos: string
+    dni: string
+    direccion: string
+    telefono: number
     email: string
     userId: {
       id: number
@@ -280,6 +290,9 @@ const profesorEditar: Ref<
     id: 0,
     nombre: '',
     apellidos: '',
+    dni: '',
+    direccion: '',
+    telefono: 0,
     email: '',
     userId: {
       id: 0,
@@ -317,6 +330,9 @@ const editarProfesor = async () => {
         body: JSON.stringify({
           nombre: profesorEditar.value?.nombre,
           apellidos: profesorEditar.value?.apellidos,
+          dni: profesorEditar.value?.dni,
+          direccion: profesorEditar.value?.direccion,
+          telefono: profesorEditar.value?.telefono,
           email: profesorEditar.value?.email,
           userId: profesorEditar.value?.userId.id
         }),
@@ -332,6 +348,9 @@ const editarProfesor = async () => {
         const profesorActualizado = {
           nombre: profesorEditar.value?.nombre,
           apellidos: profesorEditar.value?.apellidos,
+          dni: profesorEditar.value?.dni,
+          direccion: profesorEditar.value?.direccion,
+          telefono: profesorEditar.value?.telefono,
           email: profesorEditar.value?.email,
           userId: profesorEditar.value?.userId.id
         };
@@ -365,6 +384,9 @@ const initFilters = () => { // componente filtro en global para que busque cualq
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     'nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'apellidos': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'dni': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'direccion': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'telefono': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'email': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'userId.username': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'userId.email': { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -419,7 +441,7 @@ const getSeverity = (permiso: string) => {
   <div class="flex justify-content-start pt-2" v-if="isAdmin">
     <div class="card flex justify-content-center">
       <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['nombre', 'apellidos', 'email', 'userId.username', 'userId.email', 'userId.permiso']" class="" removableSort
-        :value="teachersRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" tableStyle="width: 40rem" :pt="{
+        :value="teachersRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" :pt="{
     paginator: {
       paginatorWrapper: { class: 'col-12 flex justify-content-center' },
       firstPageButton: { class: 'w-auto' },
@@ -429,7 +451,7 @@ const getSeverity = (permiso: string) => {
       lastPageButton: { class: 'w-auto' },
     },
     table: {
-      class: 'mt-0',
+      class: 'mt-0 w-auto',
       style: { 'border': 'none' }
     }
   }
@@ -447,39 +469,53 @@ const getSeverity = (permiso: string) => {
 
         <ColumnGroup type="header" class="">
           <Row>
-            <Column :hidden="!mostrarUsuario" header="Profesor" :colspan="3" headerClass="h-3rem pl-1"></Column>
+            <Column :hidden="!mostrarUsuario" header="Profesor" :colspan="6" headerClass="h-3rem pl-1"></Column>
             <Column :hidden="!mostrarUsuario" header="Usuario" :colspan="4" headerClass="h-3rem pl-1"></Column>
           </Row>
           <Row>
-            <Column field="nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+            <Column field="nombre" header="Nombre" sortable headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
               <template #filter="{ filterModel }">
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>
             </Column>
-            <Column field="apellidos" header="Apellidos" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+            <Column field="apellidos" header="Apellidos" sortable headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
               <template #filter="{ filterModel }">
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>
             </Column>
-            <Column field="email" header="Email" sortable headerStyle="width:40%; min-width:6rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+            <Column field="dni" header="DNI" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <Column field="direccion" header="Dirección" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <Column field="telefono" header="Teléfono" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="number" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <Column field="email" header="Email" sortable headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
               <template #filter="{ filterModel }">
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>
             </Column>
             <!-- columnas de ver usuario -->
             <div v-if="mostrarUsuario">
-              <Column field="userId.username" header="Username" sortable headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+              <Column field="userId.username" header="Username" sortable headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
                 <template #filter="{ filterModel }">
                   <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                 </template>
               </Column>
-              <Column field="userId.email" header="Email de usuario" sortable headerStyle="width:40%; min-width:13rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5"
-                :show-filter-match-modes="false">
+              <Column field="userId.email" header="Email de usuario" sortable headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
                 <template #filter="{ filterModel }">
                   <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                 </template>
               </Column>
-              <Column field="userId.permiso" header="Permiso" headerStyle="width:40%; min-width:6rem" :show-filter-match-modes="false">
+              <Column field="userId.permiso" header="Permiso" :show-filter-match-modes="false">
                 <template #body="{ data }">
                   <Tag :value="data.userId.permiso" :severity="getSeverity(data.userId.permiso)" />
                 </template>
@@ -498,6 +534,9 @@ const getSeverity = (permiso: string) => {
 
         <Column field="nombre"></Column>
         <Column field="apellidos"></Column>
+        <Column field="dni"></Column>
+        <Column field="direccion"></Column>
+        <Column field="telefono"></Column>
         <Column field="email"></Column>
         <div v-if="mostrarUsuario">
           <Column field="userId.username"></Column>
@@ -553,6 +592,18 @@ const getSeverity = (permiso: string) => {
         <div class="flex align-items-center gap-3 mb-3">
           <label for="apellidos" class="font-semibold w-6rem">Apellidos</label>
           <InputText id="apellidos" class="w-7" v-model="profesorEditar.apellidos" :class="{ 'p-invalid': !profesorEditar.apellidos }" />
+        </div>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="dni" class="font-semibold w-6rem">DNI</label>
+          <InputText id="dni" class="w-3" v-model="profesorEditar.dni" :class="{ 'p-invalid': !profesorEditar.dni }" />
+        </div>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="direccion" class="font-semibold w-6rem">Dirección</label>
+          <InputText id="direccion" class="flex-auto" v-model="profesorEditar.direccion" :class="{ 'p-invalid': !profesorEditar.direccion }" />
+        </div>
+        <div class="flex align-items-center gap-3 mb-3">
+          <label for="telefono" class="font-semibold w-6rem">Teléfono</label>
+          <InputNumber id="telefono" inputId="withoutgrouping" :useGrouping="false" class="w-3" v-model="profesorEditar.telefono" :class="{ 'p-invalid': !profesorEditar.telefono }" />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
           <label for="email" class="font-semibold w-6rem">Email</label>

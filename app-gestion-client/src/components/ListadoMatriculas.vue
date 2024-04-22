@@ -65,6 +65,9 @@ const matriculasRefFromServer: Ref<
       usuario_id: string
       nombre: string
       apellidos: string
+      dni: string
+      direccion: string
+      telefono: number
       email: string
     }
     year: number
@@ -163,6 +166,9 @@ const matriculasByStudentId: Ref<{
       usuario_id: string
       nombre: string
       apellidos: string
+      dni: string
+      direccion: string
+      telefono: number
       email: string
     }
     year: number
@@ -238,6 +244,9 @@ const allStudentsWithMatriculasRef: Ref<{
       usuario_id: string
       nombre: string
       apellidos: string
+      dni: string
+      direccion: string
+      telefono: number
       email: string
     }
     year: number
@@ -347,6 +356,9 @@ const matriculaEditar: Ref<
       usuario_id: string
       nombre: string
       apellidos: string
+      dni: string
+      direccion: string
+      telefono: number
       email: string
     }
     year: number
@@ -366,6 +378,9 @@ const selectedTeacher: Ref<
     usuario_id: string
     nombre: string
     apellidos: string
+    dni: string
+    direccion: string
+    telefono: number
     email: string
   } | undefined
 > = ref(undefined)
@@ -421,6 +436,9 @@ const teachersBySubjectIdRefFromServer: Ref<{
       id: number
       nombre: string
       apellidos: string
+      dni: string
+      direccion: string
+      telefono: number
       email: string
     }
   }[]
@@ -431,6 +449,9 @@ const onlyTeachersArray: Ref<{
   id: number
   nombre: string
   apellidos: string
+  dni: string
+  direccion: string
+  telefono: number
   email: string
 }[]> = ref([])
 
@@ -471,6 +492,9 @@ const getTeachersBySubjectData = async () => {
             id: number
             nombre: string
             apellidos: string
+            dni: string
+            direccion: string
+            telefono: number
             email: string
           }
         }[]
@@ -530,6 +554,9 @@ const teachersRefFromServer: Ref<
     id: number
     nombre: string
     apellidos: string
+    dni: string
+    direccion: string
+    telefono: number
     email: string
   }[]
 > = ref([])
@@ -551,6 +578,9 @@ const getTeachersData = async () => {
         usuario_id: string
         nombre: string
         apellidos: string
+        dni: string
+        direccion: string
+        telefono: number
         email: string
       }[]
       teachersRefFromServer.value = data
@@ -643,6 +673,10 @@ const fetchEditarMatricula = async (matriculaId: number, subjectSelected: typeof
             id: teacherSelected?.id,
             nombre: teacherSelected?.nombre,
             apellidos: teacherSelected?.apellidos,
+            dni: teacherSelected?.dni,
+            direccion: teacherSelected?.direccion,
+            telefono: teacherSelected?.telefono,
+            email: teacherSelected?.email
           }
         }
       }
@@ -695,6 +729,9 @@ const initFilters = () => { // componente filtro en global para que busque cualq
     'subject.nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'teacher.nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'teacher.apellidos': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'teacher.dni': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'teacher.direccion': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'teacher.telefono': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'teacher.email': { value: null, matchMode: FilterMatchMode.CONTAINS },
   }
 }
@@ -733,7 +770,7 @@ const collapseAll = () => {
   <div class="flex justify-content-start pt-2" v-if="isAdmin">
     <div class="card flex justify-content-center">
       <DataTable v-model:expandedRows="expandedRows" v-model:filters="filters" filterDisplay="menu"
-        :globalFilterFields="['student.nombre', 'student.apellidos', 'student.dni', 'student.direccion', 'student.telefono', 'student.email', 'matriculas.subject.nombre', 'matriculas.teacher.nombre', 'matriculas.teacher.apellidos', 'matriculas.teacher.email']"
+        :globalFilterFields="['student.nombre', 'student.apellidos', 'student.dni', 'student.direccion', 'student.telefono', 'student.email', 'matriculas.subject.nombre', 'matriculas.teacher.nombre', 'matriculas.teacher.apellidos', 'matriculas.teacher.dni', 'matriculas.teacher.direccion', 'matriculas.teacher.telefono', 'matriculas.teacher.email']"
         class="" removableSort removableSortstripedRows :value="allStudentsWithMatriculasRef" dataKey="student.id" sortField="student.id" :sortOrder="1" :paginator="true" :rows="10"
         tableStyle="width: 100%" :pt="{
     paginator: {
@@ -750,9 +787,9 @@ const collapseAll = () => {
     }
   }">
         <template #header>
-          <div class="flex flex-wrap justify-content-end h-1rem align-content-center">
-            <Button class="w-auto mr-2" severity="secondary" text icon="pi pi-plus" label="Expandir" v-tooltip.top="'Expandir todo'" @click="expandAll"></Button>
-            <Button class="w-auto" severity="secondary" text icon="pi pi-minus" label="Colapsar" v-tooltip.top="'Colapsar todo'" @click="collapseAll"></Button>
+          <div class="flex flex-wrap justify-content-end h-max align-content-center">
+            <Button class="w-auto mr-2 h-1rem" severity="secondary" text icon="pi pi-plus" label="Expandir" v-tooltip.top="'Expandir todo'" @click="expandAll"></Button>
+            <Button class="w-auto h-1rem" severity="secondary" text icon="pi pi-minus" label="Colapsar" v-tooltip.top="'Colapsar todo'" @click="collapseAll"></Button>
           </div>
         </template>
         <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
@@ -815,7 +852,22 @@ const collapseAll = () => {
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>
             </Column>
-            <Column field="teacher.nombre" header="Profesores" sortable headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+            <Column field="teacher.nombre" header="Nombre" sortable headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <Column field="teacher.apellidos" header="Apellidos" sortable headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <Column field="teacher.dni" header="DNI" sortable headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+              <template #filter="{ filterModel }">
+                <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+              </template>
+            </Column>
+            <Column field="teacher.email" header="Email" sortable headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
               <template #filter="{ filterModel }">
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>

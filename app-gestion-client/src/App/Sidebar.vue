@@ -116,7 +116,8 @@ const menuItems2 = ref([
   <Menu :model="adminStore.isAdmin ? menuItems1 : menuItems2" class="">
     <template #item="{ item, props }">
       <RouterLink :to="item.to" :class="[item.class, 'p-ripple', { 'p-disabled': item.disabled }]" :style="item.style" role="">
-        <a v-ripple class="flex align-items-center" v-bind="props.action">
+        <!-- <a v-ripple class="flex align-items-center" v-bind="props.action">  desactivado ripple   -->
+        <a class="flex align-items-center" v-bind="props.action">
           <span :class="item.icon"></span>
           <span class="ml-2">{{ item.label }}</span>
         </a>

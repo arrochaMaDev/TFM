@@ -23,6 +23,7 @@ export class RegisterSubjectTeacherController {
         profesor: {
           nombre: subjectTeacherData.teacher.nombre,
           apellidos: subjectTeacherData.teacher.apellidos,
+          dni: subjectTeacherData.teacher.dni,
         },
       };
 

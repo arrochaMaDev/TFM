@@ -39,7 +39,10 @@ app.use(VueCookies, {
 })
 
 //Primevue
-app.use(PrimeVue, { ripple: true, inputStyle: 'outlined' }) // oulined??
+app.use(PrimeVue, {
+  ripple: true,
+  inputStyle: 'outlined'
+}) // oulined??
 app.use(ConfirmationService)
 app.use(ToastService)
 app.directive('tooltip', Tooltip)

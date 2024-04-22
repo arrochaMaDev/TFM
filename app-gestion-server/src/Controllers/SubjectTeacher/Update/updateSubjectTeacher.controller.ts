@@ -47,6 +47,7 @@ export class UpdateSubjectTeacherController {
           id: updatedSubjectTeacher.teacher.id,
           nombre: updatedSubjectTeacher.teacher.nombre,
           apellidos: updatedSubjectTeacher.teacher.apellidos,
+          dni: updatedSubjectTeacher.teacher.dni,
         },
       };
       return response.status(200).json(updatedSubjectTeacherDto);

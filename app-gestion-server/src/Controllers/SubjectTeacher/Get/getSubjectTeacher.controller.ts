@@ -29,6 +29,9 @@ export class GetSubjectteacherController {
           id: subjectTeacher.teacher.id,
           nombre: subjectTeacher.teacher.nombre,
           apellidos: subjectTeacher.teacher.apellidos,
+          dni: subjectTeacher.teacher.dni,
+          direccion: subjectTeacher.teacher.direccion,
+          telefono: subjectTeacher.teacher.telefono,
           email: subjectTeacher.teacher.email,
         },
       };

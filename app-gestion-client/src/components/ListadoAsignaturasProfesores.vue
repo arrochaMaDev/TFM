@@ -48,6 +48,9 @@ let teachersRefFromServer: Ref<
     id: number
     nombre: string
     apellidos: string
+    dni: string
+    direccion: string
+    telefono: number
     email: string
   }[]
 > = ref([])
@@ -69,6 +72,9 @@ const getTeachersData = async () => {
         usuario_id: string
         nombre: string
         apellidos: string
+        dni: string
+        direccion: string
+        telefono: number
         email: string
       }[]
       teachersRefFromServer.value = data
@@ -89,6 +95,9 @@ const subjectsTeachersRefFromServer: Ref<
       id: number
       nombre: string
       apellidos: string
+      dni: string
+      direccion: string
+      telefono: number
       email: string
     }
     subject: {
@@ -127,6 +136,9 @@ const subjectsByTeacherIdRef: Ref<{
     id: number
     nombre: string
     apellidos: string
+    dni: string
+    direccion: string
+    telefono: number
     email: string
   }
   asignaciones: {
@@ -188,6 +200,9 @@ const teachersWithSubjectsRef: Ref<{
     id: number
     nombre: string
     apellidos: string
+    dni: string
+    direccion: string
+    telefono: number
     email: string
   }
   asignaciones: {
@@ -295,6 +310,9 @@ const asignacionEditar: Ref<
       id: number
       nombre: string
       apellidos: string
+      dni: string
+      direccion: string
+      telefono: number
       email: string
     }
     subject: {
@@ -430,6 +448,9 @@ const fetchEditarSubjectTeacher = async (asignacionId: number, subjectSelected: 
           id: asignacionEditar.value?.teacher.id,
           nombre: asignacionEditar.value?.teacher.nombre,
           apellidos: asignacionEditar.value?.teacher.apellidos,
+          dni: asignacionEditar.value?.teacher.dni,
+          direccion: asignacionEditar.value?.teacher.direccion,
+          telefono: asignacionEditar.value?.teacher.telefono,
           email: asignacionEditar.value?.teacher.email,
         },
         subject: {
@@ -487,6 +508,9 @@ const initFilters = () => { // componente filtro en global para que busque cualq
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     'teacher.nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'teacher.apellidos': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'teacher.dni': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'teacher.direccion': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'teacher.telefono': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'teacher.email': { value: null, matchMode: FilterMatchMode.CONTAINS },
   }
   filters1.value = {
@@ -527,8 +551,9 @@ const collapseAll = () => {
     "></Toast>
   <div class="flex justify-content-start pt-2" v-if="isAdmin">
     <div class="card flex justify-content-center">
-      <DataTable v-model:expandedRows="expandedRows" v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['teacher.nombre', 'teacher.apellidos', 'teacher.email', 'subject.nombre']"
-        class="" removableSort removableSortstripedRows :value="teachersWithSubjectsRef" dataKey="teacher.id" sortField="teacher.id" :sortOrder="1" :paginator="true" :rows="10" :pt="{
+      <DataTable v-model:expandedRows="expandedRows" v-model:filters="filters" filterDisplay="menu"
+        :globalFilterFields="['teacher.nombre', 'teacher.apellidos', 'teacher.dni', 'teacher.direccion', 'teacher.telefono', 'teacher.email', 'subject.nombre']" class="" removableSort
+        removableSortstripedRows :value="teachersWithSubjectsRef" dataKey="teacher.id" sortField="teacher.id" :sortOrder="1" :paginator="true" :rows="10" :pt="{
     paginator: {
       paginatorWrapper: { class: 'col-12 flex justify-content-center' },
       firstPageButton: { class: 'w-auto' },
@@ -543,9 +568,9 @@ const collapseAll = () => {
     }
   }">
         <template #header>
-          <div class="flex flex-wrap justify-content-end h-1rem align-content-center">
-            <Button class="w-auto mr-2" severity="secondary" text icon="pi pi-plus" label="Expandir" v-tooltip.top="'Expandir todo'" @click="expandAll"></Button>
-            <Button class="w-auto" severity="secondary" text icon="pi pi-minus" label="Colapsar" v-tooltip.top="'Colapsar todo'" @click="collapseAll"></Button>
+          <div class="flex flex-wrap justify-content-end h-max align-content-center">
+            <Button class="w-auto mr-2 h-1rem" severity="secondary" text icon="pi pi-plus" label="Expandir" v-tooltip.top="'Expandir todo'" @click="expandAll"></Button>
+            <Button class="w-auto h-1rem" severity="secondary" text icon="pi pi-minus" label="Colapsar" v-tooltip.top="'Colapsar todo'" @click="collapseAll"></Button>
           </div>
         </template>
 
@@ -558,12 +583,27 @@ const collapseAll = () => {
           </span>
         </div>
         <Column expander style="width: 1rem"></Column>
-        <Column field="teacher.nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+        <Column field="teacher.nombre" header="Nombre" sortable headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
           <template #filter="{ filterModel }">
             <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
           </template>
         </Column>
-        <Column field="teacher.apellidos" header="Apellidos" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+        <Column field="teacher.apellidos" header="Apellidos" sortable headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+          <template #filter="{ filterModel }">
+            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+          </template>
+        </Column>
+        <Column field="teacher.dni" header="DNI" sortable headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+          <template #filter="{ filterModel }">
+            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+          </template>
+        </Column>
+        <Column field="teacher.direccion" header="Direccion" sortable headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+          <template #filter="{ filterModel }">
+            <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+          </template>
+        </Column>
+        <Column field="teacher.telefono" header="Telefono" sortable headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
           <template #filter="{ filterModel }">
             <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
           </template>
@@ -641,6 +681,7 @@ const collapseAll = () => {
     ">
       <Column field="nombre" header="Nombre" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
       <Column field="apellidos" header="Apellidos" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="dni" header="DNI" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
       <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
     </DataTable>
 
