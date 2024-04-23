@@ -90,6 +90,10 @@ const getStudentData = async () => {
       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
       const data = await response.json()
+      if (data == null) { // si no existe 
+        router.push('/notFound')
+        return
+      }
       studentDataFromServer.value = data
       console.log(studentDataFromServer.value)
       // Para cambiar el permiso a string

@@ -43,7 +43,6 @@ onMounted(async () => {
 
   // VERIFICAR SI PUEDE VER LA PÁGINA
   const teacherId = Number(router.currentRoute.value.params.id)
-
   await getTeacherData(teacherId)
 
   if (!isAdmin.value && userCookie && teacherDataFromServer.value?.userId.id != userCookie.id) {
@@ -92,6 +91,10 @@ const getTeacherData = async (teacherId: number) => {
       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
       const data = await response.json()
+      if (data == null) { // si no existe 
+        router.push('/notFound')
+        return
+      }
       teacherDataFromServer.value = data
       console.log(teacherDataFromServer.value)
       // Para cambiar el permiso a string
