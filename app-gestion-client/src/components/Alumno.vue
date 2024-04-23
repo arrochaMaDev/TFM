@@ -800,6 +800,9 @@ const initFilters = () => { // componente filtro en global para que busque cualq
     'subject.nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'teacher.nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'teacher.apellidos': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'teacher.dni': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'teacher.direccion': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'teacher.telefono': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'teacher.email': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'year': { value: null, matchMode: FilterMatchMode.CONTAINS },
   }
@@ -909,10 +912,10 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
         </div>
       </div>
 
-      <div v-if="matriculaFromServer?.matriculas" class="card col-12">
+      <div v-if="matriculaFromServer?.matriculas" class="card w-max">
         <DataTable :value="matriculaFromServer?.matriculas" dataKey="id" v-model:filters="filters" filterDisplay="menu"
-          :globalFilterFields="['subject.nombre', 'teacher.nombre', 'teacher.apellidos', 'teacher.email', 'year']" class="" removableSort sortField="matricula.subject.nombre" :sortOrder="1"
-          :paginator="true" :rows="5" stripedRows selection-mode="single" :pt="{
+          :globalFilterFields="['subject.nombre', 'teacher.nombre', 'teacher.apellidos', 'teacher.dni', 'teacher.direccion', 'teacher.telefono', 'teacher.email', 'year']" class="" removableSort
+          sortField="matricula.subject.nombre" :sortOrder="1" :paginator="true" :rows="5" stripedRows selection-mode="single" :pt="{
     paginator: {
       paginatorWrapper: { class: 'flex justify-content-center' },
       firstPageButton: { class: 'w-auto' },
@@ -921,7 +924,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       nextPageButton: { class: 'w-auto' },
       lastPageButton: { class: 'w-auto' },
     }, table: {
-      class: 'mt-0 w-12',
+      class: 'mt-0 w-auto',
       style: { 'border': 'none', 'background-color': 'transparent' }
     }
   }">
@@ -947,7 +950,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
                   <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                 </template>
               </Column>
-              <Column header="Profesor" :colspan="4" headerClass="h-3rem pl-1 "></Column>
+              <Column header="Profesor" :colspan="isAdmin ? 7 : 4" headerClass="h-3rem pl-1 "></Column>
             </Row>
             <Row>
               <Column header="Nombre" sortable field="teacher.nombre" headerClass="h-2rem pl-1  pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
@@ -957,6 +960,21 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
               </Column>
 
               <Column header="Apellidos" sortable field="teacher.apellidos" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                <template #filter="{ filterModel }">
+                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                </template>
+              </Column>
+              <Column v-if="isAdmin" header="DNI" sortable field="teacher.dni" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                <template #filter="{ filterModel }">
+                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                </template>
+              </Column>
+              <Column v-if="isAdmin" header="Dirección" sortable field="teacher.direccion" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                <template #filter="{ filterModel }">
+                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                </template>
+              </Column>
+              <Column v-if="isAdmin" header="Teléfono" sortable field="teacher.telefono" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
                 <template #filter="{ filterModel }">
                   <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                 </template>
@@ -976,11 +994,16 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
               {{ slotProps.data.year }} / {{ slotProps.data.year + 1 }}
             </template>
           </Column>
-          <Column field="subject.nombre" bodyClass="p-0 pl-1">
+          <Column field="subject.nombre" bodyClass="p-0 pl-1"> </Column>
+          <Column sortable field="teacher.nombre" headerClass="h-2rem pl-1 bg-transparent"> </Column>
+          <Column field="teacher.apellidos" bodyClass="p-0 pl-1"></Column>
+          <Column v-if="isAdmin" field="teacher.dni" bodyClass="p-0 pl-1"></Column>
+          <Column v-if="isAdmin" field="teacher.direccion" bodyClass="p-0 pl-1"></Column>
+          <Column v-if="isAdmin" field="teacher.telefono" bodyClass="p-0 pl-1">
+            <template #body="slotProps">
+              <a :href="'tel:' + slotProps.data.teacher.telefono" class="flex justify-content-start"> {{ slotProps.data.teacher.telefono }}</a>
+            </template>
           </Column>
-          <Column header="Nombre" sortable field="teacher.nombre" headerClass="h-2rem pl-1 bg-transparent">
-          </Column>
-          <Column header="Apellidos" field="teacher.apellidos" bodyClass="p-0 pl-1"></Column>
           <Column field="teacher.email" bodyClass="p-0 pl-1">
             <template #body="slotProps">
               <a :href="'mailto:' + slotProps.data.teacher.email" class="flex justify-content-start"> {{ slotProps.data.teacher.email }}</a>

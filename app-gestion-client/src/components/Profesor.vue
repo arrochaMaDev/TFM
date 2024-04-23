@@ -7,6 +7,7 @@ import Column from 'primevue/column';
 import ColumnGroup from 'primevue/columngroup';
 import Row from 'primevue/row';
 import InputText from 'primevue/inputtext'
+import InputNumber from 'primevue/inputnumber'
 import Dropdown from 'primevue/dropdown';
 import { FilterMatchMode } from 'primevue/api';
 import Toast from 'primevue/toast';
@@ -60,6 +61,9 @@ const teacherDataFromServer: Ref<{
   id: number
   nombre: string
   apellidos: string
+  dni: string
+  direccion: string
+  telefono: number
   email: string
   userId: {
     id: number
@@ -120,7 +124,9 @@ const subjectsByTeacherIdFromServer: Ref<{
     id: number
     nombre: string
     apellidos: string
-    asignaturas: string
+    dni: string
+    direccion: string
+    telefono: number
   }
   asignaciones: {
     id: number
@@ -172,7 +178,10 @@ const matriculasRefFromServer: Ref<{
     id: number
     nombre: string
     apellidos: string
-    asignaturas: string
+    dni: string
+    direccion: string
+    telefono: number
+    email: string
   }
   matriculas: {
     id: number
@@ -286,6 +295,9 @@ const profesorEditar: Ref<
     id: number
     nombre: string
     apellidos: string
+    dni: string
+    direccion: string
+    telefono: number
     email: string
     userId: {
       id: number
@@ -297,6 +309,9 @@ const profesorEditar: Ref<
     id: 0,
     nombre: '',
     apellidos: '',
+    dni: '',
+    direccion: '',
+    telefono: 0,
     email: '',
     userId: {
       id: 0,
@@ -339,6 +354,9 @@ const editarProfesor = async () => {
         body: JSON.stringify({
           nombre: profesorEditar.value?.nombre,
           apellidos: profesorEditar.value?.apellidos,
+          dni: profesorEditar.value?.dni,
+          direccion: profesorEditar.value?.direccion,
+          telefono: Number(profesorEditar.value?.telefono),
           email: profesorEditar.value?.email,
           userId: profesorEditar.value?.userId.id
         }),
@@ -354,6 +372,9 @@ const editarProfesor = async () => {
         const profesorActualizado = {
           nombre: profesorEditar.value?.nombre,
           apellidos: profesorEditar.value?.apellidos,
+          dni: profesorEditar.value?.dni,
+          direccion: profesorEditar.value?.direccion,
+          telefono: profesorEditar.value?.telefono,
           email: profesorEditar.value?.email,
           userId: profesorEditar.value?.userId.id
         };
@@ -517,6 +538,9 @@ const asignacionEditar: Ref<
       id: number
       nombre: string
       apellidos: string
+      dni: string
+      direccion: string
+      telefono: number
       email: string
     }
     subject: {
@@ -653,6 +677,9 @@ const fetchEditarSubjectTeacher = async (asignacionId: number, subjectSelected: 
           id: asignacionEditar.value?.teacher.id,
           nombre: asignacionEditar.value?.teacher.nombre,
           apellidos: asignacionEditar.value?.teacher.apellidos,
+          dni: asignacionEditar.value?.teacher.dni,
+          direccion: asignacionEditar.value?.teacher.direccion,
+          telefono: asignacionEditar.value?.teacher.telefono,
           email: asignacionEditar.value?.teacher.email,
         },
         subject: {
@@ -763,6 +790,9 @@ const matriculaEditar: Ref<
       usuario_id: string
       nombre: string
       apellidos: string
+      dni: string
+      direccion: string
+      telefono: number
       email: string
     }
     year: number
@@ -783,6 +813,9 @@ const selectedTeacher: Ref<
     usuario_id: string
     nombre: string
     apellidos: string
+    dni: string
+    direccion: string
+    telefono: number
     email: string
   } | undefined
 > = ref(undefined)
@@ -809,6 +842,9 @@ const studentWithMatriculasEditar: Ref<{
       usuario_id: string
       nombre: string
       apellidos: string
+      dni: string
+      direccion: string
+      telefono: number
       email: string
     }
     year: number
@@ -855,6 +891,9 @@ const matriculaFromServer: Ref<{
       id: number
       nombre: string
       apellidos: string
+      dni: string
+      direccion: string
+      telefono: number
       email: string
     }
     year: number
@@ -930,6 +969,9 @@ const teachersBySubjectIdRefFromServer: Ref<{
       id: number
       nombre: string
       apellidos: string
+      dni: string
+      direccion: string
+      telefono: number
       email: string
     }
   }[]
@@ -940,6 +982,9 @@ const onlyTeachersArray: Ref<{
   id: number
   nombre: string
   apellidos: string
+  dni: string
+  direccion: string
+  telefono: number
   email: string
 }[]> = ref([])
 
@@ -981,6 +1026,9 @@ const getTeachersBySubjectData = async () => {
             id: number
             nombre: string
             apellidos: string
+            dni: string
+            direccion: string
+            telefono: number
             email: string
           }
         }[]
@@ -1086,6 +1134,7 @@ const fetchEditarMatricula = async (matriculaId: number, subjectSelected: typeof
             id: teacherSelected?.id,
             nombre: teacherSelected?.nombre,
             apellidos: teacherSelected?.apellidos,
+            email: teacherSelected?.email
           }
         }
       }
@@ -1167,8 +1216,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       <div id="datos" class="card col ml-5">
         <div id="Datos-personales" class="mb-5">
           <h6 class="m-1 text-2xl text-800 font-bold"> {{ teacherDataFromServer?.nombre }} {{ teacherDataFromServer?.apellidos }}</h6>
-          HAY QUE AÑADIR DNI A LA BASE DE DATOS
-          <!-- <h6 class="m-1 text-xl text-800 font-bold"> {{ teacherDataFromServer?.dni }}</h6> -->
+          <h6 class="m-1 text-xl text-800 font-bold"> {{ teacherDataFromServer?.dni }}</h6>
 
           <ul id="datos-contacto" class="list-none p-0">
             <li class="flex mb-3">
@@ -1177,8 +1225,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
               </div>
               <div class="flex-column align-self-center">
                 <span class="flex justify-content-start align-self-center font-bold mb-1">Dirección</span>
-                HAY QUE AÑADIR DIRECCION A LA BASE DE DATOS
-                <!-- <span class="flex justify-content-start "> {{ teacherDataFromServer?.direccion }}</span> -->
+                <span class="flex justify-content-start "> {{ teacherDataFromServer?.direccion }}</span>
               </div>
             </li>
             <li class="flex mb-3">
@@ -1187,9 +1234,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
               </div>
               <div class="flex-column align-self-center">
                 <span class="flex justify-content-start align-self-center font-bold mb-1">Teléfono</span>
-                HAY QUE AÑADIR TELEFONO A LA BASE DE DATOS
 
-                <!-- <a :href="'tel:' + teacherDataFromServer?.telefono" class="flex justify-content-start"> {{ teacherDataFromServer?.telefono }}</a> -->
+                <a :href="'tel:' + teacherDataFromServer?.telefono" class="flex justify-content-start"> {{ teacherDataFromServer?.telefono }}</a>
               </div>
             </li>
             <li class="flex mb-3">
@@ -1310,36 +1356,46 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
 
           <ColumnGroup type="header">
             <Row>
-              <Column header="Curso escolar" field="year" :rowspan="2" headerClass="h-3rem pl-1 bg-transparent pr-3 " :show-filter-match-modes="false">
+              <Column header="Curso escolar" field="year" :rowspan="2" headerClass="h-3rem pl-1  pr-3 " :show-filter-match-modes="false">
                 <template #filter="{ filterModel }">
                   <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                 </template>
               </Column>
-              <Column header="Asignatura" field="subject.nombre" :rowspan="2" sortable headerClass="h-2rem pl-1 bg-transparent" :show-filter-match-modes="false">
+              <Column header="Asignatura" field="subject.nombre" :rowspan="2" sortable headerClass="h-2rem pl-1 " :show-filter-match-modes="false">
                 <template #filter="{ filterModel }">
                   <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                 </template>
               </Column>
-              <Column header="Alumno" :colspan="4" headerClass="h-3rem pl-1 bg-transparent"></Column>
+              <Column header="Alumno" :colspan="6" headerClass="h-3rem pl-1 "></Column>
             </Row>
             <Row>
-              <Column header="Nombre" sortable field="student.nombre" headerClass="h-2rem pl-1 bg-transparent pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+              <Column header="Nombre" sortable field="student.nombre" headerClass="h-2rem pl-1  pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
                 <template #filter="{ filterModel }">
                   <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                 </template>
               </Column>
 
-              <Column header="Apellidos" sortable field="student.apellidos" headerClass="h-2rem pl-1 bg-transparent pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+              <Column header="Apellidos" sortable field="student.apellidos" headerClass="h-2rem pl-1  pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
                 <template #filter="{ filterModel }">
                   <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                 </template>
               </Column>
-              <Column header="DNI" sortable field="student.dni" headerClass="h-2rem pl-1 bg-transparent pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+              <Column header="DNI" sortable field="student.dni" headerClass="h-2rem pl-1  pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
                 <template #filter="{ filterModel }">
                   <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                 </template>
               </Column>
-              <Column header="" headerClass="h-2rem pl-1 bg-transparent pr-2"></Column>
+              <Column header="Teléfono" sortable field="student.telefono" headerClass="h-2rem pl-1  pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                <template #filter="{ filterModel }">
+                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                </template>
+              </Column>
+              <Column header="Email" sortable field="student.email" headerClass="h-2rem pl-1  pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                <template #filter="{ filterModel }">
+                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                </template>
+              </Column>
+              <Column header="" headerClass="h-2rem pl-1  pr-2"></Column>
             </Row>
           </ColumnGroup>
 
@@ -1352,6 +1408,16 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           <Column field="student.nombre" bodyClass="p-0 pl-1"></Column>
           <Column field="student.apellidos" bodyClass="p-0 pl-1"></Column>
           <Column field="student.dni" bodyClass="p-0 pl-1"></Column>
+          <Column field="student.telefono" bodyClass="p-0 pl-1">
+            <template #body="slotProps">
+              <a :href="'tel:' + slotProps.data.student.telefono" class="flex justify-content-start"> {{ slotProps.data.student.telefono }}</a>
+            </template>
+          </column>
+          <Column field="student.email" bodyClass="p-0 pl-1">
+            <template #body="slotProps">
+              <a :href="'mailto:' + slotProps.data.student.email" class="flex justify-content-start"> {{ slotProps.data.student.email }}</a>
+            </template>
+          </Column>
           <Column header="" headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="flex p-1 pl-1 h-3rem">
             <!-- mostrar solo si es admin -->
             <template #body="slotProps" v-if="isAdmin">
@@ -1383,6 +1449,18 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       <div class="flex align-items-center gap-3 mb-3">
         <label for="apellidos" class="font-semibold w-6rem">Apellidos</label>
         <InputText id="apellidos" class="w-7" v-model="profesorEditar.apellidos" :class="{ 'p-invalid': !profesorEditar.apellidos }" />
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="apellidos" class="font-semibold w-6rem">DNI</label>
+        <InputText id="apellidos" class="w-7" v-model="profesorEditar.dni" :class="{ 'p-invalid': !profesorEditar.dni }" />
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="apellidos" class="font-semibold w-6rem">Direccion</label>
+        <InputText id="apellidos" class="w-7" v-model="profesorEditar.direccion" :class="{ 'p-invalid': !profesorEditar.direccion }" />
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="apellidos" class="font-semibold w-6rem">Teléfono</label>
+        <InputNumber id="telefono" inputId="withoutgrouping" :useGrouping="false" class="w-3" v-model="profesorEditar.telefono" :class="{ 'p-invalid': !profesorEditar.telefono }" />
       </div>
       <div class="flex align-items-center gap-3 mb-3">
         <label for="email" class="font-semibold w-6rem">Email</label>
@@ -1418,7 +1496,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
     </Dialog>
 
     <!-- Dialog editar asignación -->
-    <Dialog v-model:visible="visibleDialogEditarAsignacion" modal header="Editar Asignación" class="w-3" :pt="{
+    <Dialog v-model:visible="visibleDialogEditarAsignacion" modal header="Editar Asignación" class="w-auto" :pt="{
     header: { class: 'flex align-items-baseline h-5rem' },
     title: { class: '' },
     closeButtonIcon: { class: '' }
@@ -1427,16 +1505,18 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       <span class="p-text-secondary flex mb-5">Cambiar asignatura</span>
 
       <label class="text-xl text-800 font-bold">Datos del profesor</label>
-      <DataTable :value="[asignacionEditar?.teacher]" class="pt-1" tableStyle="width: 30rem" :pt="{
+      <DataTable :value="[asignacionEditar?.teacher]" class="pt-1" :pt="{
     table: {
-      class: 'mt-0',
+      class: 'mt-0 w-auto',
       style: { 'border': 'none' }
     }
   }
     ">
-        <Column field="nombre" header="Nombre" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="apellidos" header="Apellidos" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
+        <Column field="nombre" header="Nombre" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 h-3rem pr-2"></Column>
+        <Column field="apellidos" header="Apellidos" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 h-3rem pr-2"></Column>
+        <Column field="dni" header="DNI" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 h-3rem pr-2"></Column>
+        <Column field="direccion" header="Dirección" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 h-3rem pr-2"></Column>
+        <Column field="email" header="Email" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 h-3rem pr-2"> </Column>
       </DataTable>
 
       <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12 pt-4">
