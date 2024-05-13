@@ -501,7 +501,6 @@ const goToTeacher = (id: number) => {
 const filters = ref() // variable filtro
 const filters1 = ref() // variable filtro
 
-
 const initFilters = () => { // componente filtro en global para que busque cualquier valor
   filters.value =
   {
@@ -513,7 +512,9 @@ const initFilters = () => { // componente filtro en global para que busque cualq
     'teacher.telefono': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'teacher.email': { value: null, matchMode: FilterMatchMode.CONTAINS },
   }
+
   filters1.value = {
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     'subject.nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
   }
 }
@@ -551,8 +552,8 @@ const collapseAll = () => {
     "></Toast>
   <div class="flex justify-content-start pt-2" v-if="isAdmin">
     <div class="card flex justify-content-center">
-      <DataTable v-model:expandedRows="expandedRows" v-model:filters="filters" filterDisplay="menu"
-        :globalFilterFields="['teacher.nombre', 'teacher.apellidos', 'teacher.dni', 'teacher.direccion', 'teacher.telefono', 'teacher.email', 'subject.nombre']" class="" removableSort
+      <DataTable v-model:expandedRows="expandedRows" v-model:filters="filters"
+        :globalFilterFields="['teacher.nombre', 'teacher.apellidos', 'teacher.dni', 'teacher.direccion', 'teacher.telefono', 'teacher.email']" filterDisplay="menu" class="" removableSort
         removableSortstripedRows :value="teachersWithSubjectsRef" dataKey="teacher.id" sortField="teacher.id" :sortOrder="1" :paginator="true" :rows="10" :pt="{
     paginator: {
       paginatorWrapper: { class: 'col-12 flex justify-content-center' },
@@ -576,9 +577,15 @@ const collapseAll = () => {
 
         <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
           <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Asignaciones</h5>
-          <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
-            <i class="pi pi-search"></i>
-            <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscar..." />
+          <span class="flex justify-content-end">
+            <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+              <i class="pi pi-search"></i>
+              <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscar profesor..." />
+            </span>
+            <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+              <i class="pi pi-search"></i>
+              <InputText id="buscarAsignatura" class="h-3rem mr-2" v-model="filters1['global'].value" placeholder="Buscar asignatura..." />
+            </span>
             <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
           </span>
         </div>
@@ -608,8 +615,8 @@ const collapseAll = () => {
             <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
           </template>
         </Column>
-        <Column field="teacher.email" header="Email" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false"> <template
-            #filter="{ filterModel }">
+        <Column field="teacher.email" header="Email" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+          <template #filter="{ filterModel }">
             <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
           </template>
         </Column>
@@ -621,12 +628,13 @@ const collapseAll = () => {
 
         <!-- Tabla asignaturas asignadas -->
         <template #expansion="slotProps">
-          <DataTable :value="slotProps.data.asignaciones" v-model:filters="filters1" filterDisplay="menu" :globalFilterFields="['subject.nombre']" class="" removableSort selection-mode="single"
-            tableStyle="width: 10rem" :pt="{
+          <DataTable :value="slotProps.data.asignaciones" class="" style="background-color:#f8f9fa" v-model:filters="filters1" filterDisplay="menu" :globalFilterFields="['subject.nombre']"
+            removableSort selection-mode="single" tableStyle="width: 10rem" :pt="{
     table: {
       class: 'mt-0 ml-7',
       style: {
-        'border': 'none', 'background-color': 'transparent'
+        'border': 'solid 1rem #f8f9fa', 'background-color': 'transparent'
+
       }
     }
   }
@@ -643,6 +651,8 @@ const collapseAll = () => {
               </template>
             </Column>
           </DataTable>
+          <div id="separadorTablas" class="h-2rem mb-0" style="background-color: #f8f9fa"></div>
+
         </template>
       </DataTable>
     </div>

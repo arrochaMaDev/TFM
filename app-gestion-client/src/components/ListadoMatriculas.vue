@@ -464,6 +464,7 @@ const onlyTeachersArray: Ref<{
 const noTeachersAssigned: Ref<boolean> = ref(false)
 
 const getTeachersBySubjectData = async () => {
+  onlyTeachersArray.value = []
   try {
     if (!selectedSubject.value) {
       // Manejar el caso en el que no haya una asignatura seleccionada
@@ -738,6 +739,7 @@ const initFilters = () => { // componente filtro en global para que busque cualq
     'matriculas.teacher.email': { value: null, matchMode: FilterMatchMode.CONTAINS },
   }
   filters1.value = {
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     'subject.nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'teacher.nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'teacher.apellidos': { value: null, matchMode: FilterMatchMode.CONTAINS },

@@ -161,6 +161,13 @@ const getTeachersBySubjectData = async () => {
         credentials: 'include'
       }
     )
+    if (response.status === 404) {
+      teacherSelected.value = null
+      onlyTeachersArray.value = []
+      teachersBySubjectIdRefFromServer.value = null
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'La asignatura seleccionada no tiene profesores asignados', life: 3000 });
+      return null;
+    }
     if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
     } else {
@@ -186,13 +193,18 @@ const getTeachersBySubjectData = async () => {
       onlyTeachersArray.value = teachersBySubjectIdRefFromServer.value.teachers.map(teacher => teacher.teacher)
 
       console.table(onlyTeachersArray.value)
+
+      teacherSelected.value = null
+
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
     teachersBySubjectIdRefFromServer.value = null
+
   }
 }
+
 
 // REFERENCIAS DE LA MATRICULA
 const subjectSelected: Ref<{
@@ -244,12 +256,13 @@ const crearMatricula = async () => {
   formSubmitted.value = true;
   let isValid = true;
 
-  if (!teacherSelected.value || !subjectSelected.value || !teacherSelected.value) {
+  if (!studentSelected.value || !subjectSelected.value || !teacherSelected.value) {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
     isValid = false;
   }
-  if (!existenDuplicados) {
-    if (isValid) {
+  // await existenDuplicados(); 
+  if (isValid) {
+    if (!(await existenDuplicados())) {
       try {
         const response = await fetch('http://localhost:3000/matricula', {
           method: 'POST',
@@ -297,9 +310,9 @@ const crearMatricula = async () => {
         onlyTeachersArray.value = []
         formSubmitted.value = false;
       }
+    } else { // existenDuplicados == true
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'El alumno ya está matriculado en esa asignatura', life: 3000 });
     }
-  } else { // existenDuplicados == true
-    toast.add({ severity: 'warn', summary: 'Error', detail: 'El alumno ya está matriculado en esa asignatura', life: 3000 });
   }
 }
 
@@ -376,9 +389,9 @@ const getMatriculasByStudentId = async (studentId: number) => {
 }
 
 // Chequear si el alumno ya está matriculado en esa asignatura
-const existenDuplicados = () => {
+const existenDuplicados = async () => {
   if (studentSelected.value) {
-    getMatriculasByStudentId(studentSelected.value?.id)
+    await getMatriculasByStudentId(studentSelected.value?.id)
   }
 
   if (matriculasByStudentId.value && subjectSelected) {
@@ -388,13 +401,15 @@ const existenDuplicados = () => {
     const duplicados = subjectsIdsOfMatriculasOfStudent.filter(subjectId => subjectId === selectedSubjectId); // filtro si esa asignatura ya se encuentra en las matriculas del alumno
 
     if (duplicados.length > 0) {
+      console.log('true')
       return true
     }
-    if (duplicados.length == 0) {
+    if (duplicados.length == 0 || duplicados == undefined) {
+      console.log('false')
       return false
     }
   }
-};
+}
 
 // para resetear los datos del formulario y poner cada ref a vacío
 const borrarDatosForm = () => {

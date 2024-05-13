@@ -23,7 +23,7 @@ const inicio = () => {
   <div class="card mt-4 text-center">
     <img src="../utils/error-404.png" alt="error-image" />
     <h1 class="text-800 text-6xl">UPS! Error 404 Página No encontrada!</h1>
-    <Button class="w-auto m-5 text-xl" severity="primary" @click="inicio()">Volver</Button>
+    <Button class="w-auto m-5 text-xl" severity="primary" @click="inicio()">Volver a inicio</Button>
   </div>
 </template>
 

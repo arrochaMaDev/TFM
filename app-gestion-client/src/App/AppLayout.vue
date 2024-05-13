@@ -214,7 +214,7 @@ onMounted(() => {
             <sidebar class="layout-sidebar"></sidebar>
         </div>
 
-        <div class="layout-main-container">
+        <div class="layout-main-container ">
             <div class="layout-main">
                 <router-view />
             </div>
