@@ -12,6 +12,7 @@ export class Student {
     private readonly direccion: string,
     private readonly telefono: number,
     private readonly email: string,
+    private readonly foto: string,
     private readonly userId: UserDb,
   ) {}
 
@@ -38,6 +39,9 @@ export class Student {
   }
   getEmail(): string {
     return this.email;
+  }
+  getFoto(): string {
+    return this.foto;
   }
   getUserId(): UserDb {
     return this.userId;

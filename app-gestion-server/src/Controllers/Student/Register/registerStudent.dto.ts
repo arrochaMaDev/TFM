@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsNotEmpty,
@@ -5,6 +6,7 @@ import {
   IsNumber,
   Max,
   Min,
+  IsOptional,
 } from 'class-validator';
 
 export class RegisterStudentDto {
@@ -24,10 +26,10 @@ export class RegisterStudentDto {
   @IsNotEmpty()
   direccion: string;
 
-  @IsNumber()
+  // @IsNumber()
   @IsNotEmpty() // validado para que sea un número de 9 dígitos (entre 100000000 y 999999999) y en formato 123456789
-  @Min(100000000)
-  @Max(999999999)
+  // @Min(100000000)
+  // @Max(999999999)
   telefono: number;
 
   @IsString()
@@ -35,6 +37,12 @@ export class RegisterStudentDto {
   @IsEmail()
   email: string;
 
-  @IsNumber()
+  // @IsString()
+  @IsOptional()
+  foto: any;
+  // @Type(() => File)
+  // foto: File;
+
+  // @IsNumber()
   userId: number;
 }

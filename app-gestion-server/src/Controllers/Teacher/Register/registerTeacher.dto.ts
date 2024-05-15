@@ -5,6 +5,7 @@ import {
   IsNumber,
   Max,
   Min,
+  IsIdentityCard,
 } from 'class-validator';
 
 export class RegisterTeacherDto {
@@ -34,6 +35,9 @@ export class RegisterTeacherDto {
   @IsNotEmpty()
   @IsEmail()
   email: string;
+
+  @IsString()
+  foto: string;
 
   @IsNumber()
   userId: number;

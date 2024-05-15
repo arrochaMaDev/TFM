@@ -1,5 +1,5 @@
 // import './assets/main.css' // vue por defecto
-import { G } from './G'
+// import { G } from './G'
 import('@fortawesome/fontawesome-free/css/all.css')
 
 import 'primevue/resources/primevue.min.css'

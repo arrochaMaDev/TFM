@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+// import { MulterModule } from '@nestjs/platform-express';
 // import { AppController } from './app.controller';
 import { RegisterStudentService } from './Controllers/Student/Register/registerStudent.service';
 import { RegisterStudentController } from './Controllers/Student/Register/registerStudent.controller';
@@ -108,6 +109,9 @@ import { ListerMatriculasByTeacherIdController } from './Controllers/Matricula/G
       MatriculaDb,
       SubjectTeacherDb,
     ]),
+    // MulterModule.register({
+    //   dest: '/app-gestion-client/src/utils/picturesProfile', // Opción de guardar todas las fotos aquí. OJO! NO ES ESCALABLE! Cualquier archivo se guardará aquí
+    // }),
   ],
   controllers: [
     RegisterStudentController,

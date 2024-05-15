@@ -25,8 +25,16 @@ export class RegisterStudentService {
     // email: string,
   ) {
     try {
-      const { nombre, apellidos, dni, direccion, telefono, email, userId } =
-        data;
+      const {
+        nombre,
+        apellidos,
+        dni,
+        direccion,
+        telefono,
+        email,
+        foto,
+        userId,
+      } = data;
       const usuario_uuid = await uuidv4();
       console.log(usuario_uuid);
 
@@ -43,6 +51,7 @@ export class RegisterStudentService {
         direccion,
         telefono,
         email,
+        foto,
         usuario_id,
       );
       console.log(student);
@@ -56,6 +65,7 @@ export class RegisterStudentService {
         direccion: student.getDireccion(),
         telefono: student.getTelefono(),
         email: student.getEmail(),
+        foto: student.getFoto(),
         userId: student.getUserId(),
       };
       console.log(studentDb);
@@ -63,8 +73,8 @@ export class RegisterStudentService {
       await this.studentRepository.insert(studentDb);
       return studentDb;
     } catch (error) {
-      console.error('Error al crear la matrícula:', error);
-      throw new Error('No se pudo crear el profesor');
+      console.error('Error al crear el estudiante:', error);
+      throw new Error('No se pudo crear el estudiante');
     }
   }
 }

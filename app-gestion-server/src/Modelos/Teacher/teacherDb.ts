@@ -38,6 +38,9 @@ export class TeacherDb {
   @IsEmail()
   email: string;
 
+  @Column()
+  foto: string;
+
   // @ManyToOne(() => StudentDb, (student: StudentDb) => student.teachers)
   @ManyToOne(() => StudentDb)
   @JoinColumn({ name: 'id' })

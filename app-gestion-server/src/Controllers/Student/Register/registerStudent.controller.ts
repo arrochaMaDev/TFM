@@ -1,6 +1,16 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 import { RegisterStudentService } from './registerStudent.service';
 import { RegisterStudentDto } from './registerStudent.dto';
+import { v4 as uuidv4 } from 'uuid';
+import { extname } from 'path';
 
 @Controller('student')
 export class RegisterStudentController {
@@ -9,8 +19,27 @@ export class RegisterStudentController {
   ) {}
 
   @Post()
-  async registerStudent(@Body() data: RegisterStudentDto) {
+
+  // subir foto
+  @UseInterceptors(
+    FileInterceptor('foto', {
+      storage: diskStorage({
+        destination: '../../../picturesProfile', // dentro de la carpeta del server
+        filename: (req, file, cb) => {
+          const fileName = uuidv4(); // usamos uuid para generar un nombre único para el archivo
+          // const fileExt = extname(file.originalname); // extraemos la extensión del archivo
+          cb(null, `${fileName}.jpg`); // llamamos al callback con el nombre del archivo
+          // cb(null, `${fileName}${fileExt}`); // llamamos al callback con el nombre del archivo
+        },
+      }),
+    }),
+  )
+  async registerStudent(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() data: RegisterStudentDto,
+  ) {
     try {
+      data.foto = file.filename; // "../../../picturesProfile/07adda8d-e4d7-41f3-afad-26c67b811786.jpg" Es una ruta correcta para almacenar??
       // const { nombre, apellidos, dni, direccion, telefono, email } = data;
       const studentData = await this.registerStudentService.createStudent(data);
 
@@ -22,6 +51,7 @@ export class RegisterStudentController {
         direccion: studentData.direccion,
         telefono: studentData.telefono,
         email: studentData.email,
+        foto: studentData.foto,
         usuario: {
           id: studentData.userId.id,
           username: studentData.userId.username,

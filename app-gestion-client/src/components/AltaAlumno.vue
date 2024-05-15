@@ -2,6 +2,7 @@
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import InputMask from 'primevue/inputmask';
+import FileUpload from 'primevue/fileupload';
 import Dropdown from 'primevue/dropdown';
 import InlineMessage from 'primevue/inlinemessage';
 import Button from 'primevue/button';
@@ -14,6 +15,7 @@ import Column from 'primevue/column';
 import router from '@/router';
 import { useAdminStore } from '@/stores/isAdmin';
 import type { VueCookies } from 'vue-cookies';
+import { stringifyQuery } from 'vue-router';
 
 const toast = useToast();
 
@@ -49,6 +51,7 @@ const studentRef = {
   provincia: ref<string | undefined>(undefined),
   telefono: ref<string | undefined>(undefined),
   email: ref<string | undefined>(undefined),
+  foto: ref<File | null>(null),
   userId: ref<number | undefined>(undefined)
 }
 
@@ -108,10 +111,10 @@ const getUsersData = async () => {
 //OBTENER USUARIO PARA MOSTRAR
 const selectedUserId: Ref<number | undefined> = ref(undefined)
 const user: Ref<{
-  id: number | null;
+  id: number;
   username: string;
   email: string;
-  permiso: number | null;
+  permiso: number;
 } | undefined> = ref(undefined);
 
 const permisoString: Ref<string> = ref("")
@@ -196,22 +199,43 @@ const crearAlumno = async () => {
   }
   if (isValid) {
     try {
+      // const response = await fetch('http://localhost:3000/student', {
+      //   method: 'POST',
+      //   body: JSON.stringify({
+      //     nombre: studentRef.nombre.value,
+      //     apellidos: studentRef.apellidos.value,
+      //     dni: studentRef.dni.value,
+      //     direccion: studentRef.direccion.value,
+      //     telefono: Number(studentRef.telefono.value),
+      //     email: studentRef.email.value,
+      //     userId: user.value?.id
+      //   }),
+      //   headers: {
+      //     'Content-Type': 'application/json'
+      //   },
+      //   credentials: 'include'
+      // })
+
+      const formData = new FormData();
+      formData.append('nombre', `${studentRef.nombre.value}`);
+      formData.append('apellidos', `${studentRef.apellidos.value}`);
+      formData.append('dni', `${studentRef.dni.value}`);
+      formData.append('direccion', `${studentRef.direccion.value}`);
+      formData.append('telefono', `${studentRef.telefono.value}`);
+      formData.append('email', `${studentRef.email.value}`);
+      formData.append('userId', `${selectedUserId.value}`);
+      formData.append('foto', `${studentRef.foto.value?.name}`);
+
       const response = await fetch('http://localhost:3000/student', {
         method: 'POST',
-        body: JSON.stringify({
-          nombre: studentRef.nombre.value,
-          apellidos: studentRef.apellidos.value,
-          dni: studentRef.dni.value,
-          direccion: studentRef.direccion.value,
-          telefono: Number(studentRef.telefono.value),
-          email: studentRef.email.value,
-          userId: user.value?.id
-        }),
+        body: formData,
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'multipart/formData'
         },
         credentials: 'include'
-      })
+      });
+
+
       if (!response.ok) {
         throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
       } else {
@@ -297,7 +321,7 @@ onMounted(async () => {
   }
     "></Toast>
   <div class="card col-12 xl:col-9 lg:col-12 md:col-12 sm:col-12" v-if="isAdmin">
-    <form @submit.prevent="crearAlumno()">
+    <form id="altaAlumno" @submit.prevent="crearAlumno()">
       <h2>Nuevo Alumno</h2>
       <div class="p-fluid formgrid grid">
         <div class="field col-12 lg:col-6 md:col-12 sm:col-12">
@@ -370,6 +394,11 @@ onMounted(async () => {
                 </template>
               </Column>
             </DataTable>
+          </div>
+          <div class="field col-12 lg:col-4 md:col-12 sm:col-12">
+            <label class="">Seleccionar imagen de perfil</label>
+            <FileUpload class="field w-auto" mode="basic" name="foto" chooseLabel="Selecciona" url="../utils/picturesProfile/students" accept="image/*" :maxFileSize="1000000"
+              @select="(foto) => studentRef.foto.value = foto.files[0]"></FileUpload>
           </div>
         </div>
         <div class="field col-12">
