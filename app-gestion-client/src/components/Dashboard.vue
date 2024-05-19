@@ -4,6 +4,8 @@ import { inject, onMounted, onUnmounted, ref, type Ref } from 'vue';
 import type { VueCookies } from 'vue-cookies';
 import { useLoggedStore } from '@/stores/isLogged';
 import { useDashboardStore } from '@/stores/isDashboard';
+import Image from 'primevue/image';
+
 
 import router from '@/router';
 
@@ -79,11 +81,8 @@ onUnmounted(() => {
 
     </div>
 
-
-
-
-
   </div>
+
 </template>
 
 <style scoped></style>

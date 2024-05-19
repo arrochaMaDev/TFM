@@ -26,10 +26,11 @@ export class RegisterStudentDto {
   @IsNotEmpty()
   direccion: string;
 
-  // @IsNumber()
+  @Type(() => Number) // decorador de class-transformer
+  @IsNumber()
   @IsNotEmpty() // validado para que sea un número de 9 dígitos (entre 100000000 y 999999999) y en formato 123456789
-  // @Min(100000000)
-  // @Max(999999999)
+  @Min(100000000)
+  @Max(999999999)
   telefono: number;
 
   @IsString()
@@ -43,6 +44,7 @@ export class RegisterStudentDto {
   // @Type(() => File)
   // foto: File;
 
-  // @IsNumber()
+  @Type(() => Number) // decorador de class-transformer
+  @IsNumber()
   userId: number;
 }

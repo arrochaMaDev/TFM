@@ -24,10 +24,10 @@ export class RegisterStudentController {
   @UseInterceptors(
     FileInterceptor('foto', {
       storage: diskStorage({
-        destination: '../../../picturesProfile', // dentro de la carpeta del server
+        destination: './uploads', // dentro de la carpeta del server
         filename: (req, file, cb) => {
           const fileName = uuidv4(); // usamos uuid para generar un nombre único para el archivo
-          // const fileExt = extname(file.originalname); // extraemos la extensión del archivo
+          const fileExt = extname(file.originalname); // extraemos la extensión del archivo
           cb(null, `${fileName}.jpg`); // llamamos al callback con el nombre del archivo
           // cb(null, `${fileName}${fileExt}`); // llamamos al callback con el nombre del archivo
         },
@@ -35,9 +35,10 @@ export class RegisterStudentController {
     }),
   )
   async registerStudent(
-    @UploadedFile() file: Express.Multer.File,
     @Body() data: RegisterStudentDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
+    console.log(file);
     try {
       data.foto = file.filename; // "../../../picturesProfile/07adda8d-e4d7-41f3-afad-26c67b811786.jpg" Es una ruta correcta para almacenar??
       // const { nombre, apellidos, dni, direccion, telefono, email } = data;

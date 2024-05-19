@@ -46,9 +46,9 @@ const studentRef = {
   apellidos: ref<string | undefined>(undefined),
   dni: ref<string | undefined>(undefined),
   direccion: ref<string | undefined>(undefined),
-  codigoPostal: ref<string | undefined>(undefined),
-  ciudad: ref<string | undefined>(undefined),
-  provincia: ref<string | undefined>(undefined),
+  // codigoPostal: ref<string | undefined>(undefined),
+  // ciudad: ref<string | undefined>(undefined),
+  // provincia: ref<string | undefined>(undefined),
   telefono: ref<string | undefined>(undefined),
   email: ref<string | undefined>(undefined),
   foto: ref<File | null>(null),
@@ -63,9 +63,9 @@ const borrarDatosForm = () => {
   studentRef.apellidos.value = undefined
   studentRef.dni.value = undefined
   studentRef.direccion.value = undefined
-  studentRef.codigoPostal.value = undefined
-  studentRef.ciudad.value = undefined
-  studentRef.provincia.value = undefined
+  // studentRef.codigoPostal.value = undefined
+  // studentRef.ciudad.value = undefined
+  // studentRef.provincia.value = undefined
   studentRef.telefono.value = undefined
   studentRef.email.value = undefined
   selectedUserId.value = undefined
@@ -167,7 +167,7 @@ const getUser = async () => {
 }
 
 watch(selectedUserId, () => {
-  if (selectedUserId.value) {
+  if (selectedUserId.value != undefined) {
     getUser()
   }
 })
@@ -177,6 +177,14 @@ const patronTel = /^\d{9}$/
 const patronEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 // FETCH PARA ENVIAR DATOS DEL ALUMNO A LA BD:
+
+const foto: Ref<File | null> = ref(null);
+
+const handleFileChange = (event: any) => {
+  foto.value = event.files[0]
+  console.log(foto.value)
+};
+
 const crearAlumno = async () => {
   formSubmitted.value = true;
   let isValid = true
@@ -221,17 +229,16 @@ const crearAlumno = async () => {
       formData.append('apellidos', `${studentRef.apellidos.value}`);
       formData.append('dni', `${studentRef.dni.value}`);
       formData.append('direccion', `${studentRef.direccion.value}`);
-      formData.append('telefono', `${studentRef.telefono.value}`);
+      formData.append('telefono', `${studentRef.telefono.value}`); // Ojo que se pasa como string. Se transforma como number en el DTO
       formData.append('email', `${studentRef.email.value}`);
-      formData.append('userId', `${selectedUserId.value}`);
-      formData.append('foto', `${studentRef.foto.value?.name}`);
+      formData.append('userId', `${user.value?.id}`); // Ojo que se pasa como string. Se transforma como number en el DTO
+      if (foto.value) {
+        formData.append('foto', foto.value);
+      }
 
       const response = await fetch('http://localhost:3000/student', {
         method: 'POST',
         body: formData,
-        headers: {
-          'Content-Type': 'multipart/formData'
-        },
         credentials: 'include'
       });
 
@@ -247,7 +254,8 @@ const crearAlumno = async () => {
           studentRef.dni.value,
           studentRef.direccion.value,
           studentRef.telefono.value,
-          studentRef.email.value
+          studentRef.email.value,
+          // studentRef.foto.value = foto.value,
         ]
         console.table(datosAlumno)
         borrarDatosForm()
@@ -355,9 +363,8 @@ onMounted(async () => {
           <InputText class="" id="direcciónInput" v-model="studentRef.direccion.value" />
           <InlineMessage v-if="!studentRef.direccion.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La dirección es obligatoria</InlineMessage>
         </div>
-        <div class="field col-12 lg:col-3 md:col-12 sm:col-12">
+        <!-- <div class="field col-12 lg:col-3 md:col-12 sm:col-12">
           <label class="">Código Postal</label>
-          <!-- <InputNumber class="" id="CPInput" :useGrouping="false" v-model="studentRef.codigoPostal.value" /> -->
           <InputMask class="" id="CPInput" mask="99999" slotChar="" v-model="studentRef.codigoPostal.value" />
           <InlineMessage v-if="!studentRef.codigoPostal.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El CP es obligatorio</InlineMessage>
         </div>
@@ -371,35 +378,32 @@ onMounted(async () => {
           <Dropdown class="" :options="provincias" optionLabel="label" optionValue="label" checkmark :highlightOnSelect="false" showClear id="provinciaInput" placeholder="Selecciona una provincia"
             v-model="studentRef.provincia.value" />
           <InlineMessage v-if="!studentRef.provincia.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La provincia es obligatoria</InlineMessage>
+        </div> -->
+        <div class="field col-12 lg:col-6 md:col-12 sm:col-12 ">
+          <label class="w-auto">Seleccionar usuario</label>
+          <Dropdown class="w-auto" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput"
+            placeholder="Selecciona un usuario" v-model="selectedUserId" />
+          <InlineMessage v-if="!user && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El usuario es obligatorio</InlineMessage>
         </div>
-        <div class="field col-12 mt-2 pl-0 mb-0 ">
-          <div class="field col-12 lg:col-4 md:col-12 sm:col-12 ">
-            <label class="">Seleccionar usuario</label>
-            <Dropdown class="" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput"
-              placeholder="Selecciona un usuario" v-model="selectedUserId" />
-            <InlineMessage v-if="!user && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El usuario es obligatorio</InlineMessage>
-          </div>
-          <div v-if="selectedUserId" class="ml-1">
-            <DataTable :value="[user]" class="pl-1" tableStyle="width: 30rem" :pt="{
+        <div class="field col-12 lg:col-6 md:col-12 sm:col-12">
+          <label class="">Seleccionar imagen de perfil</label>
+          <FileUpload class="w-auto" mode="basic" choose-label="Seleccionar archivo" accept="image/*" :maxFileSize="1000000" @select="handleFileChange"></FileUpload>
+        </div>
+        <div class="field col-12 mb-3" v-if="selectedUserId != undefined">
+          <DataTable :value="[user]" class="pl-1" tableStyle="width: 30rem" :pt="{
     table: {
       class: 'mt-0',
       style: { 'border': 'none' }
     }
   }">
-              <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-              <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-              <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem">
-                <template #body="">
-                  {{ permisoString }}
-                </template>
-              </Column>
-            </DataTable>
-          </div>
-          <div class="field col-12 lg:col-4 md:col-12 sm:col-12">
-            <label class="">Seleccionar imagen de perfil</label>
-            <FileUpload class="field w-auto" mode="basic" name="foto" chooseLabel="Selecciona" url="../utils/picturesProfile/students" accept="image/*" :maxFileSize="1000000"
-              @select="(foto) => studentRef.foto.value = foto.files[0]"></FileUpload>
-          </div>
+            <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+            <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+            <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem">
+              <template #body="">
+                {{ permisoString }}
+              </template>
+            </Column>
+          </DataTable>
         </div>
         <div class="field col-12">
           <Button class="justify-content-center w-auto h-auto mr-2" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
@@ -407,6 +411,7 @@ onMounted(async () => {
         </div>
       </div>
     </form>
+
   </div>
   <Toast :pt="{
     container: {

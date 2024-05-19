@@ -13,7 +13,7 @@ async function bootstrap() {
       credentials: true, // Si modificas los credentials en el front, se debe especificar también en el back
     },
   });
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
   // app.enableCors();
 
   await app.listen(3000);
