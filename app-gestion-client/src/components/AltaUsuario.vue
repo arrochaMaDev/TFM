@@ -40,17 +40,17 @@ const visibleDialogUsername = ref(false)
 
 const usernameGenerated = {
   nombre: ref<string>(""),
-  // nombre2: ref<string>(""),
+  nombre2: ref<string>(""),
   apellido1: ref<string>(""),
   apellido2: ref<string>(""),
   DNI: ref<string>(""),
 }
 
-const generarUsername = (nombre: string, apellido1: string, apellido2: string, DNI: string) => {
+const generarUsername = (nombre: string, nombre2: string, apellido1: string, apellido2: string, DNI: string) => {
 
   // Obtener las primeras letras de cada variable y convertirlas a minúsculas
   const inicialesNombre: string = nombre.slice(0, 1).toLowerCase();
-  // const segundoNombre: string = nombre2.slice(0, 1).toLowerCase();
+  const inicialesNombre2: string = nombre2.slice(0, 1).toLowerCase();
   const inicialesApellido1: string = apellido1.slice(0, 3).toLowerCase();
   const inicialesApellido2: string = apellido2.slice(0, 3).toLowerCase();
   const letraDNI: string = DNI.substring(DNI.length - 1).toLowerCase()
@@ -58,9 +58,21 @@ const generarUsername = (nombre: string, apellido1: string, apellido2: string, D
   visibleDialogUsername.value = false
 
   // Concatenar las iniciales
-  const username: string = inicialesNombre + inicialesApellido1 + inicialesApellido2 + letraDNI;
+  const username: string = inicialesNombre + inicialesNombre2 + inicialesApellido1 + inicialesApellido2 + letraDNI;
 
-  userRef.username.value = username
+  userRef.username.value = username.replace(/\s+/g, '') // expresión regular que reemplaza los espacios que haya en la variable
+  /* 
+- Los caracteres de barra inclinada (/) delimitan el inicio y el final de la expresión regular.  
+- El carácter de barra invertida (\) seguido de 's' es una secuencia de escape que representa cualquier carácter de espacio en blanco. Esto incluye:
+    · Espacio (' ')
+    · Tabulación (\t)
+    · Nueva línea (\n)
+    · Retorno de carro (\r)
+    · Form feed (\f)
+    · Espacio de página (\v)
+- El signo más (+) es un cuantificador que significa "uno o más". En este contexto, \s+ coincide con una secuencia de uno o más caracteres de espacio en blanco consecutivos.
+- La bandera g (de "global") indica que la búsqueda debe realizarse en toda la cadena, no solo en la primera coincidencia.
+*/
 }
 
 const toast = useToast();
@@ -213,7 +225,8 @@ const borrarDatosForm = () => {
         </div>
       </div>
     </form>
-    <Dialog v-model:visible="visibleDialogUsername" modal header="Generar Username" class="w-2" :pt="{
+    <!-- Dialog Generar username -->
+    <Dialog v-model:visible="visibleDialogUsername" modal header="Generar Username" class="w-auto" :pt="{
     header: { class: 'flex align-items-baseline h-5rem' },
     title: { class: '' },
     closeButtonIcon: { class: '' },
@@ -227,10 +240,10 @@ const borrarDatosForm = () => {
         <label for="nombre" class="font-semibold w-6rem">Nombre</label>
         <InputText id="nombre" class="w-full" v-model="usernameGenerated.nombre.value" />
       </div>
-      <!-- <div class="flex align-items-center gap-3 mb-3">
+      <div class="flex align-items-center gap-3 mb-3">
         <label for="nombre" class="font-semibold w-6rem">Segundo Nombre</label>
         <InputText id="nombre" class="w-full" v-model="usernameGenerated.nombre2.value" />
-      </div> -->
+      </div>
       <div class="flex align-items-center gap-3 mb-3">
         <label for="nombre" class="font-semibold w-6rem">Primer Apellido</label>
         <InputText id="nombre" class="w-full" v-model="usernameGenerated.apellido1.value" />
@@ -246,7 +259,7 @@ const borrarDatosForm = () => {
       <div class="flex justify-content-center mb-3 pt-2">
         <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialogUsername = false"></Button>
         <Button type="button" rounded label="Generar"
-          @click="generarUsername(usernameGenerated.nombre.value, usernameGenerated.apellido1.value, usernameGenerated.apellido2.value, usernameGenerated.DNI.value)"></Button>
+          @click="generarUsername(usernameGenerated.nombre.value, usernameGenerated.nombre2.value, usernameGenerated.apellido1.value, usernameGenerated.apellido2.value, usernameGenerated.DNI.value)"></Button>
       </div>
       <Toast></Toast>
     </Dialog>
