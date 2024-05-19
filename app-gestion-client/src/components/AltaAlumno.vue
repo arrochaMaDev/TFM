@@ -242,7 +242,6 @@ const crearAlumno = async () => {
         credentials: 'include'
       });
 
-
       if (!response.ok) {
         throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
       } else {

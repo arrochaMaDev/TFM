@@ -36,11 +36,13 @@ export class RegisterStudentController {
   )
   async registerStudent(
     @Body() data: RegisterStudentDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file?: Express.Multer.File,
   ) {
     console.log(file);
     try {
-      data.foto = file.filename; // "../../../picturesProfile/07adda8d-e4d7-41f3-afad-26c67b811786.jpg" Es una ruta correcta para almacenar??
+      if (file != undefined) {
+        data.foto = file.filename;
+      }
       // const { nombre, apellidos, dni, direccion, telefono, email } = data;
       const studentData = await this.registerStudentService.createStudent(data);
 

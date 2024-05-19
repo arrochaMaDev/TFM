@@ -19,6 +19,7 @@ import Tag from 'primevue/tag';
 import { useAdminStore } from '@/stores/isAdmin';
 import type { VueCookies } from 'vue-cookies';
 import Image from 'primevue/image';
+import FileUpload from 'primevue/fileupload';
 
 
 const confirm = useConfirm();
@@ -298,6 +299,7 @@ const borrarMatricula = async (matriculaId: number) => {
 
 // LÓGICA EDITAR ALUMNO
 const visibleDialogAlumno: Ref<boolean> = ref(false);
+const visibleDialogImagen: Ref<boolean> = ref(false);
 
 const alumnoEditar: Ref<
   | {
@@ -341,7 +343,6 @@ const mostrarDialogEditarAlumno = async () => {
   }
   console.table(alumnoEditar.value)
 }
-
 
 // validar datos del dialog
 const patronTel = /^\d{9}$/
@@ -487,6 +488,89 @@ const getUser = async () => {
     }
   }
 }
+
+// LÓGICA EDITAR IMAGEN DE PERFIL
+const mostrarDialogEditarImagen = async () => {
+  visibleDialogImagen.value = true
+
+}
+const foto: Ref<File | null> = ref(null);
+
+const handleFileChange = (event: any) => {
+  foto.value = event.files[0]
+  console.log(foto.value)
+};
+
+const editarFoto = async () => {
+  try {
+    const formData = new FormData();
+    if (foto.value) {
+      formData.append('foto', foto.value);
+    }
+    const response = await fetch(`http://localhost:3000/student/${studentId}`, {
+      method: 'PUT',
+      body: formData,
+      credentials: 'include'
+    });
+    if (!response.ok) {
+      throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      toast.add({ severity: 'success', summary: 'Creado', detail: 'Imagen editada', life: 3000 });
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+  } finally {
+    visibleDialogImagen.value = false
+    getStudentData()
+  }
+}
+
+const confirmDeleteImage = () => {
+  console.log("borrando imagen")
+  confirm.require({
+    message: '¿Seguro que quiere eliminar la imagen de perfil?',
+    header: 'Borrar imagen de perfil',
+    icon: 'pi pi-info-circle',
+    rejectLabel: 'Cancelar',
+    acceptLabel: 'Borrar',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-danger',
+    accept: () => {
+      borrarFoto()
+    },
+    reject: () => {
+      toast.add({ severity: 'info', summary: 'Cancelado', detail: 'Se ha cancelado la operación', life: 3000 });
+    }
+  });
+};
+
+const borrarFoto = async () => {
+  try {
+    foto.value = null
+    const formData = new FormData();
+    if (foto.value) {
+      formData.append('foto', foto.value);
+    }
+    const response = await fetch(`http://localhost:3000/student/${studentId}`, {
+      method: 'PUT',
+      body: formData,
+      credentials: 'include'
+    });
+    if (!response.ok) {
+      throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      toast.add({ severity: 'success', summary: 'Creado', detail: 'Imagen borrada', life: 3000 });
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+  } finally {
+    visibleDialogImagen.value = false
+    getStudentData()
+  }
+}
+
 
 // LÓGICA EDITAR MATRICULA
 const visibleDialogMatricula: Ref<boolean> = ref(false);
@@ -853,10 +937,15 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           <h2 class="m-0 text-4xl text-800 font-bold">Perfil del Alumno</h2>
           <Button class="w-auto" severity="secondary" @click="volver()">Volver</Button>
         </div>
-        <div id="photo" class="card col-fixed flex align-items-center justify-content-center col-3 h-20rem w-20rem">
-          <Image :src=imageSrc alt="Imagen de perfil" imageClass="w-full"> </Image>
+        <div id="photo" class="card col-fixed flex flex-column align-items-center col-3 mr-5 h-max w-20rem">
+          <Image :src=imageSrc alt="Imagen de perfil" imageClass="flex w-full"> </Image>
+          <div class="flex mt-2" v-if="isAdmin">
+            <!-- mostrar solo si es admin -->
+            <Button class="w-max w-3rem mr-2" icon="pi pi-trash" severity="danger" v-tooltip.top="'Borrar Imagen de perfil'" @click="confirmDeleteImage()"></Button>
+            <Button class="w-max w-3rem" icon="pi pi-pencil" severity="secondary" v-tooltip.top="'Editar imagen de perfil'" @click="mostrarDialogEditarImagen()"></Button>
+          </div>
         </div>
-        <div id="datos" class="card col ml-5">
+        <div id="datos" class="card col">
           <div id="Datos-personales" class="mb-5">
             <h6 class="m-1 text-2xl text-800 font-bold"> {{ studentDataFromServer?.nombre }} {{ studentDataFromServer?.apellidos }}</h6>
             <h6 class="m-1 text-xl text-800 font-bold"> {{ studentDataFromServer?.dni }}</h6>
@@ -1118,6 +1207,27 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       <div class="flex justify-content-center mb-3 pt-2">
         <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="getStudentData(), visibleDialogAlumno = false"></Button>
         <Button type="button" rounded label="Actualizar" @click="editarAlumno()"></Button>
+      </div>
+      <Toast></Toast>
+    </Dialog>
+
+    <!-- Dialog editar imagen -->
+    <Dialog v-model:visible="visibleDialogImagen" modal header="Editar imagen de perfil" class="w-auto flex justify-content-center" :pt="{
+    header: { class: 'flex align-items-baseline h-5rem' },
+    title: { class: '' },
+    closeButtonIcon: { class: '' },
+    mask: {
+      style: 'backdrop-filter: blur(3px)'
+    }
+  }
+    ">
+      <span class="p-text-secondary mb-5">Seleccionar nueva imagen de perfil</span>
+      <div class="flex justify-content-center">
+        <FileUpload class="w-auto mt-2" mode="basic" choose-label="Seleccionar archivo" accept="image/*" :maxFileSize="1000000" @select="handleFileChange"></FileUpload>
+      </div>
+      <div class="flex justify-content-center mb-3 pt-3">
+        <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="getStudentData(), visibleDialogImagen = false"></Button>
+        <Button type="button" rounded label="Actualizar" @click="editarFoto()"></Button>
       </div>
       <Toast></Toast>
     </Dialog>
