@@ -208,7 +208,7 @@ const borrarDatosForm = () => {
           <InlineMessage v-if="!userRef.pass.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La contraseña es obligatoria</InlineMessage>
         </div>
         <div class="field col-12 lg:col-4 md:col-4 sm:col-12">
-          <label class="">Repeat Pass</label>
+          <label class="">Repetir contraseña</label>
           <Password class="" id="passConfirmed" toggleMask :feedback="false" v-model="userPassRefConfirmed" />
           <InlineMessage v-if="!userPassRefConfirmed && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">Debe repetir la contraseña</InlineMessage>
           <InlineMessage v-if="!passValid" class="bg-transparent justify-content-start p-0 pt-1">Las contraseñas no coindiden</InlineMessage>

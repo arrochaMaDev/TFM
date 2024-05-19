@@ -18,6 +18,7 @@ import Dialog from 'primevue/dialog';
 import Tag from 'primevue/tag';
 import { useAdminStore } from '@/stores/isAdmin';
 import type { VueCookies } from 'vue-cookies';
+import Image from 'primevue/image';
 
 
 const confirm = useConfirm();
@@ -63,6 +64,7 @@ const studentDataFromServer: Ref<{
   dni: string
   direccion: string
   telefono: number
+  foto: string
   email: string
   userId: {
     id: number
@@ -75,6 +77,9 @@ const studentDataFromServer: Ref<{
 const studentId = Number(router.currentRoute.value.params.id) // Obtengo el id de la url
 console.log(studentId)
 console.log(router.currentRoute.value.params['id'])
+
+const imageSrc: Ref<string | null> = ref(null) // Directorio donde se almacena la imagen de perfil
+
 
 // OBTENER DATOS DEL ESTUDIANTE
 const getStudentData = async () => {
@@ -100,12 +105,20 @@ const getStudentData = async () => {
       if (studentDataFromServer.value) {
         studentDataFromServer.value.userId.permiso = PermisoToString(Number(studentDataFromServer.value?.userId.permiso))
       }
+      // Definir el directorio de la imagen de perfil
+      if (studentDataFromServer.value?.foto != null) {
+        imageSrc.value = `http://localhost:3000/uploads/${studentDataFromServer.value?.foto}`
+      } else {
+        imageSrc.value = '../src/utils/img/user-profile-img.jpg'
+      }
     }
   } catch (error) {
     console.error('Error en la solicitud:', error)
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error obteniendo los datos del alumno', life: 3000 });
   }
 }
+
+
 
 const PermisoToString = (permiso: number) => {
   switch (permiso) {
@@ -130,6 +143,7 @@ const matriculaFromServer: Ref<{
     dni: string
     direccion: string
     telefono: string
+    foto: string
     email: string
   }
   matriculas: {
@@ -817,6 +831,9 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
   initFilters()
 }
 
+// const imageSrc = `../../../app-gestion-server/uploads/${studentDataFromServer.value?.foto}`
+// console.log(imageSrc)
+
 </script>
 
 <template>
@@ -837,8 +854,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
           <Button class="w-auto" severity="secondary" @click="volver()">Volver</Button>
         </div>
         <div id="photo" class="card col-fixed flex align-items-center justify-content-center col-3 h-20rem w-20rem">
-          <img src="../utils/img/user-profile-img.jpg" alt="Imagen de perfil" class="h-20rem w-20rem">
-          <!--TODO Hay que añadir fotos a la base de datos -->
+          <Image :src=imageSrc alt="Imagen de perfil" imageClass="w-full"> </Image>
         </div>
         <div id="datos" class="card col ml-5">
           <div id="Datos-personales" class="mb-5">
@@ -931,7 +947,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       class: 'mt-0 w-auto',
       style: { 'border': 'none', 'background-color': 'transparent' }
     }
-  }">
+  }
+    ">
 
           <div id=" header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
             <h5 class="m-0 text-3xl text-800 font-bold pl-1">Matrículas</h5>
@@ -1048,7 +1065,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
     mask: {
       style: 'backdrop-filter: blur(3px)'
     }
-  }">
+  }
+    ">
 
       <span class="p-text-secondary flex mb-5">Actualizar información</span>
       <div class="flex align-items-center gap-3 mb-3">

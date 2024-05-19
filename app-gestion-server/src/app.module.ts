@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
-// import { MulterModule } from '@nestjs/platform-express';
 // import { AppController } from './app.controller';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+
+//Entidades, controladores y servicios:
 import { RegisterStudentService } from './Controllers/Student/Register/registerStudent.service';
 import { RegisterStudentController } from './Controllers/Student/Register/registerStudent.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -109,9 +112,11 @@ import { ListerMatriculasByTeacherIdController } from './Controllers/Matricula/G
       MatriculaDb,
       SubjectTeacherDb,
     ]),
-    // MulterModule.register({
-    //   dest: '/app-gestion-client/src/utils/picturesProfile', // Opción de guardar todas las fotos aquí. OJO! NO ES ESCALABLE! Cualquier archivo se guardará aquí
-    // }),
+    ServeStaticModule.forRoot({
+      // configuración para servir archivos estáticos y ver las imagenes almacenadas en el servidor
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
   ],
   controllers: [
     RegisterStudentController,
