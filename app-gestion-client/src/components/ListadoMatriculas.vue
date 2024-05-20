@@ -757,7 +757,8 @@ const profesorBuscar = ref('')
 const allStudentsWithMatriculasRefFiltered = computed(() => {
   if (asignaturaBuscar.value === '' && profesorBuscar.value === '') {
     return allStudentsWithMatriculasRef.value;
-  } else {
+  }
+  else {
     return allStudentsWithMatriculasRef.value.filter((student) => {
       const asignaturaCoincide = student.matriculas.some((matricula) => {
         return matricula.subject.nombre.toLowerCase().includes(asignaturaBuscar.value.toLowerCase())

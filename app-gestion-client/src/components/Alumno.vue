@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onMounted, ref, type Ref } from 'vue'
+import { computed, inject, onMounted, ref, type Ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable';
@@ -65,8 +65,8 @@ const studentDataFromServer: Ref<{
   dni: string
   direccion: string
   telefono: number
-  foto: string
   email: string
+  foto: string
   userId: {
     id: number
     username: string
@@ -77,7 +77,7 @@ const studentDataFromServer: Ref<{
 
 const studentId = Number(router.currentRoute.value.params.id) // Obtengo el id de la url
 console.log(studentId)
-console.log(router.currentRoute.value.params['id'])
+// console.log(router.currentRoute.value.params['id'])
 
 const imageSrc: Ref<string | null> = ref(null) // Directorio donde se almacena la imagen de perfil
 
@@ -144,8 +144,8 @@ const matriculaFromServer: Ref<{
     dni: string
     direccion: string
     telefono: string
-    foto: string
     email: string
+    foto: string
   }
   matriculas: {
     id: number
@@ -299,7 +299,6 @@ const borrarMatricula = async (matriculaId: number) => {
 
 // LÓGICA EDITAR ALUMNO
 const visibleDialogAlumno: Ref<boolean> = ref(false);
-const visibleDialogImagen: Ref<boolean> = ref(false);
 
 const alumnoEditar: Ref<
   | {
@@ -490,6 +489,8 @@ const getUser = async () => {
 }
 
 // LÓGICA EDITAR IMAGEN DE PERFIL
+const visibleDialogImagen: Ref<boolean> = ref(false);
+
 const mostrarDialogEditarImagen = async () => {
   visibleDialogImagen.value = true
 
@@ -526,6 +527,7 @@ const editarFoto = async () => {
   }
 }
 
+// borrar foto
 const confirmDeleteImage = () => {
   console.log("borrando imagen")
   confirm.require({
@@ -907,16 +909,31 @@ const initFilters = () => { // componente filtro en global para que busque cualq
     'teacher.telefono': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'teacher.email': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'year': { value: null, matchMode: FilterMatchMode.CONTAINS },
+
   }
 }
 initFilters()
 
+// Buscar por nombre o apellidos del profesor dentro del array
+const profesorBuscar = ref('')
+
+const matriculaFromServerFiltered = computed(() => {
+  if (profesorBuscar.value === '') {
+    return matriculaFromServer.value?.matriculas ? matriculaFromServer.value.matriculas : []
+  }
+  else {
+    return matriculaFromServer.value?.matriculas.filter((matricula) => {
+      const profesorCoincide = matricula.teacher.nombre.toLowerCase().includes(profesorBuscar.value.toLowerCase())
+        || matricula.teacher.apellidos.toLowerCase().includes(profesorBuscar.value.toLowerCase())
+      return profesorCoincide
+    })
+  }
+})
+
+
 const clearFilter = () => { // para borrar los filtros, reinicio la función y el value = null
   initFilters()
 }
-
-// const imageSrc = `../../../app-gestion-server/uploads/${studentDataFromServer.value?.foto}`
-// console.log(imageSrc)
 
 </script>
 
@@ -1022,16 +1039,16 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       </div>
 
       <div v-if="matriculaFromServer?.matriculas" class="card w-max">
-        <DataTable :value="matriculaFromServer?.matriculas" dataKey="id" v-model:filters="filters" filterDisplay="menu"
+        <DataTable :value="matriculaFromServerFiltered" dataKey="id" v-model:filters="filters" filterDisplay="menu"
           :globalFilterFields="['subject.nombre', 'teacher.nombre', 'teacher.apellidos', 'teacher.dni', 'teacher.direccion', 'teacher.telefono', 'teacher.email', 'year']" class="" removableSort
           sortField="matricula.subject.nombre" :sortOrder="1" :paginator="true" :rows="5" stripedRows selection-mode="single" :pt="{
     paginator: {
       paginatorWrapper: { class: 'flex justify-content-center' },
-      firstPageButton: { class: 'w-auto' },
-      previousPageButton: { class: 'w-auto' },
-      pageButton: { class: 'w-auto' },
-      nextPageButton: { class: 'w-auto' },
-      lastPageButton: { class: 'w-auto' },
+      firstPageButton: { class: 'w-auto m-0' },
+      previousPageButton: { class: 'w-auto m-0' },
+      pageButton: { class: 'w-auto m-0' },
+      nextPageButton: { class: 'w-auto m-0' },
+      lastPageButton: { class: 'w-auto m-0' },
     }, table: {
       class: 'mt-0 w-auto',
       style: { 'border': 'none', 'background-color': 'transparent' }
@@ -1041,16 +1058,27 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
 
           <div id=" header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
             <h5 class="m-0 text-3xl text-800 font-bold pl-1">Matrículas</h5>
-            <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
-              <i class="pi pi-search"></i>
-              <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscar..." />
+            <span class="flex md:justify-content-end align-items-center">
+              <span class="mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+                <i class="pi pi-search"></i>
+                <InputText class="h-3rem mr-2" v-model="filters['subject.nombre'].value" placeholder="Buscar asignatura..." />
+              </span>
+              <span class="mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+                <i class="pi pi-search"></i>
+                <!-- <InputText class="h-3rem mr-2" v-model="filters['teacher.nombre'].value" placeholder="Buscar profesor..." /> -->
+                <InputText class="h-3rem mr-2" v-model="profesorBuscar" placeholder="Buscar profesor..." />
+              </span>
+              <span class="mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+                <i class="pi pi-search"></i>
+                <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscador global..." />
+              </span>
               <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
             </span>
           </div>
 
           <ColumnGroup type="header">
             <Row>
-              <Column header="Curso escolar" field="year" :rowspan="2" headerClass="h-3rem pl-1  pr-3 " :show-filter-match-modes="false">
+              <Column header="Curso escolar" field="year" :rowspan="2" headerClass="h-3rem pl-1 pr-3 " :show-filter-match-modes="false">
                 <template #filter="{ filterModel }">
                   <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                 </template>
