@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, ref, onMounted, inject } from 'vue'
+import { type Ref, ref, onMounted, inject, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -520,8 +520,23 @@ const initFilters = () => { // componente filtro en global para que busque cualq
 }
 initFilters()
 
-const clearFilter = () => { // para borrar los filtros, reinicio la función y el value = null
+// Buscar por asignatura dentro del array
+const asignaturaBuscar = ref('')
+
+const teachersWithSubjectsRefFiltered = computed(() => {
+  if (asignaturaBuscar.value === '') {
+    return teachersWithSubjectsRef.value;
+  } else {
+    return teachersWithSubjectsRef.value.filter((teacher) =>
+      teacher.asignaciones.some((asignacion) =>
+        asignacion.subject.nombre.toLowerCase().includes(asignaturaBuscar.value.toLowerCase())
+      ))
+  }
+})
+
+const clearFilter = () => { // para borrar los filtros
   initFilters()
+  asignaturaBuscar.value = ''
 }
 
 // Expandir la tabla
@@ -554,7 +569,7 @@ const collapseAll = () => {
     <div class="card flex justify-content-center">
       <DataTable v-model:expandedRows="expandedRows" v-model:filters="filters"
         :globalFilterFields="['teacher.nombre', 'teacher.apellidos', 'teacher.dni', 'teacher.direccion', 'teacher.telefono', 'teacher.email']" filterDisplay="menu" class="" removableSort
-        removableSortstripedRows :value="teachersWithSubjectsRef" dataKey="teacher.id" sortField="teacher.id" :sortOrder="1" :paginator="true" :rows="10" :pt="{
+        removableSortstripedRows :value="teachersWithSubjectsRefFiltered" dataKey="teacher.id" sortField="teacher.id" :sortOrder="1" :paginator="true" :rows="10" :pt="{
     paginator: {
       paginatorWrapper: { class: 'col-12 flex justify-content-center' },
       firstPageButton: { class: 'w-auto' },
@@ -584,7 +599,8 @@ const collapseAll = () => {
             </span>
             <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
               <i class="pi pi-search"></i>
-              <InputText id="buscarAsignatura" class="h-3rem mr-2" v-model="filters1['global'].value" placeholder="Buscar asignatura..." />
+              <!-- <InputText id="buscarAsignatura" class="h-3rem mr-2" v-model="filters1['global'].value" placeholder="Buscar asignatura..." /> -->
+              <InputText id="buscarAsignatura" class="h-3rem mr-2" v-model="asignaturaBuscar" placeholder="Buscar asignatura..." />
             </span>
             <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
           </span>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, ref, onMounted, inject } from 'vue'
+import { type Ref, ref, onMounted, inject, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -750,8 +750,32 @@ const initFilters = () => { // componente filtro en global para que busque cualq
 }
 initFilters()
 
-const clearFilter = () => { // para borrar los filtros, reinicio la función y el value = null
+// Buscar por asignatura o profesor dentro del array
+const asignaturaBuscar = ref('')
+const profesorBuscar = ref('')
+
+const allStudentsWithMatriculasRefFiltered = computed(() => {
+  if (asignaturaBuscar.value === '' && profesorBuscar.value === '') {
+    return allStudentsWithMatriculasRef.value;
+  } else {
+    return allStudentsWithMatriculasRef.value.filter((student) => {
+      const asignaturaCoincide = student.matriculas.some((matricula) => {
+        return matricula.subject.nombre.toLowerCase().includes(asignaturaBuscar.value.toLowerCase())
+      })
+      const profesorCoincide = student.matriculas.some((matricula) => {
+        return matricula.teacher.nombre.toLowerCase().includes(profesorBuscar.value.toLowerCase())
+          || matricula.teacher.apellidos.toLowerCase().includes(profesorBuscar.value.toLowerCase())
+      })
+      return asignaturaCoincide && profesorCoincide;
+    })
+  }
+})
+
+
+const clearFilter = () => { // para borrar los filtros
   initFilters()
+  asignaturaBuscar.value = ''
+  profesorBuscar.value = ''
 }
 
 // Expandir la tabla
@@ -783,8 +807,8 @@ const collapseAll = () => {
   <div class="flex justify-content-start pt-2" v-if="isAdmin">
     <div class="card flex justify-content-center">
       <DataTable v-model:expandedRows="expandedRows" v-model:filters="filters" filterDisplay="menu"
-        :globalFilterFields="['student.nombre', 'student.apellidos', 'student.dni', 'student.direccion', 'student.telefono', 'student.email', 'matriculas.subject.nombre', 'matriculas.teacher.nombre', 'matriculas.teacher.apellidos', 'matriculas.teacher.dni', 'matriculas.teacher.telefono', 'matriculas.teacher.email']"
-        class="" removableSort removableSortstripedRows :value="allStudentsWithMatriculasRef" dataKey="student.id" sortField="student.id" :sortOrder="1" :paginator="true" :rows="10" :pt="{
+        :globalFilterFields="['student.nombre', 'student.apellidos', 'student.dni', 'student.direccion', 'student.telefono', 'student.email', 'matriculas.teacher.nombre', 'matriculas.teacher.apellidos']"
+        class="" removableSort removableSortstripedRows :value="allStudentsWithMatriculasRefFiltered" dataKey="student.id" sortField="student.id" :sortOrder="1" :paginator="true" :rows="10" :pt="{
     paginator: {
       paginatorWrapper: { class: 'col-12 flex justify-content-center' },
       firstPageButton: { class: 'w-auto' },
@@ -806,9 +830,19 @@ const collapseAll = () => {
         </template>
         <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
           <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Matrículas</h5>
-          <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
-            <i class="pi pi-search"></i>
-            <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscar..." />
+          <span class="flex justify-content-end">
+            <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+              <i class="pi pi-search"></i>
+              <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscar alumno..." />
+            </span>
+            <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+              <i class="pi pi-search"></i>
+              <InputText id="buscarProfesor" class="h-3rem mr-2" v-model="profesorBuscar" placeholder="Buscar profesor..." />
+            </span>
+            <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+              <i class="pi pi-search"></i>
+              <InputText id="buscarAsignatura" class="h-3rem mr-2" v-model="asignaturaBuscar" placeholder="Buscar asignatura..." />
+            </span>
             <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
           </span>
         </div>
