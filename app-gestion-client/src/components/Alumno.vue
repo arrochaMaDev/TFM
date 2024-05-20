@@ -933,6 +933,7 @@ const matriculaFromServerFiltered = computed(() => {
 
 const clearFilter = () => { // para borrar los filtros, reinicio la función y el value = null
   initFilters()
+  profesorBuscar.value = ''
 }
 
 </script>
@@ -948,13 +949,14 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
   }
     "></Toast>
   <div v-if="isUser">
-    <div class="col-10">
+    <div class="col-11">
       <div class="grid">
         <div id="header" class="flex col-12 justify-content-between h-auto mb-2">
           <h2 class="m-0 text-4xl text-800 font-bold">Perfil del Alumno</h2>
           <Button class="w-auto" severity="secondary" @click="volver()">Volver</Button>
         </div>
-        <div id="photo" class="card col-fixed flex flex-column align-items-center col-3 mr-5 h-max w-20rem">
+        <div id="photo" class="card col-3 flex flex-column align-items-center col-3 mr-5 h-max w-20rem">
+
           <Image :src=imageSrc alt="Imagen de perfil" imageClass="flex w-full"> </Image>
           <div class="flex mt-2" v-if="isAdmin">
             <!-- mostrar solo si es admin -->
@@ -1038,10 +1040,11 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
         </div>
       </div>
 
-      <div v-if="matriculaFromServer?.matriculas" class="card w-max">
-        <DataTable :value="matriculaFromServerFiltered" dataKey="id" v-model:filters="filters" filterDisplay="menu"
-          :globalFilterFields="['subject.nombre', 'teacher.nombre', 'teacher.apellidos', 'teacher.dni', 'teacher.direccion', 'teacher.telefono', 'teacher.email', 'year']" class="" removableSort
-          sortField="matricula.subject.nombre" :sortOrder="1" :paginator="true" :rows="5" stripedRows selection-mode="single" :pt="{
+      <div id="tabla" class="flex mt-5 w-12">
+        <div v-if="matriculaFromServer?.matriculas" class="card col h-max">
+          <DataTable :value="matriculaFromServerFiltered" dataKey="id" v-model:filters="filters" filterDisplay="menu"
+            :globalFilterFields="['subject.nombre', 'teacher.nombre', 'teacher.apellidos', 'teacher.dni', 'teacher.direccion', 'teacher.telefono', 'teacher.email', 'year']" class="" removableSort
+            sortField="matricula.subject.nombre" :sortOrder="1" :paginator="true" :rows="5" stripedRows selection-mode="single" :pt="{
     paginator: {
       paginatorWrapper: { class: 'flex justify-content-center' },
       firstPageButton: { class: 'w-auto m-0' },
@@ -1050,112 +1053,112 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       nextPageButton: { class: 'w-auto m-0' },
       lastPageButton: { class: 'w-auto m-0' },
     }, table: {
-      class: 'mt-0 w-auto',
+      class: 'mt-0 w-12',
       style: { 'border': 'none', 'background-color': 'transparent' }
     }
   }
     ">
 
-          <div id=" header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
-            <h5 class="m-0 text-3xl text-800 font-bold pl-1">Matrículas</h5>
-            <span class="flex md:justify-content-end align-items-center">
-              <span class="mt-2 md:mt-0 p-input-icon-left flex align-items-center">
-                <i class="pi pi-search"></i>
-                <InputText class="h-3rem mr-2" v-model="filters['subject.nombre'].value" placeholder="Buscar asignatura..." />
+            <div id=" header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-max pt-3 pb-3 border-round-top" style="background-color:  #f8f9fa">
+              <h5 class="m-0 text-3xl text-800 font-bold pl-1">Matrículas</h5>
+              <span class="flex md:justify-content-end align-items-center">
+                <span class="mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+                  <i class="pi pi-search"></i>
+                  <InputText class="h-3rem mr-2" v-model="filters['subject.nombre'].value" placeholder="Buscar asignatura..." />
+                </span>
+                <span class="mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+                  <i class="pi pi-search"></i>
+                  <InputText class="h-3rem mr-2" v-model="profesorBuscar" placeholder="Buscar profesor..." />
+                </span>
+                <span class="mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+                  <i class="pi pi-search"></i>
+                  <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscador global..." />
+                </span>
+                <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
               </span>
-              <span class="mt-2 md:mt-0 p-input-icon-left flex align-items-center">
-                <i class="pi pi-search"></i>
-                <!-- <InputText class="h-3rem mr-2" v-model="filters['teacher.nombre'].value" placeholder="Buscar profesor..." /> -->
-                <InputText class="h-3rem mr-2" v-model="profesorBuscar" placeholder="Buscar profesor..." />
-              </span>
-              <span class="mt-2 md:mt-0 p-input-icon-left flex align-items-center">
-                <i class="pi pi-search"></i>
-                <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscador global..." />
-              </span>
-              <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
-            </span>
-          </div>
+            </div>
 
-          <ColumnGroup type="header">
-            <Row>
-              <Column header="Curso escolar" field="year" :rowspan="2" headerClass="h-3rem pl-1 pr-3 " :show-filter-match-modes="false">
-                <template #filter="{ filterModel }">
-                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-                </template>
-              </Column>
-              <Column header="Asignatura" field="subject.nombre" :rowspan="2" sortable headerClass="h-2rem pl-1 " :show-filter-match-modes="false">
-                <template #filter="{ filterModel }">
-                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-                </template>
-              </Column>
-              <Column header="Profesor" :colspan="isAdmin ? 7 : 4" headerClass="h-3rem pl-1 "></Column>
-            </Row>
-            <Row>
-              <Column header="Nombre" sortable field="teacher.nombre" headerClass="h-2rem pl-1  pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-                <template #filter="{ filterModel }">
-                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-                </template>
-              </Column>
+            <ColumnGroup type="header">
+              <Row>
+                <Column header="Curso escolar" field="year" :rowspan="2" headerClass="h-3rem pl-1 pr-3 " :show-filter-match-modes="false">
+                  <template #filter="{ filterModel }">
+                    <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                  </template>
+                </Column>
+                <Column header="Asignatura" field="subject.nombre" :rowspan="2" sortable headerClass="h-2rem pl-1 " :show-filter-match-modes="false">
+                  <template #filter="{ filterModel }">
+                    <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                  </template>
+                </Column>
+                <Column header="Profesor" :colspan="isAdmin ? 7 : 4" headerClass="h-3rem pl-1 "></Column>
+              </Row>
+              <Row>
+                <Column header="Nombre" sortable field="teacher.nombre" headerClass="h-2rem pl-1  pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                  <template #filter="{ filterModel }">
+                    <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                  </template>
+                </Column>
 
-              <Column header="Apellidos" sortable field="teacher.apellidos" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-                <template #filter="{ filterModel }">
-                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-                </template>
-              </Column>
-              <Column v-if="isAdmin" header="DNI" sortable field="teacher.dni" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-                <template #filter="{ filterModel }">
-                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-                </template>
-              </Column>
-              <Column v-if="isAdmin" header="Dirección" sortable field="teacher.direccion" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-                <template #filter="{ filterModel }">
-                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-                </template>
-              </Column>
-              <Column v-if="isAdmin" header="Teléfono" sortable field="teacher.telefono" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-                <template #filter="{ filterModel }">
-                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-                </template>
-              </Column>
-              <Column header="Email" sortable field="teacher.email" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-                <template #filter="{ filterModel }">
-                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-                </template>
-              </Column>
-              <Column field="" header="" headerClass="h-2rem pl-1 pr-2"></Column>
+                <Column header="Apellidos" sortable field="teacher.apellidos" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                  <template #filter="{ filterModel }">
+                    <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                  </template>
+                </Column>
+                <Column v-if="isAdmin" header="DNI" sortable field="teacher.dni" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                  <template #filter="{ filterModel }">
+                    <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                  </template>
+                </Column>
+                <Column v-if="isAdmin" header="Dirección" sortable field="teacher.direccion" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                  <template #filter="{ filterModel }">
+                    <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                  </template>
+                </Column>
+                <Column v-if="isAdmin" header="Teléfono" sortable field="teacher.telefono" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                  <template #filter="{ filterModel }">
+                    <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                  </template>
+                </Column>
+                <Column header="Email" sortable field="teacher.email" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                  <template #filter="{ filterModel }">
+                    <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                  </template>
+                </Column>
+                <Column field="" header="" headerClass="h-2rem pl-1 pr-2"></Column>
 
-            </Row>
-          </ColumnGroup>
+              </Row>
+            </ColumnGroup>
 
-          <Column field="year" bodyClass="p-0 pl-1">
-            <template #body="slotProps">
-              {{ slotProps.data.year }} / {{ slotProps.data.year + 1 }}
-            </template>
-          </Column>
-          <Column field="subject.nombre" bodyClass="p-0 pl-1"> </Column>
-          <Column sortable field="teacher.nombre" headerClass="h-2rem pl-1 bg-transparent"> </Column>
-          <Column field="teacher.apellidos" bodyClass="p-0 pl-1"></Column>
-          <Column v-if="isAdmin" field="teacher.dni" bodyClass="p-0 pl-1"></Column>
-          <Column v-if="isAdmin" field="teacher.direccion" bodyClass="p-0 pl-1"></Column>
-          <Column v-if="isAdmin" field="teacher.telefono" bodyClass="p-0 pl-1">
-            <template #body="slotProps">
-              <a :href="'tel:' + slotProps.data.teacher.telefono" class="flex justify-content-start"> {{ slotProps.data.teacher.telefono }}</a>
-            </template>
-          </Column>
-          <Column field="teacher.email" bodyClass="p-0 pl-1">
-            <template #body="slotProps">
-              <a :href="'mailto:' + slotProps.data.teacher.email" class="flex justify-content-start"> {{ slotProps.data.teacher.email }}</a>
-            </template>
-          </Column>
-          <Column header="" headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="flex p-1 pl-1">
-            <!-- mostrar solo si es admin -->
-            <template #body="slotProps" v-if="isAdmin">
-              <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.teacher.id)"></Button>
-              <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Matrícula'" @click="confirmDeleteMatricula(slotProps.data.id)"></Button>
-              <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Matrícula'" @click="mostrarDialogEditarMatricula(slotProps.data)"></Button>
-            </template>
-          </Column>
-        </DataTable>
+            <Column field="year" bodyClass="p-0 pl-1">
+              <template #body="slotProps">
+                {{ slotProps.data.year }} / {{ slotProps.data.year + 1 }}
+              </template>
+            </Column>
+            <Column field="subject.nombre" bodyClass="p-0 pl-1"> </Column>
+            <Column sortable field="teacher.nombre" headerClass="h-2rem pl-1 bg-transparent"> </Column>
+            <Column field="teacher.apellidos" bodyClass="p-0 pl-1"></Column>
+            <Column v-if="isAdmin" field="teacher.dni" bodyClass="p-0 pl-1"></Column>
+            <Column v-if="isAdmin" field="teacher.direccion" bodyClass="p-0 pl-1"></Column>
+            <Column v-if="isAdmin" field="teacher.telefono" bodyClass="p-0 pl-1">
+              <template #body="slotProps">
+                <a :href="'tel:' + slotProps.data.teacher.telefono" class="flex justify-content-start"> {{ slotProps.data.teacher.telefono }}</a>
+              </template>
+            </Column>
+            <Column field="teacher.email" bodyClass="p-0 pl-1">
+              <template #body="slotProps">
+                <a :href="'mailto:' + slotProps.data.teacher.email" class="flex justify-content-start"> {{ slotProps.data.teacher.email }}</a>
+              </template>
+            </Column>
+            <Column header="" headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="flex p-1 pl-1">
+              <!-- mostrar solo si es admin -->
+              <template #body="slotProps" v-if="isAdmin">
+                <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.teacher.id)"></Button>
+                <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Matrícula'" @click="confirmDeleteMatricula(slotProps.data.id)"></Button>
+                <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Matrícula'" @click="mostrarDialogEditarMatricula(slotProps.data)"></Button>
+              </template>
+            </Column>
+          </DataTable>
+        </div>
       </div>
     </div>
 

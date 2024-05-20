@@ -1312,6 +1312,7 @@ const matriculasRefFromServerFiltered = computed(() => {
 
 const clearFilter = () => { // para borrar los filtros
   initFilters()
+  alumnoBuscar.value = ''
 }
 
 </script>
@@ -1326,13 +1327,14 @@ const clearFilter = () => { // para borrar los filtros
     }
   }
     "></Toast>
-  <div class="col-10" v-if="isUser">
+  <div class="col-11" v-if="isUser">
     <div class="grid">
       <div id="header" class="flex col-12 justify-content-between h-auto mb-2">
         <h2 class="m-0 text-4xl text-800 font-bold">Perfil del Profesor</h2>
         <Button class="w-auto" severity="secondary" @click="volver()">Volver</Button>
       </div>
-      <div id="photo" class="card col-fixed flex flex-column align-items-center col-3 h-max mr-5">
+      <!-- <div id="photo" class="card col-fixed flex flex-column align-items-center col-3 h-max mr-5"> -->
+      <div id="photo" class="card col-3 flex flex-column align-items-center col-3 mr-5 h-max w-20rem">
         <Image :src=imageSrc alt="Imagen de perfil" imageClass="flex w-full"> </Image>
         <div class="flex mt-2" v-if="isAdmin">
           <!-- mostrar solo si es admin -->
@@ -1340,7 +1342,7 @@ const clearFilter = () => { // para borrar los filtros
           <Button class="w-max w-3rem" icon="pi pi-pencil" severity="secondary" v-tooltip.top="'Editar imagen de perfil'" @click="mostrarDialogEditarImagen()"></Button>
         </div>
       </div>
-      <div id="datos" class="card col-8 ">
+      <div id="datos" class="card col">
         <div id="Datos-personales" class="mb-5">
           <h6 class="m-1 text-2xl text-800 font-bold"> {{ teacherDataFromServer?.nombre }} {{ teacherDataFromServer?.apellidos }}</h6>
           <h6 class="m-1 text-xl text-800 font-bold"> {{ teacherDataFromServer?.dni }}</h6>
@@ -1417,7 +1419,7 @@ const clearFilter = () => { // para borrar los filtros
       </div>
       <!-- </div> -->
 
-      <div id="tablas" class="flex mt-5">
+      <div id="tablas" class="flex mt-5 w-12">
         <!-- Tabla de asignaturas asignadas -->
         <div v-if="subjectsByTeacherIdFromServer?.asignaciones" class="card col-3 flex w-max h-max mr-4">
           <DataTable :value="subjectsByTeacherIdFromServer.asignaciones" dataKey="id" v-model:filters="filters2" filterDisplay="menu" :globalFilterFields="['subject.nombre']" class="" removableSort
@@ -1454,7 +1456,7 @@ const clearFilter = () => { // para borrar los filtros
         </div>
 
         <!-- Tabla de alumnos matriculados -->
-        <div v-if="matriculasRefFromServer" class="card col-fixed w-max h-max">
+        <div v-if="matriculasRefFromServer" class="card col h-max">
           <DataTable :value="matriculasRefFromServerFiltered" dataKey="id" v-model:filters="filters1" filterDisplay="menu"
             :globalFilterFields="['student.nombre', 'student.apellidos', 'student.dni', 'student.direccion', 'student.telefono', 'student.email', 'subject.nombre']" class="" removableSort
             sortField="subject.nombre" :sortOrder="1" :paginator="true" :rows="10" stripedRows :showGridlines="false" selection-mode="single" :pt="{
@@ -1481,7 +1483,6 @@ const clearFilter = () => { // para borrar los filtros
                 </span>
                 <span class="mt-2 md:mt-0 p-input-icon-left flex align-items-center">
                   <i class="pi pi-search"></i>
-                  <!-- <InputText class="h-3rem mr-2" v-model="filters1['student.nombre'].value" placeholder="Buscar alumno..." /> -->
                   <InputText class="h-3rem mr-2" v-model="alumnoBuscar" placeholder="Buscar alumno..." />
                 </span>
                 <span class="mt-2 md:mt-0 p-input-icon-left flex align-items-center">
