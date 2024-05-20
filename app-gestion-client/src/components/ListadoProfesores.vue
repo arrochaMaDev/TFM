@@ -451,13 +451,13 @@ const getSeverity = (permiso: string) => {
       lastPageButton: { class: 'w-auto' },
     },
     table: {
-      class: 'mt-0 w-auto',
+      class: 'mt-0 w-max',
       style: { 'border': 'none' }
     }
   }
     ">
 
-        <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
+        <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-max pt-3 pb-3 border-round-top" style="background-color:  #f8f9fa">
           <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Profesores</h5>
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
@@ -549,7 +549,7 @@ const getSeverity = (permiso: string) => {
         </div>
 
 
-        <Column headerStyle="width:20%; min-width:8rem" bodyClass="flex p-1 pl-1">
+        <Column headerStyle="" bodyClass=" flex p-1 pl-1">
           <template #body="slotProps">
             <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.id)"></Button>
             <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Profesor'" @click="mostrarDialog(slotProps.data)"></Button>

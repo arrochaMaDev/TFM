@@ -1,5 +1,15 @@
 [
   {
+    "parent_code": "05",
+    "code": "35",
+    "label": "Las Palmas"
+  },
+  {
+    "parent_code": "05",
+    "code": "38",
+    "label": "Santa Cruz de Tenerife"
+  },
+  {
     "parent_code": "01",
     "code": "04",
     "label": "Almería"
@@ -63,16 +73,6 @@
     "parent_code": "04",
     "code": "07",
     "label": "Balears, Illes"
-  },
-  {
-    "parent_code": "05",
-    "code": "35",
-    "label": "Palmas, Las"
-  },
-  {
-    "parent_code": "05",
-    "code": "38",
-    "label": "Santa Cruz de Tenerife"
   },
   {
     "parent_code": "06",

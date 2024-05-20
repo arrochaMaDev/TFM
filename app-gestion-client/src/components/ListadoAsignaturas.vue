@@ -370,8 +370,8 @@ onMounted(() => {
 
   }">
 
-        <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
-          <h5 class="m-0 text-3xl text-800 font-bold pl-1 w-3">Listado Asignaturas</h5>
+        <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-max pt-3 pb-3 border-round-top" style="background-color:  #f8f9fa">
+          <h5 class="flex m-0 text-3xl text-800 font-bold pl-1 mr-5">Listado Asignaturas</h5>
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
             <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscar..." />

@@ -324,7 +324,7 @@ const getSeverity = (permiso: string) => {
     }
   }">
 
-        <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
+        <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-max pt-3 pb-3 border-round-top" style="background-color:  #f8f9fa">
           <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Usuarios</h5>
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>

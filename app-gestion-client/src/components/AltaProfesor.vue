@@ -3,6 +3,7 @@ import { inject, onMounted, ref, watch, type Ref } from 'vue'
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import InputMask from 'primevue/inputmask';
+import FileUpload from 'primevue/fileupload';
 import MultiSelect from 'primevue/multiselect';
 import Dropdown from 'primevue/dropdown';
 import InlineMessage from 'primevue/inlinemessage';
@@ -14,6 +15,7 @@ import Toast from 'primevue/toast';
 import router from '@/router';
 import { useAdminStore } from '@/stores/isAdmin';
 import type { VueCookies } from 'vue-cookies';
+import DireccionService from '@/utils/direccion.service';
 
 const toast = useToast();
 
@@ -44,8 +46,13 @@ const teacherRef = {
   apellidos: ref<string | undefined>(undefined),
   dni: ref<string | undefined>(undefined),
   direccion: ref<string | undefined>(undefined),
+  codigoPostal: ref<string | undefined>(undefined),
+  ciudad: ref<string | undefined>(undefined),
+  provincia: ref<string | undefined>(undefined),
   telefono: ref<string | undefined>(undefined),
   email: ref<string | undefined>(undefined),
+  foto: ref<File | null>(null),
+  userId: ref<number | undefined>(undefined)
 }
 const formSubmitted = ref(false); // variable para avisos con InlineText
 
@@ -189,60 +196,107 @@ const getUser = async () => {
   }
 }
 
-// watch(selectedUserId, () => {
-//   if (selectedUserId.value) {
-//     getUser()
-//   }
-// })
+watch(selectedUserId, () => {
+  if (selectedUserId.value != undefined) {
+    getUser()
+  }
+})
 
 // VALIDAR DATOS DEL FORMULARIO
+const patronTel = /^\d{9}$/
 const patronEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const patronDNI = /^\d{8}[a-zA-Z]$/;
+
 
 // FETCH PARA ENVIAR DATOS DEL PROFESOR A LA BD:
+
+const foto: Ref<File | null> = ref(null);
+
+const handleFileChange = (event: any) => {
+  foto.value = event.files[0]
+  console.log(foto.value)
+};
+
 const crearProfesor = async () => {
   formSubmitted.value = true;
   let isValid = true
+  if (teacherRef.telefono.value && !patronTel.test(teacherRef.telefono.value)) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'El número de teléfono debe tener 9 dígitos numéricos', life: 3000 });
+    isValid = false
+  }
   if (teacherRef.email.value && !patronEmail.test(teacherRef.email.value)) {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
+    isValid = false
+  }
+  if (teacherRef.dni.value && !patronDNI.test(teacherRef.dni.value)) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un DNI válido. Sin guiones ni puntos', life: 3000 });
     isValid = false
   }
   if (!teacherRef.nombre.value || !teacherRef.apellidos.value || !teacherRef.email.value) {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, rellene todos los campos', life: 3000 });
     isValid = false
   }
+  if (!user.value) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Debe seleccionar un usuario', life: 3000 });
+    isValid = false
+  }
   if (isValid) {
     try {
+      // const response = await fetch('http://localhost:3000/teacher', {
+      //   method: 'POST',
+      //   body: JSON.stringify({
+      //     nombre: teacherRef.nombre.value,
+      //     apellidos: teacherRef.apellidos.value,
+      //     dni: teacherRef.dni.value,
+      //     direccion: teacherRef.direccion.value,
+      //     telefono: Number(teacherRef.telefono.value),
+      //     email: teacherRef.email.value,
+      //     userId: user.value?.id
+      //   }),
+      //   headers: {
+      //     'Content-Type': 'application/json'
+      //   },
+      //   credentials: 'include'
+      // })
+
+      // unir dirección completa
+      teacherRef.direccion.value = teacherRef.direccion.value + ', ' + teacherRef.codigoPostal.value + '. ' + teacherRef.ciudad.value + ', ' + teacherRef.provincia.value
+      // console.log(studentRef.direccion.value)
+
+      const formData = new FormData();
+      formData.append('nombre', `${teacherRef.nombre.value}`);
+      formData.append('apellidos', `${teacherRef.apellidos.value}`);
+      formData.append('dni', `${teacherRef.dni.value}`);
+      formData.append('direccion', `${teacherRef.direccion.value}`);
+      formData.append('telefono', `${teacherRef.telefono.value}`); // Ojo que se pasa como string. Se transforma como number en el DTO
+      formData.append('email', `${teacherRef.email.value}`);
+      formData.append('userId', `${user.value?.id}`); // Ojo que se pasa como string. Se transforma como number en el DTO
+      if (foto.value) {
+        formData.append('foto', foto.value);
+      }
+
       const response = await fetch('http://localhost:3000/teacher', {
         method: 'POST',
-        body: JSON.stringify({
-          nombre: teacherRef.nombre.value,
-          apellidos: teacherRef.apellidos.value,
-          dni: teacherRef.dni.value,
-          direccion: teacherRef.direccion.value,
-          telefono: Number(teacherRef.telefono.value),
-          email: teacherRef.email.value,
-          userId: user.value?.id
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        body: formData,
         credentials: 'include'
-      })
+      });
+
       if (!response.ok) {
         throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
       } else {
         toast.add({ severity: 'success', summary: 'Creado', detail: 'Profesor creado', life: 3000 });
 
-        const datosProfesor = [
-          teacherRef.nombre.value,
-          teacherRef.apellidos.value,
-          teacherRef.dni.value,
-          teacherRef.direccion.value,
-          teacherRef.telefono.value,
-          teacherRef.email.value,
-        ]
+        const datosProfesor = {
+          nombre: teacherRef.nombre.value,
+          apellidos: teacherRef.apellidos.value,
+          dni: teacherRef.dni.value,
+          direccion: teacherRef.direccion.value,
+          telefono: teacherRef.telefono.value,
+          email: teacherRef.email.value,
+          userId: user.value?.id,
+          foto: foto.value,
+        }
         console.table(datosProfesor)
-
         borrarDatosForm()
         formSubmitted.value = false;
       }
@@ -252,6 +306,55 @@ const crearProfesor = async () => {
     }
   }
 }
+
+//OBTENER CCAAS Y PROVINCIAS
+const ccaas: Ref<any> = ref([])
+const provincias: Ref<{
+  parent_code: string,
+  code: string,
+  label: string
+}[]> = ref([])
+
+onMounted(async () => {
+  try {
+    getUsersData()
+
+    // const ccaasData = await fetch('/src/utils/ccaas.json', {
+    //   method: 'GET',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   credentials: 'include'
+    // });
+    // const provinciasData = await fetch('/src/utils/provincias.json', {
+    //   method: 'GET',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   credentials: 'include'
+    // });
+
+    const ccaasData = DireccionService.getCCAAS()
+    const provinciasData = DireccionService.getProvincias()
+
+    // if (!ccaasData.ok || !provinciasData.ok) {
+    //   throw new Error('No se pudo obtener el archivo JSON');
+    // }
+    if (!ccaasData || !provinciasData) {
+      throw new Error('No se pudo obtener el archivo JSON');
+    }
+
+    // ccaas.value = await ccaasData.json();
+    // provincias.value = await provinciasData.json();
+    ccaas.value = await ccaasData;
+    provincias.value = await provinciasData;
+    console.log(ccaas.value)
+    console.log(provincias.value)
+  } catch (error) {
+    console.error('Error al obtener los datos del JSON:', error);
+  }
+});
+
 
 </script>
 
@@ -300,37 +403,47 @@ const crearProfesor = async () => {
           <InputText class="" id="direcciónInput" v-model="teacherRef.direccion.value" />
           <InlineMessage v-if="!teacherRef.direccion.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La dirección es obligatoria</InlineMessage>
         </div>
-        <!-- <div class="field col-12">
-          <label class="">Seleccionar asignaturas</label>
-
-          <MultiSelect id="asignaturas" class="w-max" :style="{ 'max-width': '100%' }" :options="asignaturas" display="chip" filter optionLabel="nombre" placeholder="Seleccionar asignaturas"
-            v-model="teacherRef.asignaturas.value">
-          </MultiSelect>
-          <InlineMessage v-if="teacherRef.asignaturas.value.length == 0 && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">Las asignaturas son obligatorias</InlineMessage>
-        </div> -->
-        <div class="field col-12 mt-2 pl-0 mb-0 ">
-          <div class="field col-12 lg:col-4 md:col-12 sm:col-12 ">
-            <label class="">Seleccionar usuario</label>
-            <Dropdown class="" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput"
-              placeholder="Selecciona un usuario" v-model="selectedUserId" @change="getUser()" />
-            <InlineMessage v-if="!user && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El usuario es obligatorio</InlineMessage>
-          </div>
-          <div v-if="selectedUserId != undefined" class="ml-1">
-            <DataTable :value="[user]" class="pl-1" tableStyle="width: 30rem" :pt="{
+        <div class="field col-12 lg:col-3 md:col-12 sm:col-12">
+          <label class="">Código Postal</label>
+          <InputMask class="" id="CPInput" mask="99999" slotChar="" v-model="teacherRef.codigoPostal.value" />
+          <InlineMessage v-if="!teacherRef.codigoPostal.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El CP es obligatorio</InlineMessage>
+        </div>
+        <div class="field col-12 lg:col-5 md:col-12 sm:col-12">
+          <label class="">Ciudad</label>
+          <InputText class="" id="ciudadInput" v-model="teacherRef.ciudad.value" />
+          <InlineMessage v-if="!teacherRef.ciudad.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La ciudad es obligatoria</InlineMessage>
+        </div>
+        <div class="field col-12 lg:col-4 md:col-12 sm:col-12">
+          <label class="">Provincia</label>
+          <Dropdown class="" :options="provincias" optionLabel="label" optionValue="label" checkmark :highlightOnSelect="false" showClear id="provinciaInput" placeholder="Selecciona una provincia"
+            v-model="teacherRef.provincia.value" />
+          <InlineMessage v-if="!teacherRef.provincia.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La provincia es obligatoria</InlineMessage>
+        </div>
+        <div class="field col-12 lg:col-6 md:col-12 sm:col-12 ">
+          <label class="">Seleccionar usuario</label>
+          <Dropdown class="w-max" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput"
+            placeholder="Selecciona un usuario" v-model="selectedUserId" />
+          <InlineMessage v-if="!user && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El usuario es obligatorio</InlineMessage>
+        </div>
+        <div class="field col-12 lg:col-6 md:col-12 sm:col-12">
+          <label class="">Seleccionar imagen de perfil</label>
+          <FileUpload class="w-auto" mode="basic" choose-label="Seleccionar archivo" accept="image/*" :maxFileSize="1000000" @select="handleFileChange"></FileUpload>
+        </div>
+        <div class="field col-12 mb-3" v-if="selectedUserId != undefined">
+          <DataTable :value="[user]" class="pl-1" tableStyle="width: 30rem" :pt="{
     table: {
       class: 'mt-0',
       style: { 'border': 'none' }
     }
   }">
-              <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-              <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-              <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem">
-                <template #body="">
-                  {{ permisoString }}
-                </template>
-              </Column>
-            </DataTable>
-          </div>
+            <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+            <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+            <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem">
+              <template #body="">
+                {{ permisoString }}
+              </template>
+            </Column>
+          </DataTable>
         </div>
         <div class="field col-12">
           <Button class="justify-content-center w-auto h-auto mr-2" icon="pi pi-send" iconPos="left" type="submit" label="Enviar"></Button>
@@ -338,6 +451,7 @@ const crearProfesor = async () => {
         </div>
       </div>
     </form>
+
   </div>
   <Toast :pt="{
     container: {

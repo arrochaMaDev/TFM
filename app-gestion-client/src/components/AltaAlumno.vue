@@ -46,9 +46,9 @@ const studentRef = {
   apellidos: ref<string | undefined>(undefined),
   dni: ref<string | undefined>(undefined),
   direccion: ref<string | undefined>(undefined),
-  // codigoPostal: ref<string | undefined>(undefined),
-  // ciudad: ref<string | undefined>(undefined),
-  // provincia: ref<string | undefined>(undefined),
+  codigoPostal: ref<string | undefined>(undefined),
+  ciudad: ref<string | undefined>(undefined),
+  provincia: ref<string | undefined>(undefined),
   telefono: ref<string | undefined>(undefined),
   email: ref<string | undefined>(undefined),
   foto: ref<File | null>(null),
@@ -175,6 +175,7 @@ watch(selectedUserId, () => {
 // VALIDAR DATOS DEL FORMULARIO
 const patronTel = /^\d{9}$/
 const patronEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const patronDNI = /^\d{8}[a-zA-Z]$/;
 
 // FETCH PARA ENVIAR DATOS DEL ALUMNO A LA BD:
 
@@ -195,6 +196,10 @@ const crearAlumno = async () => {
   }
   if (studentRef.email.value && !patronEmail.test(studentRef.email.value)) {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
+    isValid = false
+  }
+  if (studentRef.dni.value && !patronDNI.test(studentRef.dni.value)) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un DNI válido. Sin guiones ni puntos', life: 3000 });
     isValid = false
   }
   if (!studentRef.nombre.value || !studentRef.apellidos.value || !studentRef.dni.value || !studentRef.direccion.value || !studentRef.telefono.value || !studentRef.email.value) {
@@ -224,6 +229,10 @@ const crearAlumno = async () => {
       //   credentials: 'include'
       // })
 
+      // unir dirección completa
+      studentRef.direccion.value = studentRef.direccion.value + ', ' + studentRef.codigoPostal.value + '. ' + studentRef.ciudad.value + ', ' + studentRef.provincia.value
+      // console.log(studentRef.direccion.value)
+
       const formData = new FormData();
       formData.append('nombre', `${studentRef.nombre.value}`);
       formData.append('apellidos', `${studentRef.apellidos.value}`);
@@ -247,15 +256,16 @@ const crearAlumno = async () => {
       } else {
         toast.add({ severity: 'success', summary: 'Creado', detail: 'Alumno creado', life: 3000 });
         // Imprimo los datos que he introducido
-        const datosAlumno = [
-          studentRef.nombre.value,
-          studentRef.apellidos.value,
-          studentRef.dni.value,
-          studentRef.direccion.value,
-          studentRef.telefono.value,
-          studentRef.email.value,
-          // studentRef.foto.value = foto.value,
-        ]
+        const datosAlumno = {
+          nombre: studentRef.nombre.value,
+          apellidos: studentRef.apellidos.value,
+          dni: studentRef.dni.value,
+          direccion: studentRef.direccion.value,
+          telefono: studentRef.telefono.value,
+          email: studentRef.email.value,
+          userId: user.value?.id,
+          foto: foto.value,
+        }
         console.table(datosAlumno)
         borrarDatosForm()
         formSubmitted.value = false;
@@ -362,7 +372,7 @@ onMounted(async () => {
           <InputText class="" id="direcciónInput" v-model="studentRef.direccion.value" />
           <InlineMessage v-if="!studentRef.direccion.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La dirección es obligatoria</InlineMessage>
         </div>
-        <!-- <div class="field col-12 lg:col-3 md:col-12 sm:col-12">
+        <div class="field col-12 lg:col-3 md:col-12 sm:col-12">
           <label class="">Código Postal</label>
           <InputMask class="" id="CPInput" mask="99999" slotChar="" v-model="studentRef.codigoPostal.value" />
           <InlineMessage v-if="!studentRef.codigoPostal.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El CP es obligatorio</InlineMessage>
@@ -377,10 +387,10 @@ onMounted(async () => {
           <Dropdown class="" :options="provincias" optionLabel="label" optionValue="label" checkmark :highlightOnSelect="false" showClear id="provinciaInput" placeholder="Selecciona una provincia"
             v-model="studentRef.provincia.value" />
           <InlineMessage v-if="!studentRef.provincia.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La provincia es obligatoria</InlineMessage>
-        </div> -->
+        </div>
         <div class="field col-12 lg:col-6 md:col-12 sm:col-12 ">
           <label class="w-auto">Seleccionar usuario</label>
-          <Dropdown class="w-auto" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput"
+          <Dropdown class="w-max" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput"
             placeholder="Selecciona un usuario" v-model="selectedUserId" />
           <InlineMessage v-if="!user && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El usuario es obligatorio</InlineMessage>
         </div>

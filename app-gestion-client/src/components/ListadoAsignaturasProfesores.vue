@@ -584,25 +584,25 @@ const collapseAll = () => {
     }
   }">
         <template #header>
-          <div class="flex flex-wrap justify-content-end h-max align-content-center">
+          <div class="flex flex-wrap md:justify-content-end h-max align-content-center">
             <Button class="w-auto mr-2 h-1rem" severity="secondary" text icon="pi pi-plus" label="Expandir" v-tooltip.top="'Expandir todo'" @click="expandAll"></Button>
             <Button class="w-auto h-1rem" severity="secondary" text icon="pi pi-minus" label="Colapsar" v-tooltip.top="'Colapsar todo'" @click="collapseAll"></Button>
           </div>
         </template>
 
-        <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
-          <h5 class="m-0 text-3xl text-800 font-bold pl-1">Listado Asignaciones</h5>
-          <span class="flex justify-content-end">
-            <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+        <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-max pt-3 pb-3 border-round-top" style="background-color:  #f8f9fa">
+          <h5 class="flex m-0 text-3xl text-800 font-bold pl-1">Listado Asignaciones</h5>
+          <span class="flex md:justify-content-end align-items-center">
+            <span class="flex mt-2 p-input-icon-left flex align-items-center">
               <i class="pi pi-search"></i>
-              <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscar profesor..." />
+              <InputText class="flex h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscar profesor..." />
             </span>
-            <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
+            <span class="mt-2 p-input-icon-left flex align-items-center ">
               <i class="pi pi-search"></i>
               <!-- <InputText id="buscarAsignatura" class="h-3rem mr-2" v-model="filters1['global'].value" placeholder="Buscar asignatura..." /> -->
-              <InputText id="buscarAsignatura" class="h-3rem mr-2" v-model="asignaturaBuscar" placeholder="Buscar asignatura..." />
+              <InputText id="buscarAsignatura" class="flex h-3rem mr-2" v-model="asignaturaBuscar" placeholder="Buscar asignatura..." />
             </span>
-            <Button class="mr-2" rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
+            <Button class="flex h-max mt-2 mr-2" rounded icon="pi pi-filter-slash" label="" outlined v-tooltip.top="'Limpiar filtros'" @click=" clearFilter()"></Button>
           </span>
         </div>
         <Column expander style="width: 1rem"></Column>
