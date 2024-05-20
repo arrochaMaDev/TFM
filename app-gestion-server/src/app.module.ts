@@ -90,6 +90,8 @@ import { RegisterEvaluacionController } from './Controllers/Evaluacion/Register/
 import { RegisterEvaluacionService } from './Controllers/Evaluacion/Register/RegisterEvaluacion.service';
 import { ListerEvaluacionesService } from './Controllers/Evaluacion/Get/listerEvaluaciones.service';
 import { ListerEvaluacionesController } from './Controllers/Evaluacion/Get/listerEvaluaciones.controller';
+import { GetEvaluacionController } from './Controllers/Evaluacion/Get/getEvaluacion.controller';
+import { GetEvaluacionService } from './Controllers/Evaluacion/Get/getEvaluacion.service';
 
 @Module({
   imports: [
@@ -165,6 +167,7 @@ import { ListerEvaluacionesController } from './Controllers/Evaluacion/Get/liste
     ListerTeachersBySubjectIdController,
     RegisterEvaluacionController,
     ListerEvaluacionesController,
+    GetEvaluacionController,
   ], //AppController
   providers: [
     RegisterStudentService,
@@ -206,6 +209,7 @@ import { ListerEvaluacionesController } from './Controllers/Evaluacion/Get/liste
     ListerTeachersBySubjectIdService,
     RegisterEvaluacionService,
     ListerEvaluacionesService,
+    GetEvaluacionService,
   ],
 })
 export class AppModule {}
