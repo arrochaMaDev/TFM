@@ -28,7 +28,7 @@ export class RegisterStudentController {
         filename: (req, file, cb) => {
           const fileName = uuidv4(); // usamos uuid para generar un nombre único para el archivo
           const fileExt = extname(file.originalname); // extraemos la extensión del archivo
-          cb(null, `${fileName}.jpg`); // llamamos al callback con el nombre del archivo
+          cb(null, `${fileName}.jpg`); // llamamos al callback con el nombre del archivo y añadimos la extension .jpg
           // cb(null, `${fileName}${fileExt}`); // llamamos al callback con el nombre del archivo
         },
       }),

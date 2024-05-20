@@ -7,6 +7,7 @@ import {
   Max,
   Min,
   IsOptional,
+  IsIdentityCard,
 } from 'class-validator';
 
 export class RegisterStudentDto {
@@ -18,7 +19,8 @@ export class RegisterStudentDto {
   @IsNotEmpty()
   apellidos: string;
 
-  @IsString() // validar para que sea en formato 12345678X????
+  @IsString()
+  @IsIdentityCard('ES') // validar para que sea en formato 12345678X de españa
   @IsNotEmpty()
   dni: string;
 

@@ -42,7 +42,6 @@ export class UpdateStudentController {
     @UploadedFile() file?: Express.Multer.File,
   ) {
     console.log(file);
-
     try {
       if (file != undefined) {
         updatedData.foto = file.filename;

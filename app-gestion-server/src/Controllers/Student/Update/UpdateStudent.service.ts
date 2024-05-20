@@ -23,10 +23,15 @@ export class UpdateStudentService {
     }
 
     // Actualiza los campos del estudiante con newData
-    Object.assign(studentToUpdate, newData);
+    // Object.assign(studentToUpdate, newData);
+    // en vez de usar el método Object.assign, uso merge:
+    const updatedStudent = this.studentRepository.merge(
+      studentToUpdate,
+      newData,
+    );
 
     // Guarda los cambios en la base de datos
-    await this.studentRepository.save(studentToUpdate);
+    await this.studentRepository.save(updatedStudent);
 
     return studentToUpdate;
   }

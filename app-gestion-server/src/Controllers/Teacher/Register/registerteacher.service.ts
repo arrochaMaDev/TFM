@@ -62,7 +62,7 @@ export class RegisterTeacherService {
         usuario_id: teacher.getUsuario_id(),
         nombre: teacher.getNombre(),
         apellidos: teacher.getApellidos(),
-        dni: teacher.getDni(),
+        dni: teacher.getDni().toUpperCase(), // se pasa la letra a mayúscula
         direccion: teacher.getDireccion(),
         telefono: teacher.getTelefono(),
         email: teacher.getEmail(),

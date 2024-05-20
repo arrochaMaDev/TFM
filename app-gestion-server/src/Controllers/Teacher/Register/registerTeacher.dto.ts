@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsNotEmpty,
@@ -6,6 +7,7 @@ import {
   Max,
   Min,
   IsIdentityCard,
+  IsOptional,
 } from 'class-validator';
 
 export class RegisterTeacherDto {
@@ -17,7 +19,8 @@ export class RegisterTeacherDto {
   @IsNotEmpty()
   apellidos: string;
 
-  @IsString() // validar para que sea en formato 12345678X????
+  @IsString()
+  @IsIdentityCard('ES', { message: 'El DNI no es válido ' }) // validar para que sea en formato 12345678X de españa
   @IsNotEmpty()
   dni: string;
 
@@ -25,6 +28,7 @@ export class RegisterTeacherDto {
   @IsNotEmpty()
   direccion: string;
 
+  @Type(() => Number) // decorador de class-transformer
   @IsNumber()
   @IsNotEmpty() // validado para que sea un número de 9 dígitos (entre 100000000 y 999999999) y en formato 123456789
   @Min(100000000)
@@ -36,9 +40,10 @@ export class RegisterTeacherDto {
   @IsEmail()
   email: string;
 
-  @IsString()
-  foto: string;
+  @IsOptional()
+  foto: any;
 
+  @Type(() => Number) // decorador de class-transformer
   @IsNumber()
   userId: number;
 }
