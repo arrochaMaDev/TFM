@@ -85,6 +85,9 @@ import { UpdateSubjectTeacherController } from './Controllers/SubjectTeacher/Upd
 import { UpdateSubjectTeacherService } from './Controllers/SubjectTeacher/Update/updateSubjectTeacher.service';
 import { ListerMatriculasByTeacherIdService } from './Controllers/Matricula/Get/listerMatriculasByTeacherId.service';
 import { ListerMatriculasByTeacherIdController } from './Controllers/Matricula/Get/listerMatriculasByTeacherId.controller';
+import { EvaluacionDb } from './Modelos/Evaluacion/evaluacionDb';
+import { RegisterEvaluacionController } from './Controllers/Evaluacion/Register/RegisterEvaluacion.controller';
+import { RegisterEvaluacionService } from './Controllers/Evaluacion/Register/RegisterEvaluacion.service';
 
 @Module({
   imports: [
@@ -102,6 +105,7 @@ import { ListerMatriculasByTeacherIdController } from './Controllers/Matricula/G
         SubjectDb,
         MatriculaDb,
         SubjectTeacherDb,
+        EvaluacionDb,
       ],
     }),
     TypeOrmModule.forFeature([
@@ -111,6 +115,7 @@ import { ListerMatriculasByTeacherIdController } from './Controllers/Matricula/G
       SubjectDb,
       MatriculaDb,
       SubjectTeacherDb,
+      EvaluacionDb,
     ]),
     ServeStaticModule.forRoot({
       // configuración para servir archivos estáticos y ver las imagenes almacenadas en el servidor
@@ -156,6 +161,7 @@ import { ListerMatriculasByTeacherIdController } from './Controllers/Matricula/G
     ListerSubjectsTeachersController,
     ListerSubjectsByTeacherIdController,
     ListerTeachersBySubjectIdController,
+    RegisterEvaluacionController,
   ], //AppController
   providers: [
     RegisterStudentService,
@@ -195,6 +201,7 @@ import { ListerMatriculasByTeacherIdController } from './Controllers/Matricula/G
     ListerSubjectsTeachersService,
     ListerSubjectsByTeacherIdService,
     ListerTeachersBySubjectIdService,
+    RegisterEvaluacionService,
   ],
 })
 export class AppModule {}
