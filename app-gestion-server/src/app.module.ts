@@ -88,6 +88,8 @@ import { ListerMatriculasByTeacherIdController } from './Controllers/Matricula/G
 import { EvaluacionDb } from './Modelos/Evaluacion/evaluacionDb';
 import { RegisterEvaluacionController } from './Controllers/Evaluacion/Register/RegisterEvaluacion.controller';
 import { RegisterEvaluacionService } from './Controllers/Evaluacion/Register/RegisterEvaluacion.service';
+import { ListerEvaluacionesService } from './Controllers/Evaluacion/Get/listerEvaluaciones.service';
+import { ListerEvaluacionesController } from './Controllers/Evaluacion/Get/listerEvaluaciones.controller';
 
 @Module({
   imports: [
@@ -162,6 +164,7 @@ import { RegisterEvaluacionService } from './Controllers/Evaluacion/Register/Reg
     ListerSubjectsByTeacherIdController,
     ListerTeachersBySubjectIdController,
     RegisterEvaluacionController,
+    ListerEvaluacionesController,
   ], //AppController
   providers: [
     RegisterStudentService,
@@ -202,6 +205,7 @@ import { RegisterEvaluacionService } from './Controllers/Evaluacion/Register/Reg
     ListerSubjectsByTeacherIdService,
     ListerTeachersBySubjectIdService,
     RegisterEvaluacionService,
+    ListerEvaluacionesService,
   ],
 })
 export class AppModule {}

@@ -8,7 +8,7 @@ export class ListerMatriculasController {
   ) {}
 
   @Get()
-  async ListerMatriculas() {
+  async listerMatriculas() {
     return this.listerMatriculasService.listerMatriculas();
   }
 }
