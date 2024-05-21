@@ -28,7 +28,7 @@ export class UpdateMatriculaService {
       const matriculaToUpdate =
         await this.getMatriculaService.getMatricula(matriculaId);
 
-      // OBTENGO EL PROFESOR NUEVO  A PARTIR DE SU ID
+      // OBTENGO EL PROFESOR NUEVO A PARTIR DE SU ID
       if (teacher) {
         const newTeacher = await this.teacherRepository.findOne({
           where: {

@@ -31,6 +31,10 @@ export class RegisterEvaluacionService {
         await this.getMatriculaService.getMatricula(matricula);
       console.log(matriculaCompleta);
 
+      if (!matriculaCompleta) {
+        throw new Error('Matricula no encontrada');
+      }
+
       const evaluacion = new Evaluacion(
         0, // id
         matriculaCompleta,

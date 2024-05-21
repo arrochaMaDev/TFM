@@ -25,7 +25,7 @@ export class UpdateTeacherService {
     // Actualiza los campos del profesor con newData
     // Object.assign(teacherToUpdate, newData);
     // en vez de usar el método Object.assign, uso merge:
-    const updatedTeacher = this.teacherRepository.merge(
+    const updatedTeacher = await this.teacherRepository.merge(
       teacherToUpdate,
       newData,
     );

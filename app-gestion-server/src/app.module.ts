@@ -106,6 +106,8 @@ import { DeleteEvaluacionesBySubjectIdController } from './Controllers/Evaluacio
 import { DeleteEvaluacionesByStudentIdService } from './Controllers/Evaluacion/Delete/deleteEvaluacionesByStudentId.service';
 import { DeleteEvaluacionesByTeacherIdService } from './Controllers/Evaluacion/Delete/deleteEvaluacionesByTeacherId.service';
 import { DeleteEvaluacionesBysubjectIdService } from './Controllers/Evaluacion/Delete/deleteEvaluacionesBySubjectId.service';
+import { UpdateEvaluacionController } from './Controllers/Evaluacion/Update/updateEvaluacion.controller';
+import { UpdateEvaluacionService } from './Controllers/Evaluacion/Update/updateEvaluacion.service';
 
 @Module({
   imports: [
@@ -189,6 +191,7 @@ import { DeleteEvaluacionesBysubjectIdService } from './Controllers/Evaluacion/D
     DeleteEvaluacionesByStudentIdController,
     DeleteEvaluacionesByTeacherIdController,
     DeleteEvaluacionesBySubjectIdController,
+    UpdateEvaluacionController,
   ], //AppController
   providers: [
     RegisterStudentService,
@@ -238,6 +241,7 @@ import { DeleteEvaluacionesBysubjectIdService } from './Controllers/Evaluacion/D
     DeleteEvaluacionesByStudentIdService,
     DeleteEvaluacionesByTeacherIdService,
     DeleteEvaluacionesBysubjectIdService,
+    UpdateEvaluacionService,
   ],
 })
 export class AppModule {}
