@@ -98,6 +98,14 @@ import { ListerEvaluacionesByTeacherIdService } from './Controllers/Evaluacion/G
 import { ListerEvaluacionesByTeacherIdController } from './Controllers/Evaluacion/Get/listerEvaluacionesByTeacherId.controller';
 import { ListerEvaluacionesBySubjectIdController } from './Controllers/Evaluacion/Get/listerEvaluacionesBySubjectId.controller';
 import { ListerEvaluacionesBySubjectIdService } from './Controllers/Evaluacion/Get/listerEvaluacionesBySubjectId.service';
+import { DeleteEvaluacionService } from './Controllers/Evaluacion/Delete/deleteEvaluacion.service';
+import { DeleteEvaluacionController } from './Controllers/Evaluacion/Delete/deleteEvaluacion.controller';
+import { DeleteEvaluacionesByStudentIdController } from './Controllers/Evaluacion/Delete/deleteEvaluacionesByStudentId.controller';
+import { DeleteEvaluacionesByTeacherIdController } from './Controllers/Evaluacion/Delete/deleteEvaluacionesByTeacherId.controller';
+import { DeleteEvaluacionesBySubjectIdController } from './Controllers/Evaluacion/Delete/deleteEvaluacionesBySubjectId.controller';
+import { DeleteEvaluacionesByStudentIdService } from './Controllers/Evaluacion/Delete/deleteEvaluacionesByStudentId.service';
+import { DeleteEvaluacionesByTeacherIdService } from './Controllers/Evaluacion/Delete/deleteEvaluacionesByTeacherId.service';
+import { DeleteEvaluacionesBysubjectIdService } from './Controllers/Evaluacion/Delete/deleteEvaluacionesBySubjectId.service';
 
 @Module({
   imports: [
@@ -177,6 +185,10 @@ import { ListerEvaluacionesBySubjectIdService } from './Controllers/Evaluacion/G
     ListerEvaluacionesByStudentIdController,
     ListerEvaluacionesByTeacherIdController,
     ListerEvaluacionesBySubjectIdController,
+    DeleteEvaluacionController,
+    DeleteEvaluacionesByStudentIdController,
+    DeleteEvaluacionesByTeacherIdController,
+    DeleteEvaluacionesBySubjectIdController,
   ], //AppController
   providers: [
     RegisterStudentService,
@@ -222,6 +234,10 @@ import { ListerEvaluacionesBySubjectIdService } from './Controllers/Evaluacion/G
     ListerEvaluacionesByStudentIdService,
     ListerEvaluacionesByTeacherIdService,
     ListerEvaluacionesBySubjectIdService,
+    DeleteEvaluacionService,
+    DeleteEvaluacionesByStudentIdService,
+    DeleteEvaluacionesByTeacherIdService,
+    DeleteEvaluacionesBysubjectIdService,
   ],
 })
 export class AppModule {}

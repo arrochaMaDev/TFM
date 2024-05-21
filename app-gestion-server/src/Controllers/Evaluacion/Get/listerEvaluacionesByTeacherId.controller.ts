@@ -25,18 +25,19 @@ export class ListerEvaluacionesByTeacherIdController {
   ) {
     try {
       const teacherId = Number(id);
-      const evaluaciones =
-        await this.listerEvaluacionesByTeacherIdService.getEvaluacionesByTeacherId(
-          teacherId,
-        );
 
       const teacher = await this.getTeacherService.getTeacher(teacherId);
       if (!teacher) {
         // throw new NotFoundException('No se encuentra este estudiante');
         return response
           .status(404)
-          .json({ message: 'No se encuentra esta asignatura' });
+          .json({ message: 'No se encuentra este profesor' });
       }
+
+      const evaluaciones =
+        await this.listerEvaluacionesByTeacherIdService.getEvaluacionesByTeacherId(
+          teacherId,
+        );
 
       if (!evaluaciones || evaluaciones.length === 0) {
         // throw new NotFoundException(

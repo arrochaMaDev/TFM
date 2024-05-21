@@ -10,7 +10,7 @@ export class DeleteMatriculaController {
     private readonly deleteStudentService: DeleteStudentService,
   ) {}
 
-  // OBTENER MATRICULA POR ID DE LA MATRICULA
+  // BORRAR MATRICULA POR ID DE LA MATRICULA
   @Delete(':id')
   async deleteMatricula(@Param('id') id: number, @Res() response: Response) {
     try {
@@ -23,7 +23,7 @@ export class DeleteMatriculaController {
     }
   }
 
-  // OBTENER MATRICULA POR ID DEL STUDENT
+  // BORRAR MATRICULA POR ID DEL STUDENT
   @Delete('student/:id')
   async deleteMatriculasByStudentId(
     @Param('id') id: number,

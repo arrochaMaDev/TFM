@@ -25,10 +25,6 @@ export class ListerEvaluacionesBySubjectIdController {
   ) {
     try {
       const subjectId = Number(id);
-      const evaluaciones =
-        await this.listerEvaluacionesBySubjectIdService.getEvaluacionesBySubjectId(
-          subjectId,
-        );
 
       const subject = await this.getSubjectService.getSubject(subjectId);
       if (!subject) {
@@ -37,6 +33,11 @@ export class ListerEvaluacionesBySubjectIdController {
           .status(404)
           .json({ message: 'No se encuentra esta asignatura' });
       }
+
+      const evaluaciones =
+        await this.listerEvaluacionesBySubjectIdService.getEvaluacionesBySubjectId(
+          subjectId,
+        );
 
       if (!evaluaciones || evaluaciones.length === 0) {
         // throw new NotFoundException(

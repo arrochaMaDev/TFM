@@ -18,10 +18,6 @@ export class ListerEvaluacionesByStudentIdController {
   ) {
     try {
       const studentId = Number(id);
-      const evaluaciones =
-        await this.listerEvaluacionesByStudentIdService.getEvaluacionesByStudentId(
-          studentId,
-        );
 
       const student = await this.getStudentService.getStudent(studentId);
       if (!student) {
@@ -30,6 +26,11 @@ export class ListerEvaluacionesByStudentIdController {
           .status(404)
           .json({ message: 'No se encuentra este estudiante' });
       }
+
+      const evaluaciones =
+        await this.listerEvaluacionesByStudentIdService.getEvaluacionesByStudentId(
+          studentId,
+        );
 
       if (!evaluaciones || evaluaciones.length === 0) {
         // throw new NotFoundException(
