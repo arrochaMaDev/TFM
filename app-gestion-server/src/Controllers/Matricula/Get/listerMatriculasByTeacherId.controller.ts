@@ -18,6 +18,14 @@ export class ListerMatriculasByTeacherIdController {
   ) {
     try {
       const teacherId = Number(id);
+
+      const teacher = await this.getTeacherService.getTeacher(teacherId);
+      if (!teacher) {
+        return response
+          .status(404)
+          .json({ message: 'No se encuentra este profesor' });
+      }
+
       const matriculas =
         await this.getMatriculasByTeacherIdService.getMatriculasByTeacherId(
           teacherId,
@@ -26,16 +34,10 @@ export class ListerMatriculasByTeacherIdController {
       if (!matriculas || matriculas.length === 0) {
         return response
           .status(404)
-          .json({ message: 'Matrículas no encontradas para este profesor' });
-      }
-      // Controlo los datos mediante un DTO
-      const teacher = await this.getTeacherService.getTeacher(teacherId);
-      if (!teacher) {
-        return response
-          .status(404)
-          .json({ message: 'No se encuentra este profesor' });
+          .json({ message: 'Evaluaciones no encontradas para este profesor' });
       }
 
+      // Controlo los datos mediante un DTO
       const matriculasDto = {
         teacher, // recibo primero los datos del estudiante y luego le añado el array de matriculas
         matriculas: matriculas.map(({ id, student, subject, year }) => ({

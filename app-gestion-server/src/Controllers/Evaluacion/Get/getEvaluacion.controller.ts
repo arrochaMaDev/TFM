@@ -56,6 +56,7 @@ export class GetEvaluacionController {
           },
         },
       };
+      console.log(evaluacionDto);
       return evaluacionDto;
       // return response.status(200).json(evaluacionDto);
     } catch (error) {

@@ -92,6 +92,12 @@ import { ListerEvaluacionesService } from './Controllers/Evaluacion/Get/listerEv
 import { ListerEvaluacionesController } from './Controllers/Evaluacion/Get/listerEvaluaciones.controller';
 import { GetEvaluacionController } from './Controllers/Evaluacion/Get/getEvaluacion.controller';
 import { GetEvaluacionService } from './Controllers/Evaluacion/Get/getEvaluacion.service';
+import { ListerEvaluacionesByStudentIdController } from './Controllers/Evaluacion/Get/listerEvaluacionesByStudentId.controller';
+import { ListerEvaluacionesByStudentIdService } from './Controllers/Evaluacion/Get/listerEvaluacionesByStudentId.service';
+import { ListerEvaluacionesByTeacherIdService } from './Controllers/Evaluacion/Get/listerEvaluacionesByTeacherId.service';
+import { ListerEvaluacionesByTeacherIdController } from './Controllers/Evaluacion/Get/listerEvaluacionesByTeacherId.controller';
+import { ListerEvaluacionesBySubjectIdController } from './Controllers/Evaluacion/Get/listerEvaluacionesBySubjectId.controller';
+import { ListerEvaluacionesBySubjectIdService } from './Controllers/Evaluacion/Get/listerEvaluacionesBySubjectId.service';
 
 @Module({
   imports: [
@@ -168,6 +174,9 @@ import { GetEvaluacionService } from './Controllers/Evaluacion/Get/getEvaluacion
     RegisterEvaluacionController,
     ListerEvaluacionesController,
     GetEvaluacionController,
+    ListerEvaluacionesByStudentIdController,
+    ListerEvaluacionesByTeacherIdController,
+    ListerEvaluacionesBySubjectIdController,
   ], //AppController
   providers: [
     RegisterStudentService,
@@ -210,6 +219,9 @@ import { GetEvaluacionService } from './Controllers/Evaluacion/Get/getEvaluacion
     RegisterEvaluacionService,
     ListerEvaluacionesService,
     GetEvaluacionService,
+    ListerEvaluacionesByStudentIdService,
+    ListerEvaluacionesByTeacherIdService,
+    ListerEvaluacionesBySubjectIdService,
   ],
 })
 export class AppModule {}

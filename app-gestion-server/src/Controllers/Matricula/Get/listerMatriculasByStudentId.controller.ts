@@ -10,7 +10,7 @@ export class ListerMatriculasByStudentIdController {
     private readonly getStudentService: GetStudentService,
   ) {}
 
-  // OBTENER MATRICULA POR ID DEL STUDENT
+  // OBTENER MATRICULAS POR ID DEL STUDENT
   @Get('student/:id')
   async getMatriculasByStudentId(
     @Param('id') id: number,
@@ -23,12 +23,6 @@ export class ListerMatriculasByStudentIdController {
           studentId,
         );
 
-      if (!matriculas || matriculas.length === 0) {
-        return response
-          .status(404)
-          .json({ message: 'Matrículas no encontradas para este estudiante' });
-      }
-      // Controlo los datos mediante un DTO
       const student = await this.getStudentService.getStudent(studentId);
       if (!student) {
         return response
@@ -36,6 +30,13 @@ export class ListerMatriculasByStudentIdController {
           .json({ message: 'No se encuentra este estudiante' });
       }
 
+      if (!matriculas || matriculas.length === 0) {
+        return response
+          .status(404)
+          .json({ message: 'Matrículas no encontradas para este estudiante' });
+      }
+
+      // Controlo los datos mediante un DTO
       const matriculasDto = {
         student, // recibo primero los datos del estudiante y luego le añado el array de matriculas
         matriculas: matriculas.map(({ id, subject, teacher, year }) => ({

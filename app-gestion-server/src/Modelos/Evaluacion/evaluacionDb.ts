@@ -6,6 +6,9 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { MatriculaDb } from '../Matricula/matriculaDb';
+import { StudentDb } from '../Student/studentDb';
+import { TeacherDb } from '../Teacher/teacherDb';
+import { SubjectDb } from '../Subject/subjectDb';
 
 @Entity({ name: 'evaluacion' })
 export class EvaluacionDb {
