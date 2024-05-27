@@ -771,13 +771,13 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
     "></Toast>
   <div id="container" v-if="isUser">
     <div class="w-max">
-      <div class="grid">
-        <div id="header" class="flex col-12 justify-content-between h-auto mb-2">
+      <div class="grid col-12">
+        <div id="header" class="flex w-full justify-content-between h-auto mb-2">
           <h2 class="m-0 text-4xl text-800 font-bold">Perfil del Usuario</h2>
           <Button class="w-auto" severity="secondary" @click="volver()">Volver</Button>
         </div>
 
-        <div id="datos" class="card col-12">
+        <div id="datos" class="card col">
           <div id="datos-usuario" class="mb-5">
 
             <ul id="datos-usuario" class="list-none p-0">

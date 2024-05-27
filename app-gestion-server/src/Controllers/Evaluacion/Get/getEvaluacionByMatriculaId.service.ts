@@ -4,18 +4,17 @@ import { EvaluacionDb } from 'src/Modelos/Evaluacion/evaluacionDb';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class ListerEvaluacionesByTeacherIdService {
+export class GetEvaluacionByMatriculaIdService {
   constructor(
     @InjectRepository(EvaluacionDb)
     private readonly evaluacionRepository: Repository<EvaluacionDb>,
   ) {}
 
-  // OBTENER EVALUACIONES POR ID DE STUDENT
-  // async getEvaluacionesByTeacherId(teacherId: number): Promise<EvaluacionDb[]> {
-  async getEvaluacionesByTeacherId(teacherId: number): Promise<EvaluacionDb[]> {
-    const listado = await this.evaluacionRepository.find({
+  // OBTENER EVALUACIONES POR ID DE MATRICULA
+  async getEvaluacionByMatriculaId(matriculaId: number): Promise<EvaluacionDb> {
+    const evaluacion = await this.evaluacionRepository.findOne({
       where: {
-        matricula: { teacher: { id: teacherId } },
+        matricula: { id: matriculaId },
       },
       relations: [
         'matricula',
@@ -31,7 +30,7 @@ export class ListerEvaluacionesByTeacherIdService {
     //   .innerJoinAndSelect('matricula.student', 'student')
     //   .innerJoinAndSelect('matricula.subject', 'subject')
     //   .innerJoinAndSelect('matricula.teacher', 'teacher')
-    //   .where('teacher.id = :teacherId', { teacherId })
+    //   .where('matricula.id = :matriculaId', { matriculaId })
     //   .getMany();
 
     // const listado = await this.evaluacionRepository
@@ -40,11 +39,11 @@ export class ListerEvaluacionesByTeacherIdService {
     //   .leftJoinAndSelect('matricula.student', 'student')
     //   .leftJoinAndSelect('matricula.subject', 'subject')
     //   .leftJoinAndSelect('matricula.teacher', 'teacher')
-    //   .where('teacher.id = :teacherId', { teacherId })
+    //   .where('matricula.id = :matriculaId', { matriculaId })
     //   .getMany();
 
-    // console.log(listado);
+    console.log(evaluacion);
 
-    return listado;
+    return evaluacion || null;
   }
 }

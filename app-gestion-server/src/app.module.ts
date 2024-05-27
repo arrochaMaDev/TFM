@@ -108,6 +108,8 @@ import { DeleteEvaluacionesByTeacherIdService } from './Controllers/Evaluacion/D
 import { DeleteEvaluacionesBysubjectIdService } from './Controllers/Evaluacion/Delete/deleteEvaluacionesBySubjectId.service';
 import { UpdateEvaluacionController } from './Controllers/Evaluacion/Update/updateEvaluacion.controller';
 import { UpdateEvaluacionService } from './Controllers/Evaluacion/Update/updateEvaluacion.service';
+import { GetEvaluacionByMatriculaIdController } from './Controllers/Evaluacion/Get/getEvaluacionByMatriculaId.controller';
+import { GetEvaluacionByMatriculaIdService } from './Controllers/Evaluacion/Get/getEvaluacionByMatriculaId.service';
 
 @Module({
   imports: [
@@ -184,6 +186,7 @@ import { UpdateEvaluacionService } from './Controllers/Evaluacion/Update/updateE
     RegisterEvaluacionController,
     ListerEvaluacionesController,
     GetEvaluacionController,
+    GetEvaluacionByMatriculaIdController,
     ListerEvaluacionesByStudentIdController,
     ListerEvaluacionesByTeacherIdController,
     ListerEvaluacionesBySubjectIdController,
@@ -234,6 +237,7 @@ import { UpdateEvaluacionService } from './Controllers/Evaluacion/Update/updateE
     RegisterEvaluacionService,
     ListerEvaluacionesService,
     GetEvaluacionService,
+    GetEvaluacionByMatriculaIdService,
     ListerEvaluacionesByStudentIdService,
     ListerEvaluacionesByTeacherIdService,
     ListerEvaluacionesBySubjectIdService,

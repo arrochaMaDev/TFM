@@ -16,8 +16,9 @@ import AltaMatricula from '@/components/AltaMatricula.vue'
 import ListadoMatriculas from '@/components/ListadoMatriculas.vue'
 import ListadoUsuarios from '@/components/ListadoUsuarios.vue'
 import AltaAsignaturaProfesorVue from '@/components/AltaAsignaturaProfesor.vue'
-import ListadoAsignaturasProfesoresVue from '@/components/ListadoAsignaturasProfesores.vue'
+import ListadoAsignaturasProfesores from '@/components/ListadoAsignaturasProfesores.vue'
 import NotFound from '@/components/NotFound.vue'
+import ListadoEvaluaciones from '@/components/ListadoEvaluaciones.vue'
 // import App from '@/App/App.vue'
 // import AppLayoutVue from '@/App/AppLayout.vue'
 
@@ -159,7 +160,13 @@ const router = createRouter({
       path: '/listado-asignaciones',
       name: 'listado-asignaciones',
 
-      component: ListadoAsignaturasProfesoresVue
+      component: ListadoAsignaturasProfesores
+    },
+    {
+      path: '/listado-evaluaciones',
+      name: 'listado-evaluaciones',
+
+      component: ListadoEvaluaciones
     },
     {
       path: '/:pathMatch(.*)*',

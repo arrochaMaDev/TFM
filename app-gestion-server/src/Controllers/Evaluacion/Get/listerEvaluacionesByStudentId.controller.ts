@@ -42,43 +42,51 @@ export class ListerEvaluacionesByStudentIdController {
       }
 
       // Controlo los datos mediante un DTO
-      const evaluacionesDto = {
-        student,
-        matriculas: evaluaciones.map(
-          ({
-            matricula,
-            nota1,
-            comentario1,
-            nota2,
-            comentario2,
-            nota3,
-            comentario3,
-          }) => ({
-            matricula: {
-              subject: {
-                id: matricula.subject.id,
-                nombre: matricula.subject.nombre,
-              },
-              teacher: {
-                id: matricula.teacher.id,
-                nombre: matricula.teacher.nombre,
-                apellidos: matricula.teacher.apellidos,
-                dni: matricula.teacher.dni,
-                telefono: matricula.teacher.telefono,
-                email: matricula.teacher.email,
-              },
-              year: matricula.year,
+      const evaluacionesDto = evaluaciones.map(
+        ({
+          id,
+          matricula,
+          nota1,
+          comentario1,
+          nota2,
+          comentario2,
+          nota3,
+          comentario3,
+        }) => ({
+          id,
+          matricula: {
+            id: matricula.id,
+            student: {
+              id: matricula.student.id,
+              nombre: matricula.student.nombre,
+              apellidos: matricula.student.apellidos,
+              dni: matricula.student.dni,
+              telefono: matricula.student.telefono,
+              email: matricula.student.email,
             },
-            nota1,
-            comentario1,
-            nota2,
-            comentario2,
-            nota3,
-            comentario3,
-          }),
-        ),
-      };
-      return evaluacionesDto;
+            teacher: {
+              id: matricula.teacher.id,
+              nombre: matricula.teacher.nombre,
+              apellidos: matricula.teacher.apellidos,
+              dni: matricula.teacher.dni,
+              telefono: matricula.teacher.telefono,
+              email: matricula.teacher.email,
+            },
+            subject: {
+              id: matricula.subject.id,
+              nombre: matricula.subject.nombre,
+            },
+            year: matricula.year,
+          },
+          nota1,
+          comentario1,
+          nota2,
+          comentario2,
+          nota3,
+          comentario3,
+        }),
+      );
+      return response.status(200).json(evaluacionesDto);
     } catch (error) {
       // throw new Error('Error interno del servidor');
       console.error(error);
