@@ -45,4 +45,38 @@ export class DeleteMatriculaService {
 
     return await this.matriculaRepository.remove(matriculas);
   }
+
+  // BORRAR MATRICULAS POR ID DE PROFESOR
+  async deleteMatriculasByTeacherId(teacherId: number): Promise<MatriculaDb[]> {
+    const matriculas = await this.matriculaRepository.find({
+      where: {
+        teacher: { id: teacherId },
+      },
+      relations: ['student', 'subject', 'teacher'],
+    });
+
+    if (!matriculas) {
+      throw new Error('Matriculas no encontradas');
+    }
+    console.log(matriculas);
+
+    return await this.matriculaRepository.remove(matriculas);
+  }
+
+  // BORRAR MATRICULAS POR ID DE ASIGNATURA
+  async deleteMatriculasBySubjectId(subjectId: number): Promise<MatriculaDb[]> {
+    const matriculas = await this.matriculaRepository.find({
+      where: {
+        subject: { id: subjectId },
+      },
+      relations: ['student', 'subject', 'teacher'],
+    });
+
+    if (!matriculas) {
+      throw new Error('Matriculas no encontradas');
+    }
+    console.log(matriculas);
+
+    return await this.matriculaRepository.remove(matriculas);
+  }
 }
