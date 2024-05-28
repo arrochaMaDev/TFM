@@ -9,7 +9,6 @@ import {
 import { SubjectDb } from '../Subject/subjectDb';
 import { TeacherDb } from '../Teacher/teacherDb';
 import { UserDb } from '../User/userDb';
-import { IsEmail, IsNumber } from 'class-validator';
 
 @Entity({ name: 'alumno' })
 export class StudentDb {
@@ -32,11 +31,9 @@ export class StudentDb {
   direccion: string;
 
   @Column()
-  @IsNumber()
   telefono: number;
 
   @Column()
-  @IsEmail()
   email: string;
 
   @Column()

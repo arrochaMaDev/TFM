@@ -8,7 +8,6 @@ import {
 } from 'typeorm';
 import { StudentDb } from '../Student/studentDb';
 import { UserDb } from '../User/userDb';
-import { IsEmail, IsNumber } from 'class-validator';
 
 @Entity({ name: 'profesor' })
 export class TeacherDb {
@@ -31,11 +30,9 @@ export class TeacherDb {
   direccion: string;
 
   @Column()
-  @IsNumber()
   telefono: number;
 
   @Column()
-  @IsEmail()
   email: string;
 
   @Column()
