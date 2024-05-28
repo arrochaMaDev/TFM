@@ -17,14 +17,15 @@ export class UpdateMatriculaService {
     private readonly subjectRepository: Repository<SubjectDb>,
     private readonly getMatriculaService: GetMatriculaService,
   ) {}
-  // Solo existen 2 opciones: se actualiza la el ID de la asignatura o el ID profesor
+  // Se actualiza a partir del estudiarnte. Por lo tanto, solo existen 2 opciones: se actualiza el ID de la asignatura o el ID del profesor
   async updateMatricula(
     matriculaId: number,
     subject?: Partial<SubjectDb>, // solo se pasa el id, pero se maneja como un objeto en vez de con un number
     teacher?: Partial<TeacherDb>,
+    newData?: Partial<MatriculaDb>,
   ): Promise<MatriculaDb> {
     try {
-      // OBTENGO LA MATRICULA A ACTUALIZAR
+      // OBTENGO LA MATRICULA A ACTUALIZAR A PARTIR DEL ID DE LA MATRICULA
       const matriculaToUpdate =
         await this.getMatriculaService.getMatricula(matriculaId);
 
@@ -41,6 +42,7 @@ export class UpdateMatriculaService {
           throw new Error('Profesor no encontrado');
         }
       }
+
       // OBTENGO LA ASIGNATURA NUEVA A PARTIR DE SU ID
       if (subject) {
         const newSubject = await this.subjectRepository.findOne({
@@ -54,6 +56,16 @@ export class UpdateMatriculaService {
           throw new Error('Asignatura no encontrada');
         }
       }
+
+      // SI QUIERO EVALUAR
+      if (newData) {
+        const evaluarMatricula = this.matriculaRepository.merge(
+          matriculaToUpdate,
+          newData,
+        );
+        return this.matriculaRepository.save(evaluarMatricula);
+      }
+
       return this.matriculaRepository.save(matriculaToUpdate);
     } catch (error) {
       console.error('Error al actualizar la matrícula:', error);

@@ -3,6 +3,7 @@ import { Response } from 'express';
 import { UpdateMatriculaService } from './updateMatricula.service';
 import { SubjectDb } from 'src/Modelos/Subject/subjectDb';
 import { TeacherDb } from 'src/Modelos/Teacher/teacherDb';
+import { MatriculaDb } from 'src/Modelos/Matricula/matriculaDb';
 
 @Controller('matricula')
 export class UpdateMatriculaController {
@@ -17,6 +18,7 @@ export class UpdateMatriculaController {
     updatedData: {
       newSubject?: Partial<SubjectDb>; // en este caso se maneja en la petición mediante las propiedades del objeto
       newTeacher?: Partial<TeacherDb>;
+      newData?: Partial<MatriculaDb>;
       // newTeacherId?: number // Otra opción es manejarlo como number. En este caso, solo le estaremos pasando el id. No el objeto y sus propiedades
     },
     @Res() response: Response,
@@ -27,6 +29,7 @@ export class UpdateMatriculaController {
           matriculaId,
           updatedData.newSubject,
           updatedData.newTeacher,
+          updatedData.newData,
         );
 
       if (!updatedMatricula) {
@@ -34,7 +37,7 @@ export class UpdateMatriculaController {
           message: 'No se encontró ninguna matrícula para este estudiante',
         });
       }
-      console.log('Actualizado con éxito');
+      console.log('Actualizada con éxito');
 
       // CONTROLO LOS DATOS DE RESPUESTA MEDIANTE UN DTO
       const updatedMatriculaDto = {
@@ -43,6 +46,7 @@ export class UpdateMatriculaController {
           id: updatedMatricula.student.id,
           nombre: updatedMatricula.student.nombre,
           apellidos: updatedMatricula.student.apellidos,
+          dni: updatedMatricula.student.dni,
         },
         subject: {
           id: updatedMatricula.subject.id,
@@ -55,6 +59,12 @@ export class UpdateMatriculaController {
           dni: updatedMatricula.teacher.dni,
         },
         year: updatedMatricula.year,
+        nota1: updatedMatricula.nota1,
+        comentario1: updatedMatricula.comentario1,
+        nota2: updatedMatricula.nota2,
+        comentario2: updatedMatricula.comentario2,
+        nota3: updatedMatricula.nota3,
+        comentario3: updatedMatricula.comentario3,
       };
       return response.status(200).json(updatedMatriculaDto); // Devuelve la matricula actualizada
     } catch (error) {
