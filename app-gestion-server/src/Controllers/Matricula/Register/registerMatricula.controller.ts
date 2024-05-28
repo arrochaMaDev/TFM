@@ -9,11 +9,11 @@ export class RegisterMatriculaController {
   ) {}
 
   @Post()
-  async registerMatriculaController(@Body() data1: RegisterMatriculaDto) {
+  async registerMatriculaController(@Body() data: RegisterMatriculaDto) {
     try {
       // const { alumno, asignatura, profesor, year } = data;
       const matriculaData =
-        await this.registerMatriculaService.createMatricula(data1);
+        await this.registerMatriculaService.createMatricula(data);
 
       //OBTENER AÑO ESCOLAR AUTOMÁTICAMENTE
       const fullDate = new Date();
@@ -24,7 +24,7 @@ export class RegisterMatriculaController {
       }
       console.log(añoEscolar);
 
-      const matriculaBD = {
+      const matricula = {
         alumno: {
           nombre: matriculaData.student.nombre,
           apellidos: matriculaData.student.apellidos,
@@ -35,8 +35,14 @@ export class RegisterMatriculaController {
           apellidos: matriculaData.teacher.apellidos,
         },
         year: añoEscolar,
+        nota1: matriculaData.nota1,
+        comentario1: matriculaData.comentario1,
+        nota2: matriculaData.nota2,
+        comentario2: matriculaData.comentario2,
+        nota3: matriculaData.nota3,
+        comentario3: matriculaData.comentario3,
       };
-      return matriculaBD;
+      return matricula;
     } catch (error) {
       console.error('Error al crear la matrícula:', error);
       throw new Error('No se pudo crear la matrícula');

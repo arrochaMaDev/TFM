@@ -39,23 +39,42 @@ export class ListerMatriculasByStudentIdController {
       // Controlo los datos mediante un DTO
       const matriculasDto = {
         student, // recibo primero los datos del estudiante y luego le añado el array de matriculas
-        matriculas: matriculas.map(({ id, subject, teacher, year }) => ({
-          id,
-          subject: {
-            id: subject.id,
-            nombre: subject.nombre,
-          },
-          teacher: {
-            id: teacher.id,
-            nombre: teacher.nombre,
-            apellidos: teacher.apellidos,
-            dni: teacher.dni,
-            direccion: teacher.direccion,
-            telefono: teacher.telefono,
-            email: teacher.email,
-          },
-          year,
-        })),
+        matriculas: matriculas.map(
+          ({
+            id,
+            subject,
+            teacher,
+            year,
+            nota1,
+            comentario1,
+            nota2,
+            comentario2,
+            nota3,
+            comentario3,
+          }) => ({
+            id,
+            subject: {
+              id: subject.id,
+              nombre: subject.nombre,
+            },
+            teacher: {
+              id: teacher.id,
+              nombre: teacher.nombre,
+              apellidos: teacher.apellidos,
+              dni: teacher.dni,
+              direccion: teacher.direccion,
+              telefono: teacher.telefono,
+              email: teacher.email,
+            },
+            year,
+            nota1,
+            comentario1,
+            nota2,
+            comentario2,
+            nota3,
+            comentario3,
+          }),
+        ),
       };
       return response.status(200).json(matriculasDto);
     } catch (error) {

@@ -1,34 +1,34 @@
 import { Controller, Get, Param, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { ListerMatriculasByTeacherIdService } from './listerMatriculasByTeacherId.service';
-import { GetTeacherService } from 'src/Controllers/Teacher/Get/getTeacher.service';
+import { GetSubjectService } from 'src/Controllers/Subject/Get/getSubject.service';
+import { ListerMatriculasBySubjectIdService } from './listerMatriculasBySubjectId.service';
 
 @Controller('matriculas')
-export class ListerMatriculasByTeacherIdController {
+export class ListerMatriculasBySubjectIdController {
   constructor(
-    private readonly getMatriculasByTeacherIdService: ListerMatriculasByTeacherIdService,
-    private readonly getTeacherService: GetTeacherService,
+    private readonly getMatriculasBySubjectIdService: ListerMatriculasBySubjectIdService,
+    private readonly getSubjectService: GetSubjectService,
   ) {}
 
   // OBTENER MATRICULA POR ID DEL PROFESOR
-  @Get('teacher/:id')
+  @Get('subject/:id')
   async getMatriculasByTeacherId(
     @Param('id') id: number,
     @Res() response: Response,
   ) {
     try {
-      const teacherId = Number(id);
+      const subjectId = Number(id);
 
-      const teacher = await this.getTeacherService.getTeacher(teacherId);
-      if (!teacher) {
+      const subject = await this.getSubjectService.getSubject(subjectId);
+      if (!subject) {
         return response
           .status(404)
           .json({ message: 'No se encuentra este profesor' });
       }
 
       const matriculas =
-        await this.getMatriculasByTeacherIdService.getMatriculasByTeacherId(
-          teacherId,
+        await this.getMatriculasBySubjectIdService.getMatriculasBySubjectId(
+          subjectId,
         );
 
       if (!matriculas || matriculas.length === 0) {
@@ -39,12 +39,12 @@ export class ListerMatriculasByTeacherIdController {
 
       // Controlo los datos mediante un DTO
       const matriculasDto = {
-        teacher, // recibo primero los datos del profesor y luego le añado el array de matriculas
+        subject, // recibo primero los datos de la asignatura y luego le añado el array de matriculas
         matriculas: matriculas.map(
           ({
             id,
             student,
-            subject,
+            teacher,
             year,
             nota1,
             comentario1,
@@ -63,9 +63,14 @@ export class ListerMatriculasByTeacherIdController {
               telefono: student.telefono,
               email: student.email,
             },
-            subject: {
-              id: subject.id,
-              nombre: subject.nombre,
+            teacher: {
+              id: teacher.id,
+              nombre: teacher.nombre,
+              apellidos: teacher.apellidos,
+              dni: teacher.dni,
+              direccion: teacher.direccion,
+              telefono: teacher.telefono,
+              email: teacher.email,
             },
             year,
             nota1,

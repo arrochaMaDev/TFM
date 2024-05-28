@@ -110,6 +110,8 @@ import { UpdateEvaluacionController } from './Controllers/Evaluacion/Update/upda
 import { UpdateEvaluacionService } from './Controllers/Evaluacion/Update/updateEvaluacion.service';
 import { GetEvaluacionByMatriculaIdController } from './Controllers/Evaluacion/Get/getEvaluacionByMatriculaId.controller';
 import { GetEvaluacionByMatriculaIdService } from './Controllers/Evaluacion/Get/getEvaluacionByMatriculaId.service';
+import { ListerMatriculasBySubjectIdService } from './Controllers/Matricula/Get/listerMatriculasBySubjectId.service';
+import { ListerMatriculasBySubjectIdController } from './Controllers/Matricula/Get/listerMatriculasBySubjectId.controller';
 
 @Module({
   imports: [
@@ -179,6 +181,7 @@ import { GetEvaluacionByMatriculaIdService } from './Controllers/Evaluacion/Get/
     ListerMatriculasController,
     ListerMatriculasByStudentIdController,
     ListerMatriculasByTeacherIdController,
+    ListerMatriculasBySubjectIdController,
     LoginUserController,
     ListerSubjectsTeachersController,
     ListerSubjectsByTeacherIdController,
@@ -230,6 +233,7 @@ import { GetEvaluacionByMatriculaIdService } from './Controllers/Evaluacion/Get/
     ListerMatriculasService,
     ListerMatriculasByStudentIdService,
     ListerMatriculasByTeacherIdService,
+    ListerMatriculasBySubjectIdService,
     LoginUserService,
     ListerSubjectsTeachersService,
     ListerSubjectsByTeacherIdService,

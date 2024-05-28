@@ -26,7 +26,18 @@ export class RegisterMatriculaService {
     // year: number,
   ) {
     try {
-      const { alumno, asignatura, profesor, year } = data;
+      const {
+        alumno,
+        asignatura,
+        profesor,
+        year,
+        nota1,
+        comentario1,
+        nota2,
+        comentario2,
+        nota3,
+        comentario3,
+      } = data;
 
       // Obtengo los objetos alumno, asignatura y profesor completos
       const student = await this.getStudentService.getStudent(alumno);
@@ -44,6 +55,12 @@ export class RegisterMatriculaService {
         subject,
         teacher,
         year,
+        nota1,
+        comentario1,
+        nota2,
+        comentario2,
+        nota3,
+        comentario3,
       );
       console.log(matricula);
 
@@ -55,6 +72,12 @@ export class RegisterMatriculaService {
       //   subject: { id: asignatura },
       //   teacher: { id: profesor },
       //   year,
+      //   nota1,
+      //   comentario1,
+      //   nota2,
+      //   comentario2,
+      //   nota3,
+      //   comentario3,
       // });
       // const matriculaJSON = JSON.stringify(matricula);
       // console.table(matriculaJSON);
@@ -65,6 +88,12 @@ export class RegisterMatriculaService {
         subject: matricula.getAsignatura(),
         teacher: matricula.getProfesor(),
         year: matricula.getYear(),
+        nota1: matricula.getNota1(),
+        comentario1: matricula.getComentario1(),
+        nota2: matricula.getNota2(),
+        comentario2: matricula.getComentario2(),
+        nota3: matricula.getNota3(),
+        comentario3: matricula.getComentario3(),
       };
       console.table(matriculaDb);
 

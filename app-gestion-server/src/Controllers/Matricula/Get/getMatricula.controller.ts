@@ -1,14 +1,10 @@
 import { Controller, Get, Param, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { GetMatriculaService } from './getMatricula.service';
-import { GetStudentService } from 'src/Controllers/Student/Get/getStudent.service';
 
 @Controller('matricula')
 export class GetMatriculaController {
-  constructor(
-    private readonly getMatriculaService: GetMatriculaService,
-    private readonly getStudentService: GetStudentService,
-  ) {}
+  constructor(private readonly getMatriculaService: GetMatriculaService) {}
 
   // OBTENER MATRICULA POR ID DE LA MATRICULA
   @Get(':id')
@@ -21,6 +17,7 @@ export class GetMatriculaController {
           .status(404)
           .json({ message: 'Matrícula no encontrada' });
       }
+
       // OPCION DE CONTROLAR LOS DATOS MEDIANTE UN DTO
       // const matriculaDto = {
       //   id: matricula.id,
@@ -37,13 +34,16 @@ export class GetMatriculaController {
       //     id: matricula.teacher.id,
       //     nombre: matricula.teacher.nombre,
       //     apellidos: matricula.teacher.apellidos,
-      //     dni: matricula.teacher.dni,
-      //     direccion: matricula.teacher.direccion,
-      //     telefono: matricula.teacher.telefono,
-      //     asignaturas: matricula.teacher.asignaturas,
       //   },
       //   year: matricula.year,
+      //   nota1: matricula.nota1,
+      //   comentario1: matricula.comentario1,
+      //   nota2: matricula.nota2,
+      //   comentario2: matricula.comentario2,
+      //   nota3: matricula.nota3,
+      //   comentario1: matricula.comentario3,
       // };
+
       return response.status(200).json(matricula);
     } catch (error) {
       console.error(error);
