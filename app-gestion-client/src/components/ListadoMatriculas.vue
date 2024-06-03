@@ -7,6 +7,8 @@ import ColumnGroup from 'primevue/columngroup';
 import Row from 'primevue/row';
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
+import InputNumber from 'primevue/inputnumber'
+import Textarea from 'primevue/textarea';
 import { FilterMatchMode } from 'primevue/api';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from "primevue/useconfirm";
@@ -74,6 +76,12 @@ const matriculasRefFromServer: Ref<
       email: string
     }
     year: number
+    nota1: number | null,
+    comentario1: string | null
+    nota2: number | null
+    comentario2: string | null
+    nota3: number | null
+    comentario3: string | null
   }[]
 > = ref([])
 
@@ -175,6 +183,12 @@ const matriculasByStudentId: Ref<{
       email: string
     }
     year: number
+    nota1: number | null,
+    comentario1: string | null
+    nota2: number | null
+    comentario2: string | null
+    nota3: number | null
+    comentario3: string | null
   }[]
 } | undefined> = ref(undefined)
 
@@ -253,6 +267,12 @@ const allStudentsWithMatriculasRef: Ref<{
       email: string
     }
     year: number
+    nota1: number | null,
+    comentario1: string | null
+    nota2: number | null
+    comentario2: string | null
+    nota3: number | null
+    comentario3: string | null
   }[]
 }[]> = ref([])
 
@@ -365,6 +385,12 @@ const matriculaEditar: Ref<
       email: string
     }
     year: number
+    nota1: number | null,
+    comentario1: string | null
+    nota2: number | null
+    comentario2: string | null
+    nota3: number | null
+    comentario3: string | null
   } | undefined
 > = ref(undefined)
 
@@ -392,7 +418,7 @@ const studentWithMatriculasEditar: Ref<typeof allStudentsWithMatriculasRef.value
 
 
 // mostrar el dialog de editar
-const mostrarDialog = async (matricula: typeof matriculaEditar.value) => {
+const mostrarDialogEditarMatricula = async (matricula: typeof matriculaEditar.value) => {
   selectedSubject.value = matricula?.subject
   await getSubjectsData()
   await getTeachersData()
@@ -703,11 +729,143 @@ const fetchEditarMatricula = async (matriculaId: number, subjectSelected: typeof
   }
 }
 
+
+// LÓGICA EVALUACIÓN
+const visibleDialogEvaluacion: Ref<boolean> = ref(false);
+
+const mostrarDialogEvaluacion = async (matricula: typeof matriculaEditar.value) => {
+  visibleDialogEvaluacion.value = true
+  if (matricula) {
+    await getMatriculasData()
+    await getMatriculaData(matricula.id)
+  }
+}
+
+const editarEvaluacion = async (matricula: typeof matriculaEditar.value) => {
+  // formSubmitted.value = true;
+  let isValid = true;
+
+  if (matriculaEditar.value?.nota1 != null) {
+    if (matriculaEditar.value.nota1 < 0 || matriculaEditar.value.nota1 > 10) {
+      isValid = false
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, la nota debe ser un número entre 0 y 10', life: 3000 });
+    }
+  }
+  if (matriculaEditar.value?.nota2 != null) {
+    if (matriculaEditar.value.nota2 < 0 || matriculaEditar.value.nota2 > 10) {
+      isValid = false
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, la nota debe ser un número entre 0 y 10', life: 3000 });
+    }
+  }
+  if (matriculaEditar.value?.nota3 != null) {
+    if (matriculaEditar.value.nota3 < 0 || matriculaEditar.value.nota3 > 10) {
+      isValid = false
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, la nota debe ser un número entre 0 y 10', life: 3000 });
+    }
+  }
+
+  if (isValid) {
+    try {
+      const response = await fetch(`http://localhost:3000/matricula/${matricula?.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          newData: {
+            nota1: matriculaEditar.value?.nota1,
+            comentario1: matriculaEditar.value?.comentario1,
+            nota2: matriculaEditar.value?.nota2,
+            comentario2: matriculaEditar.value?.comentario2,
+            nota3: matriculaEditar.value?.nota3,
+            comentario3: matriculaEditar.value?.comentario3
+          }
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      if (!response.ok) {
+        throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+      } else {
+        toast.add({ severity: 'success', summary: 'Creado', detail: 'Evaluación creada', life: 3000 });
+
+        const data = (await response.json()) as typeof matriculaEditar
+        console.log(data)
+
+
+      }
+    } catch (error) {
+      console.error('Error en la solicitud:', error)
+      toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+    } finally {
+      visibleDialogEvaluacion.value = false
+      await getAllStudentsWithMatriculas()
+    }
+  }
+}
+
+//BORRAR EVALUACION
+const confirmDeleteEvaluacion = (matricula: typeof matriculaEditar.value) => {
+  confirm.require({
+    message: '¿Seguro que quiere eliminar esta evaluación?',
+    header: 'Borrar evaluación',
+    icon: 'pi pi-info-circle',
+    rejectLabel: 'Cancelar',
+    acceptLabel: 'Borrar',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-danger',
+    accept: () => {
+      borrarEvaluacion(matricula)
+    },
+    reject: () => {
+      toast.add({ severity: 'info', summary: 'Cancelado', detail: 'Se ha cancelado la operación', life: 3000 });
+    }
+  });
+};
+
+const borrarEvaluacion = async (matricula: typeof matriculaEditar.value) => {
+  try {
+    const response = await fetch(`http://localhost:3000/matricula/${matricula?.id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        newData: {
+          nota1: null,
+          comentario1: null,
+          nota2: null,
+          comentario2: null,
+          nota3: null,
+          comentario3: null
+        }
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (response.ok) {
+      toast.add({ severity: 'success', summary: 'Borrado', detail: 'Evaluación borrada', life: 3000 });
+    } else {
+      throw new Error(`error en la solicitud: ${response.status} - ${response.statusText}`)
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+  } finally {
+    visibleDialogEvaluacion.value = false
+    await getMatriculasData()
+  }
+}
+
+
 // Resetear variables
 const resetearVariables = () => {
   selectedSubject.value = undefined
   selectedTeacher.value = undefined
 }
+
+const resetearVariablesEvaluacion = () => {
+  matriculaEditar.value = undefined
+}
+
 
 // Ir a la página idividual del alumno
 const goToStudent = (id: number) => {
@@ -737,6 +895,7 @@ const initFilters = () => { // componente filtro en global para que busque cualq
     'matriculas.teacher.dni': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'matriculas.teacher.telefono': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'matriculas.teacher.email': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'year': { value: null, matchMode: FilterMatchMode.CONTAINS },
   }
   filters1.value = {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -819,7 +978,7 @@ const collapseAll = () => {
       lastPageButton: { class: 'w-auto' },
     },
     table: {
-      class: 'mt-0 w-max',
+      class: 'mt-0 w-auto',
       style: { 'border': 'none' }
     }
   }">
@@ -866,14 +1025,24 @@ const collapseAll = () => {
             <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
           </template>
         </Column>
-        <Column field="student.telefono" header="Teléfono" sortable headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 m-0" :show-filter-match-modes="false">
+        <!-- <Column field="student.telefono" header="Teléfono" sortable headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 m-0" :show-filter-match-modes="false">
           <template #filter="{ filterModel }">
             <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
           </template>
-        </Column>
-        <Column field="student.email" header="Email" sortable headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 m-0" :show-filter-match-modes="false"> <template #filter="{ filterModel }">
+        </Column> -->
+        <Column field="student.telefono" bodyClass="p-0 pl-1">
+          <template #body="slotProps">
+            <a :href="'tel:' + slotProps.data.student.telefono" class="flex justify-content-start"> {{ slotProps.data.student.telefono }}</a>
+          </template>
+        </column>
+        <!-- <Column field="student.email" header="Email" sortable headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 m-0" :show-filter-match-modes="false"> <template #filter="{ filterModel }">
             <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-          </template> </Column>
+          </template> </Column> -->
+        <Column field="student.email" bodyClass="p-0 pl-1">
+          <template #body="slotProps">
+            <a :href="'mailto:' + slotProps.data.student.email" class="flex justify-content-start"> {{ slotProps.data.student.email }}</a>
+          </template>
+        </Column>
         <Column>
           <template #body="slotProps">
             <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Alumno'" @click="goToStudent(slotProps.data.student.id)"></Button>
@@ -904,7 +1073,8 @@ const collapseAll = () => {
                     <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                   </template>
                 </Column>
-                <Column header="Profesor" :colspan="6" headerClass="h-3rem pl-1"></Column>
+                <Column header="Profesor" :colspan="5" headerClass="h-3rem pl-1"></Column>
+                <Column header="Calificaciones" :colspan="5" headerClass="h-3rem pl-1"></Column>
               </Row>
               <Row>
                 <Column field="teacher.nombre" header="Nombre" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
@@ -932,6 +1102,21 @@ const collapseAll = () => {
                     <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                   </template>
                 </Column>
+                <Column field="nota1" header="Nota Trimestre 1" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                  <template #filter="{ filterModel }">
+                    <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                  </template>
+                </Column>
+                <Column field="nota2" header="Nota Trimestre 2" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                  <template #filter="{ filterModel }">
+                    <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                  </template>
+                </Column>
+                <Column field="nota3" header="Nota Trimestre 3" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                  <template #filter="{ filterModel }">
+                    <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                  </template>
+                </Column>
                 <Column field="" header="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
               </Row>
             </ColumnGroup>
@@ -944,12 +1129,25 @@ const collapseAll = () => {
             <Column field="teacher.nombre"> </Column>
             <Column field="teacher.apellidos"></Column>
             <Column field="teacher.dni"></Column>
-            <Column field="teacher.telefono"></Column>
-            <Column field="teacher.email"></Column>
+            <Column field="teacher.telefono">
+              <template #body="slotProps">
+                <a :href="'tel:' + slotProps.data.teacher.telefono" class="flex justify-content-start"> {{ slotProps.data.teacher.telefono }}</a>
+              </template>
+            </Column>
+            <Column field="teacher.email" bodyClass="p-0 pl-1">
+              <template #body="slotProps">
+                <a :href="'mailto:' + slotProps.data.teacher.email" class="flex justify-content-start"> {{ slotProps.data.teacher.email }}</a>
+              </template>
+            </Column>
+            <Column field="nota1"></Column>
+            <Column field="nota2"></Column>
+            <Column field="nota3"></Column>
+
             <Column field="" bodyClass="flex p-1 pl-1">
               <template #body="slotProps">
                 <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Matrícula'" @click="confirmDelete(slotProps.data)"></Button>
-                <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Matrícula'" @click="mostrarDialog(slotProps.data)"></Button>
+                <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Matrícula'" @click="mostrarDialogEditarMatricula(slotProps.data)"></Button>
+                <Button class="m-0" icon="pi pi-file-edit" text rounded severity="secondary" v-tooltip.top="'Evaluar'" @click="mostrarDialogEvaluacion(slotProps.data)"></Button>
               </template>
             </Column>
 
@@ -1069,7 +1267,92 @@ const collapseAll = () => {
       <Button class="mr-2 " type="button" rounded label="Cancelar" severity="secondary" @click="getAllStudentsWithMatriculas(), resetearVariables(), visibleDialog = false"></Button>
       <Button type="button" rounded label="Actualizar" @click="editarMatricula()"></Button>
     </div>
-
   </Dialog>
+
+  <!-- Dialog evaluacion -->
+  <Dialog v-model:visible="visibleDialogEvaluacion" modal header="Crear Evaluacion" class="w-auto" :pt="{
+    header: { class: 'flex align-items-baseline h-5rem' },
+    title: { class: '' },
+    closeButtonIcon: { class: '' },
+    mask: {
+      style: 'backdrop-filter: blur(3px)'
+    }
+  }
+    ">
+
+    <label class="text-xl text-800 font-bold">Datos del estudiante</label>
+
+    <DataTable :value="[matriculaEditar]" class="pt-1 pb-4" tableStyle="width: auto" :pt="{
+    table: {
+      class: 'mt-0',
+      style: { 'border': 'none' }
+    }
+  }
+    ">
+
+      <Column field="student.nombre" header="Nombre" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.apellidos" header="Apellidos" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.dni" header="DNI" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.direccion" header="Dirección" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.telefono" header="Teléfono" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.email" header="Email" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
+    </DataTable>
+
+    <label class="text-xl text-800 font-bold">Datos del profesor</label>
+
+    <DataTable :value="[matriculaEditar]" class="pt-1" tableStyle="width: auto" :pt="{
+    table: {
+      class: 'mt-0',
+      style: { 'border': 'none' }
+    }
+  }
+    ">
+
+      <Column field="teacher.nombre" header="Nombre" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="teacher.apellidos" header="Apellidos" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="teacher.dni" header="DNI" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="teacher.telefono" header="Teléfono" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="teacher.email" header="Email" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
+    </DataTable>
+
+    <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12 pt-4 pb-4">
+      <label class="text-xl text-800 font-bold">Asignatura</label>
+      <!-- <Tag class="ml-1 mt-1 w-max" :value="matriculaEditar?.subject.nombre" severity="secondary" /> -->
+      <label class="text-600 font-semibold">{{ matriculaEditar?.subject.nombre }}</label>
+    </div>
+
+    <div v-if="matriculaEditar" class="pl-3">
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="nombre" class="font-semibold w-8rem">Nota trimestre 1</label>
+        <InputNumber id="nota1" class="" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota1" :min="0" :max="10" :useGrouping="false" />
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="apellidos" class="font-semibold w-8rem">Comentario trimestre 1</label>
+        <Textarea id="comentario1" class="w-7" rows="5" cols="30" v-model="matriculaEditar.comentario1"></Textarea>
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="nombre" class="font-semibold w-8rem">Nota trimestre 2</label>
+        <InputNumber id="nota2" class="" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota2" :min="0" :max="10" :useGrouping="false" />
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="apellidos" class="font-semibold w-8rem">Comentario trimestre 2</label>
+        <Textarea id="comentario2" class="w-7" v-model="matriculaEditar.comentario2"></Textarea>
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="nombre" class="font-semibold w-8rem">Nota trimestre 3</label>
+        <InputNumber id="nota3" class="" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota3" :min="0" :max="10" :useGrouping="false" />
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="apellidos" class="font-semibold w-8rem">Comentario trimestre 3</label>
+        <Textarea id="comentario3" class="w-7" v-model="matriculaEditar.comentario3"></Textarea>
+      </div>
+    </div>
+    <div class="flex justify-content-center mb-3 pt-2">
+      <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="getAllStudentsWithMatriculas(), resetearVariablesEvaluacion(), visibleDialogEvaluacion = false"></Button>
+      <Button class="mr-2" type="button" rounded label="Evaluar" @click="editarEvaluacion(matriculaEditar)"></Button>
+      <Button class="" type="button" rounded label="Borrar" severity="danger" @click="confirmDeleteEvaluacion(matriculaEditar)"></Button>
+    </div>
+  </Dialog>
+
 </template>
 <style scoped></style>

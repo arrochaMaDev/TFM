@@ -67,7 +67,7 @@ const menuItems1 = ref([
       { label: 'Listado Asignaturas', icon: 'pi pi-list', to: '/listado-asignaturas' },
       { label: 'Listado Asignaciones', icon: 'pi pi-list', to: '/listado-asignaciones' },
       { label: 'Listado Matriculas', icon: 'pi pi-list', to: '/listado-matriculas' },
-      { label: 'Listado Evaluaciones', icon: 'pi pi-list', to: '/listado-evaluaciones' }
+      // { label: 'Listado Evaluaciones', icon: 'pi pi-list', to: '/listado-evaluaciones' }
     ]
   },
   // {

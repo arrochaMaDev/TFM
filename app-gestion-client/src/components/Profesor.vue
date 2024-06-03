@@ -217,6 +217,12 @@ const matriculasRefFromServer: Ref<{
       nombre: string
     }
     year: number
+    nota1: number | null,
+    comentario1: string | null
+    nota2: number | null
+    comentario2: string | null
+    nota3: number | null
+    comentario3: string | null
   }[]
 } | null> = ref(null)
 
@@ -903,6 +909,12 @@ const matriculaEditar: Ref<
       email: string
     }
     year: number
+    nota1: number | null,
+    comentario1: string | null
+    nota2: number | null
+    comentario2: string | null
+    nota3: number | null
+    comentario3: string | null
   } | undefined
 > = ref(undefined)
 
@@ -955,6 +967,12 @@ const studentWithMatriculasEditar: Ref<{
       email: string
     }
     year: number
+    nota1: number | null,
+    comentario1: string | null
+    nota2: number | null
+    comentario2: string | null
+    nota3: number | null
+    comentario3: string | null
   }[]
 } | undefined> = ref(undefined)
 
@@ -1004,6 +1022,12 @@ const matriculaFromServer: Ref<{
       email: string
     }
     year: number
+    nota1: number | null,
+    comentario1: string | null
+    nota2: number | null
+    comentario2: string | null
+    nota3: number | null
+    comentario3: string | null
   }[]
 } | null> = ref(null)
 
@@ -1097,6 +1121,8 @@ const onlyTeachersArray: Ref<{
 
 
 const getTeachersBySubjectData = async () => {
+  onlyTeachersArray.value = []
+  selectedTeacher.value = undefined
   try {
     if (!selectedSubject.value) {
       // Manejar el caso en el que no haya una asignatura seleccionada
@@ -1259,108 +1285,109 @@ const fetchEditarMatricula = async (matriculaId: number, subjectSelected: typeof
 }
 
 // LÓGICA EVALUACIÓN
+const visibleDialogEvaluacion: Ref<boolean> = ref(false);
 
-// CREAR EVALUACION
-const visibleDialogCrearEvaluacion: Ref<boolean> = ref(false);
+// const matriculaSelectedId: Ref<number | undefined> = ref(undefined)
+// const nota1: Ref<number | null> = ref(null)
+// const comentario1: Ref<string | null> = ref(null)
+// const nota2: Ref<number | null> = ref(null)
+// const comentario2: Ref<string | null> = ref(null)
+// const nota3: Ref<number | null> = ref(null)
+// const comentario3: Ref<string | null> = ref(null)
 
-const matriculaSelectedId: Ref<number | undefined> = ref(undefined)
-const nota1: Ref<number | null> = ref(null)
-const comentario1: Ref<string | null> = ref(null)
-const nota2: Ref<number | null> = ref(null)
-const comentario2: Ref<string | null> = ref(null)
-const nota3: Ref<number | null> = ref(null)
-const comentario3: Ref<string | null> = ref(null)
-
-const formSubmitted = ref(false); // variable para avisos con InlineText
+// const formSubmitted = ref(false); // variable para avisos con InlineText
 
 // mostrar el dialog de crear o editar
 const mostrarDialogEvaluacion = async (matricula: typeof matriculaEditar.value) => {
-
-  await getMatriculasByStudentData
+  visibleDialogEvaluacion.value = true
+  // await getMatriculasByStudentData
+  // if (matricula) {
+  //   await getMatriculaData(matricula.id)
+  //   // await getEvaluacionByMatriculaId(matricula.id)
+  // }
   if (matricula) {
+    await getMatriculasByStudentData(matricula.student.id)
     await getMatriculaData(matricula.id)
-    await getEvaluacionByMatriculaId(matricula.id)
   }
 }
 
-const getEvaluacionByMatriculaId = async (matriculaId: number) => {
-  if (matriculaId) {
-    try {
-      const response = await fetch(`http://localhost:3000/evaluacion/matricula/${matriculaId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      })
-      if (response.status == 404) {
-        visibleDialogCrearEvaluacion.value = true // si no existe la matricula, se crea una
-        return
-      }
-      if (!response.ok) {
-        throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
-      }
-      if (response.ok) {
-        visibleDialogEditarEvaluacion.value = true // si existe la matricula, se edita 
-        const data = await response.json()
-        evaluacionEditar.value = data
-        console.log(data)
-        console.table(evaluacionEditar.value)
-        return
-      }
-    } catch (error) {
-      console.error('Error en la solicitud:', error)
-      toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
-    }
-  }
-}
+// const getEvaluacionByMatriculaId = async (matriculaId: number) => {
+//   if (matriculaId) {
+//     try {
+//       const response = await fetch(`http://localhost:3000/matricula/${matriculaId}`, {
+//         method: 'GET',
+//         headers: {
+//           'Content-Type': 'application/json'
+//         },
+//         credentials: 'include'
+//       })
+//       if (response.status == 404) {
+//         visibleDialogCrearEvaluacion.value = true // si no existe la matricula, se crea una
+//         return
+//       }
+//       if (!response.ok) {
+//         throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+//       }
+//       if (response.ok) {
+//         visibleDialogEditarEvaluacion.value = true // si existe la matricula, se edita 
+//         const data = await response.json()
+//         matriculaEditar.value = data
+//         console.log(data)
+//         console.table(matriculaEditar.value)
+//         return
+//       }
+//     } catch (error) {
+//       console.error('Error en la solicitud:', error)
+//       toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+//     }
+//   }
+// }
 
-const getEvaluacion = async (evaluacionId: number) => {
-  if (evaluacionId) {
-    try {
-      const response = await fetch(`http://localhost:3000/evaluacion/${evaluacionId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      })
-      if (!response.ok) {
-        throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
-      }
-      if (response.ok) {
-        const data = await response.json()
-        evaluacionEditar.value = data
-        console.table(evaluacionEditar.value)
-        return
-      }
-    } catch (error) {
-      console.error('Error en la solicitud:', error)
-      toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
-    }
-  }
-}
+// const getEvaluacion = async (evaluacionId: number) => {
+//   if (evaluacionId) {
+//     try {
+//       const response = await fetch(`http://localhost:3000/evaluacion/${evaluacionId}`, {
+//         method: 'GET',
+//         headers: {
+//           'Content-Type': 'application/json'
+//         },
+//         credentials: 'include'
+//       })
+//       if (!response.ok) {
+//         throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+//       }
+//       if (response.ok) {
+//         const data = await response.json()
+//         evaluacionEditar.value = data
+//         console.table(evaluacionEditar.value)
+//         return
+//       }
+//     } catch (error) {
+//       console.error('Error en la solicitud:', error)
+//       toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+//     }
+//   }
+// }
 
 
-const crearEvaluacion = async () => {
-
+const editarEvaluacion = async (matricula: typeof matriculaEditar.value) => {
   // formSubmitted.value = true;
   let isValid = true;
 
-  if (nota1.value != null) {
-    if (nota1.value < 0 || nota1.value > 10) {
+  if (matriculaEditar.value?.nota1 != null) {
+    if (matriculaEditar.value.nota1 < 0 || matriculaEditar.value.nota1 > 10) {
       isValid = false
       toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, la nota debe ser un número entre 0 y 10', life: 3000 });
     }
   }
-  if (nota2.value != null) {
-    if (nota2.value < 0 || nota2.value > 10) {
+  if (matriculaEditar.value?.nota2 != null) {
+    if (matriculaEditar.value.nota2 < 0 || matriculaEditar.value.nota2 > 10) {
       isValid = false
       toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, la nota debe ser un número entre 0 y 10', life: 3000 });
     }
   }
-  if (nota3.value != null) {
-    if (nota3.value < 0 || nota3.value > 10) {
+  if (matriculaEditar.value?.nota3 != null) {
+    if (matriculaEditar.value.nota3 < 0 || matriculaEditar.value.nota3 > 10) {
       isValid = false
       toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, la nota debe ser un número entre 0 y 10', life: 3000 });
     }
@@ -1368,16 +1395,17 @@ const crearEvaluacion = async () => {
 
   if (isValid) {
     try {
-      const response = await fetch('http://localhost:3000/evaluacion', {
-        method: 'POST',
+      const response = await fetch(`http://localhost:3000/matricula/${matricula?.id}`, {
+        method: 'PUT',
         body: JSON.stringify({
-          matricula: matriculaEditar.value?.id,
-          // nota1: nota1.value,
-          // comentario1: comentario1.value,
-          // nota2: nota2.value,
-          // comentario2: comentario2.value,
-          // nota3: nota3.value,
-          // comentario3: comentario3.value
+          newData: {
+            nota1: matriculaEditar.value?.nota1,
+            comentario1: matriculaEditar.value?.comentario1,
+            nota2: matriculaEditar.value?.nota2,
+            comentario2: matriculaEditar.value?.comentario2,
+            nota3: matriculaEditar.value?.nota3,
+            comentario3: matriculaEditar.value?.comentario3
+          }
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -1387,18 +1415,9 @@ const crearEvaluacion = async () => {
       if (!response.ok) {
         throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
       } else {
-        toast.add({ severity: 'success', summary: 'Creado', detail: 'Matrícula creada', life: 3000 });
-        const evaluacion = {
-          matricula: matriculaEditar.value?.id,
-          nota1: nota1,
-          comentario1: comentario1,
-          nota2: nota2,
-          comentario2: comentario2,
-          nota3: nota3,
-          comentario3: comentario3
-        }
-        const data = (await response.json()) as typeof evaluacion
+        toast.add({ severity: 'success', summary: 'Creado', detail: 'Evaluación creada', life: 3000 });
 
+        const data = (await response.json()) as typeof matriculaEditar
         console.log(data)
 
 
@@ -1407,97 +1426,117 @@ const crearEvaluacion = async () => {
       console.error('Error en la solicitud:', error)
       toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
     } finally {
-      visibleDialogCrearEvaluacion.value = false
-      formSubmitted.value = false;
-      await resetearVariablesEvaluacion()
-      await getEvaluacionesByTeacherData(teacherId)
+      visibleDialogEvaluacion.value = false
+      // formSubmitted.value = false;
+      // await resetearVariablesEvaluacion()
+      await getMatriculasByTeacherData(teacherId)
+      // await getEvaluacionesByTeacherData(teacherId)
     }
   }
 }
 
 // Resetear variables
 const resetearVariablesEvaluacion = () => {
-  nota1.value = null
-  comentario1.value = null
-  nota2.value = null
-  comentario2.value = null
-  nota3.value = null
-  comentario3.value = null
-  matriculaSelectedId.value = undefined
-  evaluacionEditar.value = undefined
+  matriculaEditar.value = undefined
+  // nota1.value = null
+  // comentario1.value = null
+  // nota2.value = null
+  // comentario2.value = null
+  // nota3.value = null
+  // comentario3.value = null
+  // matriculaSelectedId.value = undefined
+  // evaluacionEditar.value = undefined
 }
 
 
-// OBTENER EVALUACIONES
-const evaluacionesByTeacherId: Ref<{
-  id: number,
-  matricula: {
-    id: number,
-    subject: {
-      id: number
-      nombre: string
-    },
-    student: {
-      id: number
-      nombre: string
-      apellidos: string
-      dni: string
-      telefono: number
-      email: string
-    },
-    year: number
-  },
-  nota1: string | null
-  comentario1: string | null
-  nota2: string | null
-  comentario2: string | null
-  nota3: string | null
-  comentario3: string | null
-}[]> = ref([])
+// // OBTENER EVALUACIONES
+// const evaluacionesByTeacherId: Ref<{
+//   id: number,
+//   matricula: {
+//     id: number,
+//     subject: {
+//       id: number
+//       nombre: string
+//     },
+//     student: {
+//       id: number
+//       nombre: string
+//       apellidos: string
+//       dni: string
+//       telefono: number
+//       email: string
+//     },
+//     year: number
+//   },
+//   nota1: string | null
+//   comentario1: string | null
+//   nota2: string | null
+//   comentario2: string | null
+//   nota3: string | null
+//   comentario3: string | null
+// }[]> = ref([])
 
-const getEvaluacionesByTeacherData = async (teacherId: number) => {
-  try {
-    const response = await fetch(`http://localhost:3000/evaluaciones/teacher/${teacherId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    })
-    if (response.status == 404) {
-      toast.add({ severity: 'info', summary: 'Error', detail: 'El profesor no puede evaluar', life: 1000 });
-      return
-    }
-    if (!response.ok) {
-      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
-    } else {
-      const data = await response.json()
-      evaluacionesByTeacherId.value = data
-      console.log(data)
-      console.log(evaluacionesByTeacherId.value)
-    }
-  } catch (error) {
-    console.error('Error en la solicitud:', error)
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error obteniendo las evaluaciones', life: 3000 });
-  }
-  // finally {
-  // }
-}
-getEvaluacionesByTeacherData(teacherId)
+// const getEvaluacionesByTeacherData = async (teacherId: number) => {
+//   try {
+//     const response = await fetch(`http://localhost:3000/evaluaciones/teacher/${teacherId}`, {
+//       method: 'GET',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       },
+//       credentials: 'include'
+//     })
+//     if (response.status == 404) {
+//       toast.add({ severity: 'info', summary: 'Error', detail: 'El profesor no puede evaluar', life: 1000 });
+//       return
+//     }
+//     if (!response.ok) {
+//       throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+//     } else {
+//       const data = await response.json()
+//       evaluacionesByTeacherId.value = data
+//       console.log(data)
+//       console.log(evaluacionesByTeacherId.value)
+//     }
+//   } catch (error) {
+//     console.error('Error en la solicitud:', error)
+//     toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error obteniendo las evaluaciones', life: 3000 });
+//   }
+//   // finally {
+//   // }
+// }
+// getEvaluacionesByTeacherData(teacherId)
 
-// LÓGICA BORRAR EVALUACUON
-const confirmDeleteEvaluacion = (evaluacionId: number) => {
-  console.log(evaluacionId)
+// // LÓGICA BORRAR EVALUACUON
+// const confirmDeleteEvaluacion = (evaluacionId: number) => {
+//   console.log(evaluacionId)
+//   confirm.require({
+//     message: '¿Seguro que quiere borrar toda la evaluacion?',
+//     header: 'Borrar Evaluación',
+//     icon: 'pi pi-info-circle',
+//     rejectLabel: 'Cancelar',
+//     acceptLabel: 'Borrar',
+//     rejectClass: 'p-button-secondary p-button-outlined',
+//     acceptClass: 'p-button-danger',
+//     accept: () => {
+//       borrarEvaluacion(evaluacionId)
+//     },
+//     reject: () => {
+//       toast.add({ severity: 'info', summary: 'Cancelado', detail: 'Se ha cancelado la operación', life: 3000 });
+//     }
+//   });
+// };
+
+const confirmDeleteEvaluacion = (matricula: typeof matriculaEditar.value) => {
   confirm.require({
-    message: '¿Seguro que quiere borrar toda la evaluacion?',
-    header: 'Borrar Evaluación',
+    message: '¿Seguro que quiere eliminar esta evaluación?',
+    header: 'Borrar evaluación',
     icon: 'pi pi-info-circle',
     rejectLabel: 'Cancelar',
     acceptLabel: 'Borrar',
     rejectClass: 'p-button-secondary p-button-outlined',
     acceptClass: 'p-button-danger',
     accept: () => {
-      borrarEvaluacion(evaluacionId)
+      borrarEvaluacion(matricula)
     },
     reject: () => {
       toast.add({ severity: 'info', summary: 'Cancelado', detail: 'Se ha cancelado la operación', life: 3000 });
@@ -1505,18 +1544,25 @@ const confirmDeleteEvaluacion = (evaluacionId: number) => {
   });
 };
 
-const borrarEvaluacion = async (evaluacionId: number) => {
+const borrarEvaluacion = async (matricula: typeof matriculaEditar.value) => {
   try {
-    const response = await fetch(
-      `http://localhost:3000/evaluacion/${evaluacionId}`,
-      {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      }
-    )
+    const response = await fetch(`http://localhost:3000/matricula/${matricula?.id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        newData: {
+          nota1: null,
+          comentario1: null,
+          nota2: null,
+          comentario2: null,
+          nota3: null,
+          comentario3: null
+        }
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
     if (response.ok) {
       toast.add({ severity: 'success', summary: 'Borrado', detail: 'Evaluación borrada', life: 3000 });
     } else {
@@ -1526,7 +1572,9 @@ const borrarEvaluacion = async (evaluacionId: number) => {
     console.error('Error en la solicitud:', error)
     toast.add({ severity: 'error', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
   } finally {
-    getEvaluacionesByTeacherData(teacherId)
+    visibleDialogEvaluacion.value = false
+    await getMatriculasByTeacherData(teacherId)
+    // getEvaluacionesByTeacherData(teacherId)
   }
 }
 
@@ -1534,127 +1582,140 @@ const borrarEvaluacion = async (evaluacionId: number) => {
 
 
 // LÓGICA EDITAR EVALUACION
-const visibleDialogEditarEvaluacion: Ref<boolean> = ref(false);
+// const visibleDialogEditarEvaluacion: Ref<boolean> = ref(false);
 
-const evaluacionEditar: Ref<
-  {
-    id: number,
-    matricula: {
-      id: number,
-      subject: {
-        id: number
-        nombre: string
-      },
-      student: {
-        id: number
-        nombre: string
-        apellidos: string
-        dni: string
-        telefono: number
-        email: string
-      },
-      teacher: {
-        id: number
-        usuario_id: string
-        nombre: string
-        apellidos: string
-        dni: string
-        telefono: number
-        email: string
-      },
-      year: number
-    },
-    nota1: number | null
-    comentario1: string | null
-    nota2: number | null
-    comentario2: string | null
-    nota3: number | null
-    comentario3: string | null
-  } | undefined
-> = ref(undefined)
-
-
-const editarEvaluacion = async (evaluacionId: number) => {
-
-  // formSubmitted.value = true;
-  let isValid = true;
-
-  if (evaluacionEditar.value && evaluacionEditar.value.nota1 != null) {
-    if (evaluacionEditar.value.nota1 < 0 || evaluacionEditar.value.nota1 > 10) {
-      isValid = false
-      toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, la nota debe ser un número entre 0 y 10', life: 3000 });
-    }
-  }
-  if (evaluacionEditar.value && evaluacionEditar.value.nota2 != null) {
-    if (evaluacionEditar.value.nota2 < 0 || evaluacionEditar.value.nota2 > 10) {
-      isValid = false
-      toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, la nota debe ser un número entre 0 y 10', life: 3000 });
-    }
-  }
-  if (evaluacionEditar.value && evaluacionEditar.value.nota3 != null) {
-    if (evaluacionEditar.value.nota3 < 0 || evaluacionEditar.value.nota3 > 10) {
-      isValid = false
-      toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, la nota debe ser un número entre 0 y 10', life: 3000 });
-    }
-  }
-
-  if (isValid) {
-    try {
-      const response = await fetch(`http://localhost:3000/evaluacion/${evaluacionId}`, {
-        method: 'PUT',
-        body: JSON.stringify({
-          // matricula: evaluacionEditar.value?.matricula.id,
-          nota1: evaluacionEditar.value?.nota1,
-          comentario1: evaluacionEditar.value?.comentario1,
-          nota2: evaluacionEditar.value?.nota2,
-          comentario2: evaluacionEditar.value?.comentario2,
-          nota3: evaluacionEditar.value?.nota3,
-          comentario3: evaluacionEditar.value?.comentario3
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      })
-      if (!response.ok) {
-        throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
-      } else {
-        const evaluacionActualizada = {
-          matricula: evaluacionEditar.value?.id,
-          nota1: evaluacionEditar.value?.nota1,
-          comentario1: evaluacionEditar.value?.comentario1,
-          nota2: evaluacionEditar.value?.nota2,
-          comentario2: evaluacionEditar.value?.comentario2,
-          nota3: evaluacionEditar.value?.nota3,
-          comentario3: evaluacionEditar.value?.comentario3
-        }
-        console.log(evaluacionActualizada)
+// const evaluacionEditar: Ref<
+//   {
+//     id: number,
+//     matricula: {
+//       id: number,
+//       subject: {
+//         id: number
+//         nombre: string
+//       },
+//       student: {
+//         id: number
+//         nombre: string
+//         apellidos: string
+//         dni: string
+//         telefono: number
+//         email: string
+//       },
+//       teacher: {
+//         id: number
+//         usuario_id: string
+//         nombre: string
+//         apellidos: string
+//         dni: string
+//         telefono: number
+//         email: string
+//       },
+//       year: number
+//     },
+//     nota1: number | null
+//     comentario1: string | null
+//     nota2: number | null
+//     comentario2: string | null
+//     nota3: number | null
+//     comentario3: string | null
+//   } | undefined
+// > = ref(undefined)
 
 
+// const editarEvaluacion = async (matricula: typeof matriculaEditar.value) => {
 
-      }
-    } catch (error) {
-      console.error('Error en la solicitud:', error)
-      toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
-    } finally {
-      visibleDialogEditarEvaluacion.value = false
-      await resetearVariablesEvaluacion()
-      await getEvaluacionesByTeacherData(teacherId)
-    }
-  }
-}
+//   // formSubmitted.value = true;
+//   let isValid = true;
 
-//Ver comentarios
+//   if (evaluacionEditar.value && evaluacionEditar.value.nota1 != null) {
+//     if (evaluacionEditar.value.nota1 < 0 || evaluacionEditar.value.nota1 > 10) {
+//       isValid = false
+//       toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, la nota debe ser un número entre 0 y 10', life: 3000 });
+//     }
+//   }
+//   if (evaluacionEditar.value && evaluacionEditar.value.nota2 != null) {
+//     if (evaluacionEditar.value.nota2 < 0 || evaluacionEditar.value.nota2 > 10) {
+//       isValid = false
+//       toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, la nota debe ser un número entre 0 y 10', life: 3000 });
+//     }
+//   }
+//   if (evaluacionEditar.value && evaluacionEditar.value.nota3 != null) {
+//     if (evaluacionEditar.value.nota3 < 0 || evaluacionEditar.value.nota3 > 10) {
+//       isValid = false
+//       toast.add({ severity: 'warn', summary: 'Error', detail: 'Por favor, la nota debe ser un número entre 0 y 10', life: 3000 });
+//     }
+//   }
+
+//   if (isValid) {
+//     try {
+//       const response = await fetch(`http://localhost:3000/evaluacion/${evaluacionId}`, {
+//         method: 'PUT',
+//         body: JSON.stringify({
+//           // matricula: evaluacionEditar.value?.matricula.id,
+//           nota1: evaluacionEditar.value?.nota1,
+//           comentario1: evaluacionEditar.value?.comentario1,
+//           nota2: evaluacionEditar.value?.nota2,
+//           comentario2: evaluacionEditar.value?.comentario2,
+//           nota3: evaluacionEditar.value?.nota3,
+//           comentario3: evaluacionEditar.value?.comentario3
+//         }),
+//         headers: {
+//           'Content-Type': 'application/json'
+//         },
+//         credentials: 'include'
+//       })
+//       if (!response.ok) {
+//         throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+//       } else {
+//         const evaluacionActualizada = {
+//           matricula: evaluacionEditar.value?.id,
+//           nota1: evaluacionEditar.value?.nota1,
+//           comentario1: evaluacionEditar.value?.comentario1,
+//           nota2: evaluacionEditar.value?.nota2,
+//           comentario2: evaluacionEditar.value?.comentario2,
+//           nota3: evaluacionEditar.value?.nota3,
+//           comentario3: evaluacionEditar.value?.comentario3
+//         }
+//         console.log(evaluacionActualizada)
+
+
+
+//       }
+//     } catch (error) {
+//       console.error('Error en la solicitud:', error)
+//       toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error', life: 3000 });
+//     } finally {
+//       visibleDialogEditarEvaluacion.value = false
+//       await resetearVariablesEvaluacion()
+//       await getEvaluacionesByTeacherData(teacherId)
+//     }
+//   }
+// }
+
+//VER COMENTARIOS
 const visibleDialogVerComentarios: Ref<boolean> = ref(false);
-const goToComentarios = async (evaluacionId: number) => {
+
+const evaluacionFormateada = computed(() => { // Formateo los datos en otro objeto para poderlo ver en una tabla con el estilo que quiero
+  if (matriculaEditar.value) {
+    return [
+      { clave: "Nota trimestre 1", valor: matriculaEditar.value.nota1 },
+      { clave: "Comentario", valor: matriculaEditar.value.comentario1 },
+      { clave: "Nota trimestre 2", valor: matriculaEditar.value.nota2 },
+      { clave: "Comentario", valor: matriculaEditar.value.comentario2 },
+      { clave: "Nota trimestre 3", valor: matriculaEditar.value.nota3 },
+      { clave: "Comentario", valor: matriculaEditar.value.comentario3 }
+    ];
+  } else {
+    return []
+  }
+})
+
+const goToComentarios = async (matricula: typeof matriculaEditar.value) => {
   visibleDialogVerComentarios.value = true
-  await getEvaluacion(evaluacionId)
+  if (matricula) {
+    await getMatriculaData(matricula.id)
+  }
 }
-
-
-
-
-
 
 
 
@@ -1674,7 +1735,7 @@ const goToStudent = (id: number) => {
 // Filtrar datos
 const filters1 = ref() // variable filtro
 const filters2 = ref() // variable filtro
-const filtersEvaluaciones = ref() // variable filtro
+// const filtersEvaluaciones = ref() // variable filtro
 
 const initFilters = () => { // componente filtro en global para que busque cualquier valor
   filters1.value =
@@ -1687,23 +1748,24 @@ const initFilters = () => { // componente filtro en global para que busque cualq
     'student.telefono': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'student.email': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'subject.nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'year': { value: null, matchMode: FilterMatchMode.CONTAINS },
   }
   filters2.value =
   {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     'subject.nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
   }
-  filtersEvaluaciones.value =
-  {
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    'matricula.student.nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
-    'matricula.student.apellidos': { value: null, matchMode: FilterMatchMode.CONTAINS },
-    'matricula.student.dni': { value: null, matchMode: FilterMatchMode.CONTAINS },
-    'matricula.student.direccion': { value: null, matchMode: FilterMatchMode.CONTAINS },
-    'matricula.student.telefono': { value: null, matchMode: FilterMatchMode.CONTAINS },
-    'matricula.student.email': { value: null, matchMode: FilterMatchMode.CONTAINS },
-    'matricula.subject.nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
-  }
+  // filtersEvaluaciones.value =
+  // {
+  //   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  //   'matricula.student.nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
+  //   'matricula.student.apellidos': { value: null, matchMode: FilterMatchMode.CONTAINS },
+  //   'matricula.student.dni': { value: null, matchMode: FilterMatchMode.CONTAINS },
+  //   'matricula.student.direccion': { value: null, matchMode: FilterMatchMode.CONTAINS },
+  //   'matricula.student.telefono': { value: null, matchMode: FilterMatchMode.CONTAINS },
+  //   'matricula.student.email': { value: null, matchMode: FilterMatchMode.CONTAINS },
+  //   'matricula.subject.nombre': { value: null, matchMode: FilterMatchMode.CONTAINS },
+  // }
 }
 initFilters()
 
@@ -1869,7 +1931,7 @@ const clearFilter = () => { // para borrar los filtros
         <!-- Tabla de alumnos matriculados -->
         <div v-if="matriculasRefFromServer" class="card col h-max">
           <DataTable :value="matriculasRefFromServerFiltered" dataKey="id" v-model:filters="filters1" filterDisplay="menu"
-            :globalFilterFields="['student.nombre', 'student.apellidos', 'student.dni', 'student.direccion', 'student.telefono', 'student.email', 'subject.nombre']" class="" removableSort
+            :globalFilterFields="['student.nombre', 'student.apellidos', 'student.dni', 'student.direccion', 'student.telefono', 'student.email', 'subject.nombre', 'year']" class="" removableSort
             sortField="subject.nombre" :sortOrder="1" :paginator="true" :rows="10" stripedRows :showGridlines="false" selection-mode="single" :pt="{
     paginator: {
       paginatorWrapper: { class: 'flex justify-content-center' },
@@ -1916,7 +1978,8 @@ const clearFilter = () => { // para borrar los filtros
                     <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                   </template>
                 </Column>
-                <Column header="Alumno" :colspan="6" headerClass="h-3rem pl-1 "></Column>
+                <Column header="Alumno" :colspan="2" headerClass="h-3rem pl-1 "></Column>
+                <Column header="Calificaciones" :colspan="7" headerClass="h-3rem pl-1 "></Column>
               </Row>
               <Row>
                 <Column header="Nombre" sortable field="student.nombre" headerClass="h-2rem pl-1  pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
@@ -1924,13 +1987,27 @@ const clearFilter = () => { // para borrar los filtros
                     <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                   </template>
                 </Column>
-
                 <Column header="Apellidos" sortable field="student.apellidos" headerClass="h-2rem pl-1  pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
                   <template #filter="{ filterModel }">
                     <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                   </template>
                 </Column>
-                <Column header="DNI" sortable field="student.dni" headerClass="h-2rem pl-1  pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                <Column header="Nota Trimestre 1" sortable field="nota1" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                  <template #filter="{ filterModel }">
+                    <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                  </template>
+                </Column>
+                <Column header="Nota Trimestre 2" sortable field="nota2" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                  <template #filter="{ filterModel }">
+                    <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                  </template>
+                </Column>
+                <Column header="Nota Trimestre 3" sortable field="nota3" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+                  <template #filter="{ filterModel }">
+                    <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
+                  </template>
+                </Column>
+                <!-- <Column header="DNI" sortable field="student.dni" headerClass="h-2rem pl-1  pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
                   <template #filter="{ filterModel }">
                     <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                   </template>
@@ -1944,7 +2021,7 @@ const clearFilter = () => { // para borrar los filtros
                   <template #filter="{ filterModel }">
                     <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                   </template>
-                </Column>
+                </Column> -->
                 <Column header="" headerClass="h-2rem pl-1  pr-2"></Column>
               </Row>
             </ColumnGroup>
@@ -1957,7 +2034,10 @@ const clearFilter = () => { // para borrar los filtros
             <Column field="subject.nombre" bodyClass="p-0 pl-1"></Column>
             <Column field="student.nombre" bodyClass="p-0 pl-1"></Column>
             <Column field="student.apellidos" bodyClass="p-0 pl-1"></Column>
-            <Column field="student.dni" bodyClass="p-0 pl-1"></Column>
+            <Column field="nota1" bodyClass="p-0 pl-1 font-bold"> </Column>
+            <Column field="nota2" bodyClass="p-0 pl-1 font-bold"> </Column>
+            <Column field="nota3" bodyClass="p-0 pl-1 font-bold"> </Column>
+            <!-- <Column field="student.dni" bodyClass="p-0 pl-1"></Column>
             <Column field="student.telefono" bodyClass="p-0 pl-1">
               <template #body="slotProps">
                 <a :href="'tel:' + slotProps.data.student.telefono" class="flex justify-content-start"> {{ slotProps.data.student.telefono }}</a>
@@ -1967,21 +2047,27 @@ const clearFilter = () => { // para borrar los filtros
               <template #body="slotProps">
                 <a :href="'mailto:' + slotProps.data.student.email" class="flex justify-content-start"> {{ slotProps.data.student.email }}</a>
               </template>
-            </Column>
+            </Column> -->
             <Column header="" headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="flex p-1 pl-1 h-3rem">
               <!-- mostrar solo si es admin -->
-              <template #body="slotProps" v-if="isAdmin">
-                <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Alumno'" @click="goToStudent(slotProps.data.student.id)"></Button>
-                <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Matrícula'" @click="confirmDeleteMatricula(slotProps.data.id)"></Button>
-                <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Matrícula'" @click="mostrarDialogEditarMatricula(slotProps.data)"></Button>
-                <Button class="m-0" icon="pi pi-file-edit" text rounded severity="secondary" v-tooltip.top="'Evaluar'" @click="mostrarDialogEvaluacion(slotProps.data)"></Button>
+              <template #body="slotProps">
+                <div>
+                  <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Alumno'" @click="goToStudent(slotProps.data.student.id)"></Button>
+                  <Button class="m-0" icon="pi pi-eye" text rounded severity="secondary" v-tooltip.top="'Ver Comentarios'" @click="goToComentarios(slotProps.data)"></Button>
+                </div>
+                <div v-if="isAdmin">
+                  <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Matrícula'" @click="confirmDeleteMatricula(slotProps.data.id)"></Button>
+                  <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Matrícula'" @click="mostrarDialogEditarMatricula(slotProps.data)"></Button>
+                  <Button class="m-0" icon="pi pi-eye" text rounded severity="secondary" v-tooltip.top="'Ver Comentarios'" @click="goToComentarios(slotProps.data)"></Button>
+                  <Button class="m-0" icon="pi pi-file-edit" text rounded severity="secondary" v-tooltip.top="'Evaluar'" @click="mostrarDialogEvaluacion(slotProps.data)"></Button>
+                </div>
               </template>
             </Column>
           </DataTable>
         </div>
       </div>
 
-      <!-- tabla de evaluaciones -->
+      <!-- tabla de evaluaciones 
       <div v-if="evaluacionesByTeacherId.length > 0" class="card col h-max">
         <DataTable :value="evaluacionesByTeacherId" dataKey="id" v-model:filters="filtersEvaluaciones" filterDisplay="menu"
           :globalFilterFields="['matricula.student.nombre', 'matricula.student.apellidos', 'matricula.student.dni', 'matricula.student.direccion', 'matricula.student.telefono', 'matricula.student.email', 'matricula.subject.nombre']"
@@ -2040,7 +2126,6 @@ const clearFilter = () => { // para borrar los filtros
                   <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                 </template>
               </Column>
-
               <Column header="Apellidos" sortable field="matricula.student.apellidos" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
                 <template #filter="{ filterModel }">
                   <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
@@ -2051,31 +2136,17 @@ const clearFilter = () => { // para borrar los filtros
                   <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                 </template>
               </Column>
-              <!-- <Column header="Comentario" sortable field="comentario1" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-                <template #filter="{ filterModel }">
-                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-                </template>
-              </Column> -->
               <Column header="Nota Trimestre 2" sortable field="nota2" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
                 <template #filter="{ filterModel }">
                   <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                 </template>
               </Column>
-              <!-- <Column header="Comentario" sortable field="comentario2" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-                <template #filter="{ filterModel }">
-                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-                </template>
-              </Column> -->
+          
               <Column header="Nota Trimestre 3" sortable field="nota3" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
                 <template #filter="{ filterModel }">
                   <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                 </template>
               </Column>
-              <!-- <Column header="Comentario" sortable field="comentario3" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
-                <template #filter="{ filterModel }">
-                  <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-                </template>
-              </Column> -->
               <Column field="" header="" headerClass="h-2rem pl-1 pr-2"></Column>
 
             </Row>
@@ -2090,27 +2161,25 @@ const clearFilter = () => { // para borrar los filtros
           <Column sortable field="matricula.student.nombre" headerClass="h-2rem pl-1 bg-transparent"> </Column>
           <Column field="matricula.student.apellidos" bodyClass="p-0 pl-1"></Column>
           <Column field="nota1" bodyClass="p-0 pl-1"> </Column>
-          <!-- <Column field="comentario1" bodyClass="p-0 pl-1"> </Column> -->
           <Column field="nota2" bodyClass="p-0 pl-1"> </Column>
-          <!-- <Column field="comentario2" bodyClass="p-0 pl-1"> </Column> -->
           <Column field="nota3" bodyClass="p-0 pl-1"> </Column>
-          <!-- <Column field="comentario3" bodyClass="p-0 pl-1"> </Column> -->
           <Column header="" headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="flex p-1 pl-1">
-            <!-- mostrar solo si es admin -->
+            mostrar solo si es admin 
             <template #body="slotProps" v-if="isAdmin">
               <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Comentarios'" @click="goToComentarios(slotProps.data.id)"></Button>
               <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Evaluacion'" @click="confirmDeleteEvaluacion(slotProps.data.id)"></Button>
               <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Evaluacion'" @click="mostrarDialogEvaluacion(slotProps.data.matricula)"></Button>
             </template>
           </Column>
-        </DataTable>
+        </DataTable> -->
 
 
-      </div>
+
     </div>
+  </div>
 
-    <!-- Dialog editar Profesor-->
-    <Dialog v-model:visible="visibleDialogProfesor" modal header="Editar Profesor" class="w-3" :pt="{
+  <!-- Dialog editar Profesor-->
+  <Dialog v-model:visible="visibleDialogProfesor" modal header="Editar Profesor" class="w-3" :pt="{
     header: { class: 'flex align-items-baseline h-5rem' },
     title: { class: '' },
     closeButtonIcon: { class: '' },
@@ -2120,102 +2189,102 @@ const clearFilter = () => { // para borrar los filtros
   }
     ">
 
-      <span class="p-text-secondary flex mb-5">Actualizar información</span>
-      <div class="flex align-items-center gap-3 mb-3">
-        <label for="nombre" class="font-semibold w-6rem">Nombre</label>
-        <InputText id="nombre" class="w-7" v-model="profesorEditar.nombre" :class="{ 'p-invalid': !profesorEditar.nombre }" />
-      </div>
-      <div class="flex align-items-center gap-3 mb-3">
-        <label for="apellidos" class="font-semibold w-6rem">Apellidos</label>
-        <InputText id="apellidos" class="w-7" v-model="profesorEditar.apellidos" :class="{ 'p-invalid': !profesorEditar.apellidos }" />
-      </div>
-      <div class="flex align-items-center gap-3 mb-3">
-        <label for="apellidos" class="font-semibold w-6rem">DNI</label>
-        <InputText id="apellidos" class="w-7" v-model="profesorEditar.dni" :class="{ 'p-invalid': !profesorEditar.dni }" />
-      </div>
-      <div class="flex align-items-center gap-3 mb-3">
-        <label for="apellidos" class="font-semibold w-6rem">Direccion</label>
-        <InputText id="apellidos" class="w-7" v-model="profesorEditar.direccion" :class="{ 'p-invalid': !profesorEditar.direccion }" />
-      </div>
-      <div class="flex align-items-center gap-3 mb-3">
-        <label for="apellidos" class="font-semibold w-6rem">Teléfono</label>
-        <InputNumber id="telefono" inputId="withoutgrouping" :useGrouping="false" class="w-3" v-model="profesorEditar.telefono" :class="{ 'p-invalid': !profesorEditar.telefono }" />
-      </div>
-      <div class="flex align-items-center gap-3 mb-3">
-        <label for="email" class="font-semibold w-6rem">Email</label>
-        <InputText id="email" class="w-7" v-model="profesorEditar.email" :class="{ 'p-invalid': !profesorEditar.email }" />
-      </div>
-      <div class="flex align-items-center gap-3 mb-3">
-        <label for="usuario" class="font-semibold w-6rem">Usuario</label>
-        <Dropdown class="" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput" placeholder="Selecciona un usuario"
-          v-model="profesorEditar.userId.id" @change="getUser()" :class="{ 'p-invalid': profesorEditar.userId.id == undefined }" />
-      </div>
-      <div v-if="profesorEditar.userId.id != undefined" class="">
-        <DataTable :value="[profesorEditar.userId]" class="pl-1" tableStyle="width: 30rem" :pt="{
+    <span class="p-text-secondary flex mb-5">Actualizar información</span>
+    <div class="flex align-items-center gap-3 mb-3">
+      <label for="nombre" class="font-semibold w-6rem">Nombre</label>
+      <InputText id="nombre" class="w-7" v-model="profesorEditar.nombre" :class="{ 'p-invalid': !profesorEditar.nombre }" />
+    </div>
+    <div class="flex align-items-center gap-3 mb-3">
+      <label for="apellidos" class="font-semibold w-6rem">Apellidos</label>
+      <InputText id="apellidos" class="w-7" v-model="profesorEditar.apellidos" :class="{ 'p-invalid': !profesorEditar.apellidos }" />
+    </div>
+    <div class="flex align-items-center gap-3 mb-3">
+      <label for="apellidos" class="font-semibold w-6rem">DNI</label>
+      <InputText id="apellidos" class="w-7" v-model="profesorEditar.dni" :class="{ 'p-invalid': !profesorEditar.dni }" />
+    </div>
+    <div class="flex align-items-center gap-3 mb-3">
+      <label for="apellidos" class="font-semibold w-6rem">Direccion</label>
+      <InputText id="apellidos" class="w-7" v-model="profesorEditar.direccion" :class="{ 'p-invalid': !profesorEditar.direccion }" />
+    </div>
+    <div class="flex align-items-center gap-3 mb-3">
+      <label for="apellidos" class="font-semibold w-6rem">Teléfono</label>
+      <InputNumber id="telefono" inputId="withoutgrouping" :useGrouping="false" class="w-3" v-model="profesorEditar.telefono" :class="{ 'p-invalid': !profesorEditar.telefono }" />
+    </div>
+    <div class="flex align-items-center gap-3 mb-3">
+      <label for="email" class="font-semibold w-6rem">Email</label>
+      <InputText id="email" class="w-7" v-model="profesorEditar.email" :class="{ 'p-invalid': !profesorEditar.email }" />
+    </div>
+    <div class="flex align-items-center gap-3 mb-3">
+      <label for="usuario" class="font-semibold w-6rem">Usuario</label>
+      <Dropdown class="" :options="usersRefFromServer" optionLabel="username" optionValue="id" checkmark :highlightOnSelect="false" showClear id="provinciaInput" placeholder="Selecciona un usuario"
+        v-model="profesorEditar.userId.id" @change="getUser()" :class="{ 'p-invalid': profesorEditar.userId.id == undefined }" />
+    </div>
+    <div v-if="profesorEditar.userId.id != undefined" class="">
+      <DataTable :value="[profesorEditar.userId]" class="pl-1" tableStyle="width: 30rem" :pt="{
     table: {
       class: 'mt-0',
       style: { 'border': 'none' }
     }
   }
     ">
-          <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-          <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-          <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem">
-            <template #body="">
-              {{ profesorEditar.userId.permiso }}
-            </template>
-          </Column>
-        </DataTable>
-      </div>
-      <div class="flex justify-content-center mb-3 pt-2">
-        <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click=" getTeacherData(teacherId), visibleDialogProfesor = false"></Button>
-        <Button type="button" rounded label="Actualizar" @click="editarProfesor()"></Button>
-      </div>
-      <Toast></Toast>
-    </Dialog>
+        <Column field="username" header="Username" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+        <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+        <Column field="permiso" header="Permiso" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem">
+          <template #body="">
+            {{ profesorEditar.userId.permiso }}
+          </template>
+        </Column>
+      </DataTable>
+    </div>
+    <div class="flex justify-content-center mb-3 pt-2">
+      <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click=" getTeacherData(teacherId), visibleDialogProfesor = false"></Button>
+      <Button type="button" rounded label="Actualizar" @click="editarProfesor()"></Button>
+    </div>
+    <Toast></Toast>
+  </Dialog>
 
-    <!-- Dialog editar asignación -->
-    <Dialog v-model:visible="visibleDialogEditarAsignacion" modal header="Editar Asignación" class="w-auto" :pt="{
+  <!-- Dialog editar asignación -->
+  <Dialog v-model:visible="visibleDialogEditarAsignacion" modal header="Editar Asignación" class="w-auto" :pt="{
     header: { class: 'flex align-items-baseline h-5rem' },
     title: { class: '' },
     closeButtonIcon: { class: '' }
   }
     ">
-      <span class="p-text-secondary flex mb-5">Cambiar asignatura</span>
+    <span class="p-text-secondary flex mb-5">Cambiar asignatura</span>
 
-      <label class="text-xl text-800 font-bold">Datos del profesor</label>
-      <DataTable :value="[asignacionEditar?.teacher]" class="pt-1" :pt="{
+    <label class="text-xl text-800 font-bold">Datos del profesor</label>
+    <DataTable :value="[asignacionEditar?.teacher]" class="pt-1" :pt="{
     table: {
       class: 'mt-0 w-auto',
       style: { 'border': 'none' }
     }
   }
     ">
-        <Column field="nombre" header="Nombre" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 h-3rem pr-2"></Column>
-        <Column field="apellidos" header="Apellidos" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 h-3rem pr-2"></Column>
-        <Column field="dni" header="DNI" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 h-3rem pr-2"></Column>
-        <Column field="direccion" header="Dirección" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 h-3rem pr-2"></Column>
-        <Column field="email" header="Email" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 h-3rem pr-2"> </Column>
-      </DataTable>
+      <Column field="nombre" header="Nombre" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 h-3rem pr-2"></Column>
+      <Column field="apellidos" header="Apellidos" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 h-3rem pr-2"></Column>
+      <Column field="dni" header="DNI" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 h-3rem pr-2"></Column>
+      <Column field="direccion" header="Dirección" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 h-3rem pr-2"></Column>
+      <Column field="email" header="Email" headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 h-3rem pr-2"> </Column>
+    </DataTable>
 
-      <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12 pt-4">
-        <label class="text-xl text-800 font-bold">Asignatura a editar</label>
-        <Tag class="ml-1 mt-1 w-max" :value="asignacionEditar?.subject.nombre" severity="secondary" />
-      </div>
+    <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12 pt-4">
+      <label class="text-xl text-800 font-bold">Asignatura a editar</label>
+      <Tag class="ml-1 mt-1 w-max" :value="asignacionEditar?.subject.nombre" severity="secondary" />
+    </div>
 
-      <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12">
-        <label class="text-xl text-800 font-bold pl-1">Selecciona nueva Asignatura</label>
-        <Dropdown class="w-max mt-2" :options="subjectsRefFromServer" optionLabel="nombre" display="chip" filter placeholder="Selecciona..." v-model="selectedSubject">
-        </Dropdown>
-      </div>
-      <div class="flex justify-content-center mb-3 pt-2">
-        <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialogEditarAsignacion = false"></Button>
-        <Button type="button" rounded label="Actualizar" @click="editarSubjectTeacher()"></Button>
-      </div>
-    </Dialog>
+    <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12">
+      <label class="text-xl text-800 font-bold pl-1">Selecciona nueva Asignatura</label>
+      <Dropdown class="w-max mt-2" :options="subjectsRefFromServer" optionLabel="nombre" display="chip" filter placeholder="Selecciona..." v-model="selectedSubject">
+      </Dropdown>
+    </div>
+    <div class="flex justify-content-center mb-3 pt-2">
+      <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialogEditarAsignacion = false"></Button>
+      <Button type="button" rounded label="Actualizar" @click="editarSubjectTeacher()"></Button>
+    </div>
+  </Dialog>
 
-    <!-- Dialog editar imagen -->
-    <Dialog v-model:visible="visibleDialogImagen" modal header="Editar imagen de perfil" class="w-auto flex justify-content-center" :pt="{
+  <!-- Dialog editar imagen -->
+  <Dialog v-model:visible="visibleDialogImagen" modal header="Editar imagen de perfil" class="w-auto flex justify-content-center" :pt="{
     header: { class: 'flex align-items-baseline h-5rem' },
     title: { class: '' },
     closeButtonIcon: { class: '' },
@@ -2224,19 +2293,19 @@ const clearFilter = () => { // para borrar los filtros
     }
   }
     ">
-      <span class="p-text-secondary mb-5">Seleccionar nueva imagen de perfil</span>
-      <div class="flex justify-content-center">
-        <FileUpload class="w-auto mt-2" mode="basic" choose-label="Seleccionar archivo" accept="image/*" :maxFileSize="1000000" @select="handleFileChange"></FileUpload>
-      </div>
-      <div class="flex justify-content-center mb-3 pt-3">
-        <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="getTeacherData(teacherId), visibleDialogImagen = false"></Button>
-        <Button type="button" rounded label="Actualizar" @click="editarFoto()"></Button>
-      </div>
-      <Toast></Toast>
-    </Dialog>
+    <span class="p-text-secondary mb-5">Seleccionar nueva imagen de perfil</span>
+    <div class="flex justify-content-center">
+      <FileUpload class="w-auto mt-2" mode="basic" choose-label="Seleccionar archivo" accept="image/*" :maxFileSize="1000000" @select="handleFileChange"></FileUpload>
+    </div>
+    <div class="flex justify-content-center mb-3 pt-3">
+      <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="getTeacherData(teacherId), visibleDialogImagen = false"></Button>
+      <Button type="button" rounded label="Actualizar" @click="editarFoto()"></Button>
+    </div>
+    <Toast></Toast>
+  </Dialog>
 
-    <!-- Dialog editar matricula -->
-    <Dialog v-model:visible="visibleDialogEditarMatricula" modal header="Editar Matrícula" class="w-auto" :pt="{
+  <!-- Dialog editar matricula -->
+  <Dialog v-model:visible="visibleDialogEditarMatricula" modal header="Editar Matrícula" class="w-auto" :pt="{
     header: { class: 'flex align-items-baseline h-5rem' },
     title: { class: '' },
     closeButtonIcon: { class: '' },
@@ -2245,10 +2314,38 @@ const clearFilter = () => { // para borrar los filtros
     }
   }
     ">
-      <span class="p-text-secondary flex mb-5">Cambiar matrícula</span>
+    <span class="p-text-secondary flex mb-5">Cambiar matrícula</span>
 
-      <label class="text-xl text-800 font-bold">Datos del estudiante</label>
+    <label class="text-xl text-800 font-bold">Datos del estudiante</label>
 
+    <DataTable :value="[matriculaEditar]" class="pt-1" tableStyle="width: auto" :pt="{
+    table: {
+      class: 'mt-0',
+      style: { 'border': 'none' }
+    }
+  }
+    ">
+
+      <Column field="student.nombre" header="Nombre" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.apellidos" header="Apellidos" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.dni" header="DNI" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.direccion" header="Dirección" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.telefono" header="Teléfono" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.email" header="Email" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
+    </DataTable>
+
+    <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12 pt-4">
+      <label class="text-xl text-800 font-bold">Asignatura a editar</label>
+      <Tag class="ml-1 mt-1 w-max" :value="matriculaEditar?.subject.nombre" severity="secondary" />
+    </div>
+    <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12">
+      <label class="text-xl text-800 font-bold pl-1">Selecciona nueva Asignatura</label>
+      <Dropdown class="w-max mt-2" :options="subjectsRefFromServer" optionLabel="nombre" display="chip" filter placeholder="Selecciona..." v-model="selectedSubject"
+        @change="getTeachersBySubjectData()">
+      </Dropdown>
+    </div>
+    <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12 pt-4">
+      <label class="text-xl text-800 font-bold">Profesor a editar</label>
       <DataTable :value="[matriculaEditar]" class="pt-1" tableStyle="width: auto" :pt="{
     table: {
       class: 'mt-0',
@@ -2256,67 +2353,39 @@ const clearFilter = () => { // para borrar los filtros
     }
   }
     ">
-
-        <Column field="student.nombre" header="Nombre" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="student.apellidos" header="Apellidos" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="student.dni" header="DNI" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="student.direccion" header="Dirección" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="student.telefono" header="Teléfono" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="student.email" header="Email" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
+        <Column field="teacher.nombre" header="Nombre" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+        <Column field="teacher.apellidos" header="Apellidos" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+        <Column field="teacher.email" header="Email" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
       </DataTable>
+    </div>
+    <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12">
+      <label class="text-xl text-800 font-bold pl-1">Selecciona nuevo profesor</label>
+      <Dropdown class="w-max mt-2" :options="onlyTeachersArray" optionLabel="nombre" display="chip" filter placeholder="Selecciona..." v-model="selectedTeacher">
+        <template #option="slotProps">
+          <div>
+            {{ slotProps.option.nombre }}
+            {{ slotProps.option.apellidos }} |
+            {{ slotProps.option.email }}
+          </div>
+        </template>
 
-      <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12 pt-4">
-        <label class="text-xl text-800 font-bold">Asignatura a editar</label>
-        <Tag class="ml-1 mt-1 w-max" :value="matriculaEditar?.subject.nombre" severity="secondary" />
-      </div>
-      <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12">
-        <label class="text-xl text-800 font-bold pl-1">Selecciona nueva Asignatura</label>
-        <Dropdown class="w-max mt-2" :options="subjectsRefFromServer" optionLabel="nombre" display="chip" filter placeholder="Selecciona..." v-model="selectedSubject"
-          @change="getTeachersBySubjectData()">
-        </Dropdown>
-      </div>
-      <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12 pt-4">
-        <label class="text-xl text-800 font-bold">Profesor a editar</label>
-        <DataTable :value="[matriculaEditar]" class="pt-1" tableStyle="width: auto" :pt="{
-    table: {
-      class: 'mt-0',
-      style: { 'border': 'none' }
-    }
-  }
-    ">
-          <Column field="teacher.nombre" header="Nombre" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-          <Column field="teacher.apellidos" header="Apellidos" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-          <Column field="teacher.email" header="Email" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
-        </DataTable>
-      </div>
-      <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12">
-        <label class="text-xl text-800 font-bold pl-1">Selecciona nuevo profesor</label>
-        <Dropdown class="w-max mt-2" :options="onlyTeachersArray" optionLabel="nombre" display="chip" filter placeholder="Selecciona..." v-model="selectedTeacher">
-          <template #option="slotProps">
-            <div>
-              {{ slotProps.option.nombre }}
-              {{ slotProps.option.apellidos }} |
-              {{ slotProps.option.email }}
-            </div>
-          </template>
+        <template #value="slotProps">
+          <div v-if="slotProps.value">
+            {{ slotProps.value.nombre }}
+            {{ slotProps.value.apellidos }} |
+            {{ slotProps.value.email }}
+          </div>
+        </template>
+      </Dropdown>
+    </div>
+    <div class="flex justify-content-center mb-3 pt-2">
+      <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="getTeacherData(teacherId), resetearVariables(), visibleDialogEditarMatricula = false"></Button>
+      <Button type="button" rounded label="Actualizar" @click="editarMatricula()"></Button>
+    </div>
+  </Dialog>
 
-          <template #value="slotProps">
-            <div v-if="slotProps.value">
-              {{ slotProps.value.nombre }}
-              {{ slotProps.value.apellidos }} |
-              {{ slotProps.value.email }}
-            </div>
-          </template>
-        </Dropdown>
-      </div>
-      <div class="flex justify-content-center mb-3 pt-2">
-        <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="getTeacherData(teacherId), resetearVariables(), visibleDialogEditarMatricula = false"></Button>
-        <Button type="button" rounded label="Actualizar" @click="editarMatricula()"></Button>
-      </div>
-    </Dialog>
-
-    <!-- Dialog crear evaluacion -->
-    <Dialog v-model:visible="visibleDialogCrearEvaluacion" modal header="Crear Evaluacion" class="w-auto" :pt="{
+  <!-- Dialog evaluacion -->
+  <Dialog v-model:visible="visibleDialogEvaluacion" modal header="Crear Evaluacion" class="w-auto" :pt="{
     header: { class: 'flex align-items-baseline h-5rem' },
     title: { class: '' },
     closeButtonIcon: { class: '' },
@@ -2326,9 +2395,9 @@ const clearFilter = () => { // para borrar los filtros
   }
     ">
 
-      <label class="text-xl text-800 font-bold">Datos del estudiante</label>
+    <label class="text-xl text-800 font-bold">Datos del estudiante</label>
 
-      <DataTable :value="[matriculaEditar]" class="pt-1" tableStyle="width: auto" :pt="{
+    <DataTable :value="[matriculaEditar]" class="pt-1" tableStyle="width: auto" :pt="{
     table: {
       class: 'mt-0',
       style: { 'border': 'none' }
@@ -2336,54 +2405,55 @@ const clearFilter = () => { // para borrar los filtros
   }
     ">
 
-        <Column field="student.nombre" header="Nombre" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="student.apellidos" header="Apellidos" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="student.dni" header="DNI" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="student.direccion" header="Dirección" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="student.telefono" header="Teléfono" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="student.email" header="Email" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
-      </DataTable>
+      <Column field="student.nombre" header="Nombre" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.apellidos" header="Apellidos" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.dni" header="DNI" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.direccion" header="Dirección" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.telefono" header="Teléfono" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.email" header="Email" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
+    </DataTable>
 
-      <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12 pt-4 pb-4">
-        <label class="text-xl text-800 font-bold">Asignatura a Evaluar</label>
-        <Tag class="ml-1 mt-1 w-max" :value="matriculaEditar?.subject.nombre" severity="secondary" />
-      </div>
+    <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12 pt-4 pb-4">
+      <label class="text-xl text-800 font-bold">Asignatura</label>
+      <!-- <Tag class="ml-1 mt-1 w-max" :value="matriculaEditar?.subject.nombre" severity="secondary" /> -->
+      <label class="text-600 font-semibold">{{ matriculaEditar?.subject.nombre }}</label>
+    </div>
 
-      <div>
-        <div class="flex align-items-center gap-3 mb-3">
-          <label for="nombre" class="font-semibold w-6rem">Nota trimestre 1</label>
-          <InputNumber id="nombre" class="w-1" v-model="nota1" />
-        </div>
-        <div class="flex align-items-center gap-3 mb-3">
-          <label for="apellidos" class="font-semibold w-6rem">Comentario trimestre 1</label>
-          <Textarea id="apellidos" class="w-7" rows="5" cols="30" v-model="comentario1"></Textarea>
-        </div>
-        <div class="flex align-items-center gap-3 mb-3">
-          <label for="nombre" class="font-semibold w-6rem">Nota trimestre 2</label>
-          <InputNumber id="nombre" class="w-1" v-model="nota2" />
-        </div>
-        <div class="flex align-items-center gap-3 mb-3">
-          <label for="apellidos" class="font-semibold w-6rem">Comentario trimestre 2</label>
-          <Textarea id="apellidos" class="w-7" v-model="comentario2"></Textarea>
-        </div>
-        <div class="flex align-items-center gap-3 mb-3">
-          <label for="nombre" class="font-semibold w-6rem">Nota trimestre 3</label>
-          <InputNumber id="nombre" class="w-1" v-model="nota3" />
-        </div>
-        <div class="flex align-items-center gap-3 mb-3">
-          <label for="apellidos" class="font-semibold w-6rem">Comentario trimestre 3</label>
-          <Textarea id="apellidos" class="w-7" v-model="comentario3"></Textarea>
-        </div>
+    <div v-if="matriculaEditar" class="pl-3">
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="nombre" class="font-semibold w-8rem">Nota trimestre 1</label>
+        <InputNumber id="nota1" class="" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota1" :min="0" :max="10" :useGrouping="false" />
       </div>
-      <div class="flex justify-content-center mb-3 pt-2">
-        <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary"
-          @click="getTeacherData(teacherId), resetearVariablesEvaluacion(), visibleDialogCrearEvaluacion = false"></Button>
-        <Button type="button" rounded label="Crear" @click="crearEvaluacion()"></Button>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="apellidos" class="font-semibold w-8rem">Comentario trimestre 1</label>
+        <Textarea id="comentario1" class="w-7" rows="5" cols="30" v-model="matriculaEditar.comentario1"></Textarea>
       </div>
-    </Dialog>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="nombre" class="font-semibold w-8rem">Nota trimestre 2</label>
+        <InputNumber id="nota2" class="" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota2" :min="0" :max="10" :useGrouping="false" />
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="apellidos" class="font-semibold w-8rem">Comentario trimestre 2</label>
+        <Textarea id="comentario2" class="w-7" v-model="matriculaEditar.comentario2"></Textarea>
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="nombre" class="font-semibold w-8rem">Nota trimestre 3</label>
+        <InputNumber id="nota3" class="" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota3" :min="0" :max="10" :useGrouping="false" />
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="apellidos" class="font-semibold w-8rem">Comentario trimestre 3</label>
+        <Textarea id="comentario3" class="w-7" v-model="matriculaEditar.comentario3"></Textarea>
+      </div>
+    </div>
+    <div class="flex justify-content-center mb-3 pt-2">
+      <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="getTeacherData(teacherId), resetearVariablesEvaluacion(), visibleDialogEvaluacion = false"></Button>
+      <Button class="mr-2" type="button" rounded label="Evaluar" @click="editarEvaluacion(matriculaEditar)"></Button>
+      <Button class="" type="button" rounded label="Borrar" severity="danger" @click="confirmDeleteEvaluacion(matriculaEditar)"></Button>
+    </div>
+  </Dialog>
 
-    <!-- Dialog editar evaluacion -->
-    <Dialog v-if="evaluacionEditar" v-model:visible="visibleDialogEditarEvaluacion" modal header="Editar Evaluacion" class="w-auto" :pt="{
+  <!-- Dialog editar evaluacion 
+    <Dialog v-if="matriculaEditar" v-model:visible="visibleDialogEditarEvaluacion" modal header="Editar Evaluacion" class="w-auto" :pt="{
     header: { class: 'flex align-items-baseline h-5rem' },
     title: { class: '' },
     closeButtonIcon: { class: '' },
@@ -2447,10 +2517,10 @@ const clearFilter = () => { // para borrar los filtros
           @click="getTeacherData(teacherId), resetearVariablesEvaluacion(), visibleDialogEditarEvaluacion = false"></Button>
         <Button type="button" rounded label="Editar" @click="editarEvaluacion(evaluacionEditar.id)"></Button>
       </div>
-    </Dialog>
+    </Dialog> -->
 
-    <!-- Dialog ver comentarios -->
-    <Dialog v-if="evaluacionEditar" v-model:visible="visibleDialogVerComentarios" modal header="Comentarios" class="w-auto" :pt="{
+  <!-- Dialog ver comentarios -->
+  <Dialog v-if="matriculaEditar" v-model:visible="visibleDialogVerComentarios" modal header="Comentarios" class="w-auto pl-5 pr-5" :pt="{
     header: { class: 'flex align-items-baseline h-5rem' },
     title: { class: '' },
     closeButtonIcon: { class: '' },
@@ -2460,61 +2530,81 @@ const clearFilter = () => { // para borrar los filtros
   }
     ">
 
-      <label class="text-xl text-800 font-bold">Datos del estudiante</label>
+    <label class="text-xl text-800 font-bold">Datos del estudiante</label>
 
-      <DataTable :value="[evaluacionEditar?.matricula]" class="pt-1" tableStyle="width: auto" :pt="{
+    <DataTable :value="[matriculaEditar]" class="pt-1" tableStyle="width: auto" :pt="{
     table: {
-      class: 'mt-0',
+      class: 'mt-0 mb-5',
       style: { 'border': 'none' }
     }
   }
     ">
 
-        <Column field="student.nombre" header="Nombre" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="student.apellidos" header="Apellidos" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="student.dni" header="DNI" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="student.direccion" header="Dirección" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="student.telefono" header="Teléfono" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
-        <Column field="student.email" header="Email" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
-      </DataTable>
+      <Column field="year" header="Curso Escolar" bodyClass="p-0 pl-1">
+        <template #body="slotProps">
+          {{ slotProps.data.year }} / {{ slotProps.data.year + 1 }}
+        </template>
+      </Column>
+      <Column field="student.nombre" header="Nombre" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.apellidos" header="Apellidos" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <!-- <Column field="student.dni" header="DNI" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.direccion" header="Dirección" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.telefono" header="Teléfono" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="student.email" header="Email" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column> -->
+      <Column field="subject.nombre" header="Asignatura" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
+    </DataTable>
 
-      <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12 pt-4">
-        <label class="text-xl text-800 font-bold">Asignatura</label>
-        <Tag class="ml-1 mt-1 w-max" :value="evaluacionEditar?.matricula.subject.nombre" severity="secondary" />
-      </div>
+    <DataTable :value="evaluacionFormateada" class="pt-1" stripedRows tableStyle="width: auto" :pt="{
+    table: {
+      class: 'mt-0 mb-5',
+      style: { 'border': 'none' }
+    }
+  }
+    ">
+      <label class="text-xl text-800 font-bold">Calificaciones y comentarios</label>
+      <Column field="clave" header="" class="pl-3 pr-3" headerClass="h-0rem pl-1 bg-transparent" bodyClass="p-0 pl-1 h-3rem font-semibold"></Column>
+      <Column field="valor" header="" class="pl-3 pr-3" headerClass="h-0rem pl-1 bg-transparent" bodyClass="p-0 pl-1 h-3rem"></Column>
+    </DataTable>
 
-      <div>
-        <div class="flex align-items-center gap-3 mb-3">
-          <label for="nombre" class="font-semibold w-6rem">Nota trimestre 1</label>
-          {{ evaluacionEditar.nota1 }}
-        </div>
-        <div class="flex align-items-center gap-3 mb-3">
-          <label for="apellidos" class="font-semibold w-6rem">Comentario trimestre 1</label>
-          {{ evaluacionEditar.comentario1 }}
-        </div>
-        <div class="flex align-items-center gap-3 mb-3">
-          <label for="nombre" class="font-semibold w-6rem">Nota trimestre 2</label>
-          {{ evaluacionEditar.nota2 }}
-        </div>
-        <div class="flex align-items-center gap-3 mb-3">
-          <label for="apellidos" class="font-semibold w-6rem">Comentario trimestre 2</label>
-          {{ evaluacionEditar.comentario2 }}
-        </div>
-        <div class="flex align-items-center gap-3 mb-3">
-          <label for="nombre" class="font-semibold w-6rem">Nota trimestre 3</label>
-          {{ evaluacionEditar.nota3 }}
-        </div>
-        <div class="flex align-items-center gap-3 mb-3">
-          <label for="apellidos" class="font-semibold w-6rem">Comentario trimestre 3</label>
-          {{ evaluacionEditar.comentario3 }}
-        </div>
-      </div>
-      <div class="flex justify-content-center mb-3 pt-2">
-        <Button class="mr-2" type="button" rounded label="Volver" severity="secondary" @click="resetearVariablesEvaluacion(), visibleDialogVerComentarios = false"></Button>
-      </div>
-    </Dialog>
 
-    <Toast :pt="{
+
+    <!-- <div class="flex flex-column col-12 lg:col-12 md:col-12 sm:col-12 pt-4">
+      <label class="text-xl text-800 font-bold">Asignatura</label>
+      <Tag class="ml-1 mt-1 w-max" :value="matriculaEditar.subject.nombre" severity="secondary" />
+    </div> -->
+
+    <!-- <div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="nombre" class="font-semibold w-1">Nota trimestre 1</label>
+        {{ matriculaEditar.nota1 }}
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="apellidos" class="font-semibold w-1">Comentario trimestre 1</label>
+        {{ matriculaEditar.comentario1 }}
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="nombre" class="font-semibold w-1">Nota trimestre 2</label>
+        {{ matriculaEditar.nota2 }}
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="apellidos" class="font-semibold w-1">Comentario trimestre 2</label>
+        {{ matriculaEditar.comentario2 }}
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="nombre" class="font-semibold w-1">Nota trimestre 3</label>
+        {{ matriculaEditar.nota3 }}
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="apellidos" class="font-semibold w-1">Comentario trimestre 3</label>
+        {{ matriculaEditar.comentario3 }}
+      </div>
+    </div> -->
+    <div class="flex justify-content-center mb-3 pt-2">
+      <Button class="mr-2" type="button" rounded label="Volver" severity="secondary" @click="resetearVariablesEvaluacion(), visibleDialogVerComentarios = false"></Button>
+    </div>
+  </Dialog>
+
+  <Toast :pt="{
     container: {
       class: 'align-items-center'
     },
@@ -2523,12 +2613,12 @@ const clearFilter = () => { // para borrar los filtros
     }
   }
     "></Toast>
-    <ConfirmDialog :pt="{
+  <ConfirmDialog :pt="{
     header: { class: 'pb-0 pt-2' },
     content: { class: 'pb-3 pt-1' }
   }
     "></ConfirmDialog>
-  </div>
+  <!-- </div> -->
 
 </template>
 
