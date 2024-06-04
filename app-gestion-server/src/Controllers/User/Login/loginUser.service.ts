@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserDb } from 'src/Modelos/User/userDb';
 import * as argon2 from 'argon2';
 import { Repository } from 'typeorm';
+import { LoginUserDto } from './loginUser.dto';
 
 @Injectable()
 export class LoginUserService {
@@ -13,6 +14,7 @@ export class LoginUserService {
 
   async login(
     email: string,
+    username: string,
     pass: string,
   ): Promise<{
     isValid: boolean;
@@ -21,7 +23,7 @@ export class LoginUserService {
     id?: number;
   }> {
     const usuario: UserDb = await this.userRepository.findOne({
-      where: { email },
+      where: { email, username },
     });
 
     if (!usuario) {

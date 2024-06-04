@@ -18,6 +18,7 @@ import { useConfirm } from "primevue/useconfirm";
 import Dialog from 'primevue/dialog';
 import Tag from 'primevue/tag';
 import { useAdminStore } from '@/stores/isAdmin';
+import { useTeacherStore } from '@/stores/isTeacher';
 import type { VueCookies } from 'vue-cookies';
 import Image from 'primevue/image';
 import FileUpload from 'primevue/fileupload';
@@ -30,23 +31,29 @@ const router = useRouter()
 
 // VERIFICAR SI SE ES ADMINISTRADOR
 const adminStore = useAdminStore()
+const teacherStore = useTeacherStore()
 const $cookies = inject<VueCookies>('$cookies')
 const userCookie = $cookies?.get('user') // si no existe, userCookie es null
 const isUser: Ref<boolean> = ref(true)
 const isAdmin: Ref<boolean> = ref(adminStore.isAdmin)
+const isTeacher: Ref<boolean> = ref(teacherStore.isTeacher)
 
 onMounted(async () => {
   console.log(userCookie)
 
+  // VERIFICAR SI PUEDE VER LA PÁGINA
   if (userCookie?.permiso == 9) {
     adminStore.isAdminTrue()
     isAdmin.value = true
+  }
+  if (userCookie?.permiso == 1) {
+    teacherStore.isTeacherTrue()
+    isTeacher.value = true
   }
   else if (!isAdmin.value || userCookie?.permiso == null || userCookie?.permiso != '9') {
     adminStore.isAdminFalse()
   }
 
-  // VERIFICAR SI PUEDE VER LA PÁGINA
   const teacherId = Number(router.currentRoute.value.params.id)
   await getTeacherData(teacherId)
 
@@ -58,7 +65,6 @@ onMounted(async () => {
       router.push('/')
     }, 3000)
   }
-
 })
 
 const teacherDataFromServer: Ref<{
@@ -1905,7 +1911,7 @@ const clearFilter = () => { // para borrar los filtros
       nextPageButton: { class: 'w-auto m-0' },
       lastPageButton: { class: 'w-auto m-0' },
     }, table: {
-      class: 'mt-0 w-auto',
+      class: 'mt-0 w-full',
       style: { 'border': 'none', 'background-color': 'transparent' }
     }
   }">
@@ -1929,7 +1935,7 @@ const clearFilter = () => { // para borrar los filtros
         </div>
 
         <!-- Tabla de alumnos matriculados -->
-        <div v-if="matriculasRefFromServer" class="card col h-max">
+        <div v-if="matriculasRefFromServer" class="card col-max h-max">
           <DataTable :value="matriculasRefFromServerFiltered" dataKey="id" v-model:filters="filters1" filterDisplay="menu"
             :globalFilterFields="['student.nombre', 'student.apellidos', 'student.dni', 'student.direccion', 'student.telefono', 'student.email', 'subject.nombre', 'year']" class="" removableSort
             sortField="subject.nombre" :sortOrder="1" :paginator="true" :rows="10" stripedRows :showGridlines="false" selection-mode="single" :pt="{
@@ -1941,7 +1947,7 @@ const clearFilter = () => { // para borrar los filtros
       nextPageButton: { class: 'w-auto m-0' },
       lastPageButton: { class: 'w-auto m-0' },
     }, table: {
-      class: 'mt-0 w-12',
+      class: 'mt-0 w-full',
       style: { 'border': 'none', 'background-color': 'transparent' }
     }
   }
@@ -2048,18 +2054,22 @@ const clearFilter = () => { // para borrar los filtros
                 <a :href="'mailto:' + slotProps.data.student.email" class="flex justify-content-start"> {{ slotProps.data.student.email }}</a>
               </template>
             </Column> -->
-            <Column header="" headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="flex p-1 pl-1 h-3rem">
-              <!-- mostrar solo si es admin -->
+            <Column header="" headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="flex w-max p-1 pl-1 h-3rem">
               <template #body="slotProps">
-                <div>
-                  <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Alumno'" @click="goToStudent(slotProps.data.student.id)"></Button>
-                  <Button class="m-0" icon="pi pi-eye" text rounded severity="secondary" v-tooltip.top="'Ver Comentarios'" @click="goToComentarios(slotProps.data)"></Button>
-                </div>
-                <div v-if="isAdmin">
-                  <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Matrícula'" @click="confirmDeleteMatricula(slotProps.data.id)"></Button>
-                  <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Matrícula'" @click="mostrarDialogEditarMatricula(slotProps.data)"></Button>
-                  <Button class="m-0" icon="pi pi-eye" text rounded severity="secondary" v-tooltip.top="'Ver Comentarios'" @click="goToComentarios(slotProps.data)"></Button>
-                  <Button class="m-0" icon="pi pi-file-edit" text rounded severity="secondary" v-tooltip.top="'Evaluar'" @click="mostrarDialogEvaluacion(slotProps.data)"></Button>
+                <div class="flex">
+                  <div>
+                    <Button class="m-0" icon="pi pi-comments" text rounded severity="secondary" v-tooltip.top="'Ver Comentarios'" @click="goToComentarios(slotProps.data)"></Button>
+                    <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Alumno'" @click="goToStudent(slotProps.data.student.id)"></Button>
+                  </div>
+                  <div v-if="isTeacher">
+                    <Button class="m-0" icon="pi pi-file-edit" text rounded severity="secondary" v-tooltip.top="'Evaluar'" @click="mostrarDialogEvaluacion(slotProps.data)"></Button>
+                  </div>
+                  <div v-if="isAdmin">
+                    <!-- mostrar solo si es admin -->
+                    <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Matrícula'" @click="confirmDeleteMatricula(slotProps.data.id)"></Button>
+                    <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Matrícula'" @click="mostrarDialogEditarMatricula(slotProps.data)"></Button>
+                    <Button class="m-0" icon="pi pi-file-edit" text rounded severity="secondary" v-tooltip.top="'Evaluar'" @click="mostrarDialogEvaluacion(slotProps.data)"></Button>
+                  </div>
                 </div>
               </template>
             </Column>

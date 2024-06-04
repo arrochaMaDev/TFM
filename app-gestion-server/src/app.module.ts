@@ -112,6 +112,8 @@ import { GetEvaluacionByMatriculaIdController } from './Controllers/Evaluacion/G
 import { GetEvaluacionByMatriculaIdService } from './Controllers/Evaluacion/Get/getEvaluacionByMatriculaId.service';
 import { ListerMatriculasBySubjectIdService } from './Controllers/Matricula/Get/listerMatriculasBySubjectId.service';
 import { ListerMatriculasBySubjectIdController } from './Controllers/Matricula/Get/listerMatriculasBySubjectId.controller';
+import { GetTeacherByUserIdController } from './Controllers/Teacher/Get/getTeacherByUserId.controller.ts';
+import { GetTeacherByUserIdService } from './Controllers/Teacher/Get/getTeacherByUserId.service.ts';
 
 @Module({
   imports: [
@@ -198,6 +200,7 @@ import { ListerMatriculasBySubjectIdController } from './Controllers/Matricula/G
     DeleteEvaluacionesByTeacherIdController,
     DeleteEvaluacionesBySubjectIdController,
     UpdateEvaluacionController,
+    GetTeacherByUserIdController,
   ], //AppController
   providers: [
     RegisterStudentService,
@@ -250,6 +253,7 @@ import { ListerMatriculasBySubjectIdController } from './Controllers/Matricula/G
     DeleteEvaluacionesByTeacherIdService,
     DeleteEvaluacionesBysubjectIdService,
     UpdateEvaluacionService,
+    GetTeacherByUserIdService,
   ],
 })
 export class AppModule {}

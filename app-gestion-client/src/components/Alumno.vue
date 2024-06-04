@@ -33,9 +33,13 @@ const $cookies = inject<VueCookies>('$cookies')
 const userCookie = $cookies?.get('user') // si no existe, userCookie es null
 const isUser: Ref<boolean> = ref(true)
 const isAdmin: Ref<boolean> = ref(adminStore.isAdmin)
+const isTeacherOfStudent: Ref<boolean> = ref(false)
+const userId: number = userCookie?.id
 
 onMounted(async () => {
   console.log(userCookie)
+
+  // VERIFICAR SI PUEDE VER LA PÁGINA
   if (userCookie?.permiso == 9) {
     adminStore.isAdminTrue()
     isAdmin.value = true
@@ -44,10 +48,17 @@ onMounted(async () => {
     adminStore.isAdminFalse()
   }
 
-  // VERIFICAR SI PUEDE VER LA PÁGINA
   await getStudentData(studentId)
 
-  if (!isAdmin.value && userCookie && studentDataFromServer.value?.userId.id != userCookie.id) {
+  // Verificar que es profesor del alumno
+  await getMatriculasData(studentId)
+  await getTeacherByUserId(userId)
+  if (matriculasFromServer.value?.matriculas.some(matricula => matricula.teacher.id === teacherFromServer.value?.id)) {
+    isTeacherOfStudent.value = true
+  }
+  console.log(isTeacherOfStudent.value)
+
+  if (!isAdmin.value && userCookie && !isTeacherOfStudent.value && studentDataFromServer.value?.userId.id != userCookie.id) {
     isUser.value = false
     // alert("no tiene permiso para ver esta pagina")
     toast.add({ severity: 'info', summary: 'No tiene permiso', detail: 'No tiene permiso para ver esta página', group: 'tc', life: 3000, });
@@ -55,9 +66,50 @@ onMounted(async () => {
       router.push('/')
     }, 3000)
   }
-
 })
 
+//VERIFICAR SI ES PROFESOR DEL ALUMNO
+const teacherFromServer: Ref<{
+  id: number
+  nombre: string
+  apellidos: string
+  dni: string
+  direccion: string
+  telefono: number
+  email: string
+  foto: string
+  userId: {
+    id: number
+    username: string
+    email: string
+    permiso: number
+  }
+} | undefined> = ref(undefined)
+
+const getTeacherByUserId = async (userId: number) => {
+  try {
+    const response = await fetch(`http://localhost:3000/teacher/user/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      const data = await response.json()
+
+      teacherFromServer.value = data
+      // console.log(teacherFromServer.value)
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error obteniendo los datos del profesor', life: 3000 });
+  }
+}
+
+//OBTENER DATOS ALUMNO
 const studentDataFromServer: Ref<{
   id: number
   usuario_id: string
@@ -136,7 +188,7 @@ const PermisoToString = (permiso: number) => {
 }
 
 // OBTENER MATRICULAS DEL ALUMNO
-const matriculaFromServer: Ref<{
+const matriculasFromServer: Ref<{
   student: {
     id: number
     usuario_id: string
@@ -179,15 +231,15 @@ const getMatriculasData = async (studentId: number) => {
       },
       credentials: 'include'
     })
-    if (response.status == 404 && !matriculaFromServer.value?.matriculas) {
+    if (response.status == 404 && !matriculasFromServer.value?.matriculas) {
       toast.add({ severity: 'info', summary: 'Error', detail: 'El alumno no tiene matrículas asignadas', life: 3000 });
       return
     }
     if (response.ok) {
       const data = await response.json()
-      matriculaFromServer.value = data
+      matriculasFromServer.value = data
       console.log(data)
-      console.dir(matriculaFromServer.value)
+      console.dir(matriculasFromServer.value)
 
       // para cuando estemos editando la matricula
       if (visibleDialogMatricula.value) {
@@ -638,7 +690,7 @@ const selectedTeacher: Ref<
   } | undefined
 > = ref(undefined)
 
-const studentWithMatriculasEditar: Ref<typeof matriculaFromServer.value | undefined> = ref(undefined)
+const studentWithMatriculasEditar: Ref<typeof matriculasFromServer.value | undefined> = ref(undefined)
 
 
 // mostrar el dialog de editar
@@ -1092,12 +1144,12 @@ initFilters()
 // Buscar por nombre o apellidos del profesor dentro del array
 const profesorBuscar = ref('')
 
-const matriculaFromServerFiltered = computed(() => {
+const matriculasFromServerFiltered = computed(() => {
   if (profesorBuscar.value === '') {
-    return matriculaFromServer.value?.matriculas ? matriculaFromServer.value.matriculas : []
+    return matriculasFromServer.value?.matriculas ? matriculasFromServer.value.matriculas : []
   }
   else {
-    return matriculaFromServer.value?.matriculas.filter((matricula) => {
+    return matriculasFromServer.value?.matriculas.filter((matricula) => {
       const profesorCoincide = matricula.teacher.nombre.toLowerCase().includes(profesorBuscar.value.toLowerCase())
         || matricula.teacher.apellidos.toLowerCase().includes(profesorBuscar.value.toLowerCase())
       return profesorCoincide
@@ -1123,7 +1175,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
     }
   }
     "></Toast>
-  <div v-if="isUser">
+  <div v-if="isUser || isTeacherOfStudent">
     <div class="col-11">
       <div class="grid">
         <div id="header" class="flex col-12 justify-content-between h-auto mb-2">
@@ -1217,8 +1269,8 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
 
       <!-- tabla matriculas -->
       <div id="tabla" class="flex mt-5 w-12">
-        <div v-if="matriculaFromServer?.matriculas" class="card col h-max">
-          <DataTable :value="matriculaFromServerFiltered" dataKey="id" v-model:filters="filters" filterDisplay="menu"
+        <div v-if="matriculasFromServer?.matriculas" class="card col h-max">
+          <DataTable :value="matriculasFromServerFiltered" dataKey="id" v-model:filters="filters" filterDisplay="menu"
             :globalFilterFields="['subject.nombre', 'teacher.nombre', 'teacher.apellidos', 'teacher.dni', 'teacher.direccion', 'teacher.telefono', 'teacher.email', 'year']" class="" removableSort
             sortField="matricula.subject.nombre" :sortOrder="1" :paginator="true" :rows="5" stripedRows selection-mode="single" :pt="{
     paginator: {
@@ -1345,17 +1397,19 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
             <Column field="nota2" bodyClass="p-0 pl-1 font-semibold"> </Column>
             <Column field="nota3" bodyClass="p-0 pl-1 font-semibold"> </Column>
 
-            <Column header="" headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="flex p-1 pl-1">
-              <!-- mostrar solo si es admin -->
+            <Column header="" headerStyle="" headerClass="h-2rem pl-1 bg-transparent" bodyClass="flex w-max p-1 pl-1">
               <template #body="slotProps">
-                <div>
-                  <Button class="m-0" icon="pi pi-eye" text rounded severity="secondary" v-tooltip.top="'Ver Comentarios'" @click="goToComentarios(slotProps.data)"></Button>
-                </div>
-                <div v-if="isAdmin">
-                  <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.teacher.id)"></Button>
-                  <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Matrícula'" @click="confirmDeleteMatricula(slotProps.data.id)"></Button>
-                  <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Matrícula'" @click="mostrarDialogEditarMatricula(slotProps.data)"></Button>
-                  <Button class="m-0" icon="pi pi-file-edit" text rounded severity="secondary" v-tooltip.top="'Evaluar'" @click="mostrarDialogEvaluacion(slotProps.data)"></Button>
+                <div class="flex">
+                  <div>
+                    <Button class="m-0" icon="pi pi-comments" text rounded severity="secondary" v-tooltip.top="'Ver Comentarios'" @click="goToComentarios(slotProps.data)"></Button>
+                  </div>
+                  <div v-if="isAdmin">
+                    <!-- mostrar solo si es admin -->
+                    <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.teacher.id)"></Button>
+                    <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Matrícula'" @click="confirmDeleteMatricula(slotProps.data.id)"></Button>
+                    <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Matrícula'" @click="mostrarDialogEditarMatricula(slotProps.data)"></Button>
+                    <Button class="m-0" icon="pi pi-file-edit" text rounded severity="secondary" v-tooltip.top="'Evaluar'" @click="mostrarDialogEvaluacion(slotProps.data)"></Button>
+                  </div>
                 </div>
               </template>
             </Column>

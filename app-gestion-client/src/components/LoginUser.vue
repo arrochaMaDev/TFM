@@ -17,7 +17,7 @@ const toast = useToast();
 const loggedStore = useLoggedStore()
 const $cookies = inject<VueCookies>('$cookies');
 const user: Ref<{
-  email: string | undefined,
+  // email: string | undefined,
   username: string | undefined,
   isValid: string | undefined,
   permiso: string | undefined,
@@ -45,8 +45,11 @@ onMounted(() => {
 })
 
 //Referencias del formulario
+const data: Ref<string | undefined> = ref(undefined)
+
 const userRef = {
   email: ref<string | undefined>(undefined),
+  username: ref<string | undefined>(undefined),
   pass: ref<string | undefined>(undefined),
 }
 
@@ -56,11 +59,21 @@ const formSubmitted = ref(false); // variable para avisos con InlineText
 
 const loginUser = async () => {
   formSubmitted.value = true;
-  let isValid = true
+  let isValid = false
 
-  if (userRef.email.value && !patronEmail.test(userRef.email.value)) {
-    toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
-    isValid = false
+  if (data.value && !data.value.includes('@')) {
+    userRef.username.value = data.value
+    userRef.email.value = undefined
+    isValid = true
+  } else {
+    userRef.email.value = data.value
+    userRef.username.value = undefined
+    isValid = true
+    if (userRef.email.value && !patronEmail.test(userRef.email.value)) {
+      console.log(userRef.email.value)
+      toast.add({ severity: 'warn', summary: 'Error', detail: 'Introduzca un email válido', life: 3000 });
+      isValid = false
+    }
   }
 
   if (isValid)
@@ -68,6 +81,7 @@ const loginUser = async () => {
       const response = await fetch('http://localhost:3000/login', {
         method: 'POST',
         body: JSON.stringify({
+          username: userRef.username.value,
           email: userRef.email.value,
           pass: userRef.pass.value
         }),
@@ -111,11 +125,11 @@ const loginUser = async () => {
       <div id="formulario" class="col-6">
         <form @submit.prevent="loginUser()">
 
-          <label for="email" class="block text-900 text-xl font-medium mb-2">Email</label>
-          <InputText id="email" type="text" placeholder="Email" class="w-full" style="padding: 1rem" v-model="userRef.email.value" />
-          <InlineMessage v-if="!userRef.email.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El email es obligatorio</InlineMessage>
+          <label for="email" class="block text-900 text-xl font-medium mb-2">Email o username</label>
+          <InputText id="email" type="text" placeholder="Email" class="w-full" style="padding: 1rem" v-model="data" />
+          <InlineMessage v-if="!data && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">El email o el usuario es obligatorio</InlineMessage>
 
-          <label for="password" class="block text-900 font-medium text-xl mb-2 mt-6">Password</label>
+          <label for="password" class="block text-900 font-medium text-xl mb-2 mt-4">Password</label>
           <Password id="password" v-model="userRef.pass.value" placeholder="Password" :toggleMask="true" :feedback="false" class="w-full" inputClass="w-full" :inputStyle="{ padding: '1rem' }">
           </Password>
           <InlineMessage v-if="!userRef.pass.value && formSubmitted" class="bg-transparent justify-content-start p-0 pt-1">La contraseña es obligatoria</InlineMessage>

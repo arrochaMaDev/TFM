@@ -9,17 +9,20 @@ export class LoginUserController {
 
   @Post()
   async loginUser(@Res() response: Response, @Body() data: LoginUserDto) {
-    const { email, pass } = data;
+    const { email, username, pass } = data;
 
-    const { isValid, permiso, username, id } =
-      await this.loginUserService.login(email, pass);
+    const { isValid, permiso, id } = await this.loginUserService.login(
+      email,
+      username,
+      pass,
+    );
 
     if (!isValid) {
       response.sendStatus(HttpStatus.FORBIDDEN);
       console.log('Usuario o contraseña incorrectos');
     } else {
       const userObject = {
-        email: email,
+        // email: email,
         username,
         isValid: true,
         permiso,

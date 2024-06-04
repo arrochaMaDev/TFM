@@ -896,6 +896,9 @@ const initFilters = () => { // componente filtro en global para que busque cualq
     'matriculas.teacher.telefono': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'matriculas.teacher.email': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'year': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'nota1': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'nota2': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'nota3': { value: null, matchMode: FilterMatchMode.CONTAINS },
   }
   filters1.value = {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -905,6 +908,9 @@ const initFilters = () => { // componente filtro en global para que busque cualq
     'teacher.dni': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'teacher.telefono': { value: null, matchMode: FilterMatchMode.CONTAINS },
     'teacher.email': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'nota1': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'nota2': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'nota3': { value: null, matchMode: FilterMatchMode.CONTAINS },
   }
 }
 initFilters()
@@ -912,9 +918,10 @@ initFilters()
 // Buscar por asignatura o profesor dentro del array
 const asignaturaBuscar = ref('')
 const profesorBuscar = ref('')
+const alumnoBuscar = ref('')
 
 const allStudentsWithMatriculasRefFiltered = computed(() => {
-  if (asignaturaBuscar.value === '' && profesorBuscar.value === '') {
+  if (asignaturaBuscar.value === '' && profesorBuscar.value === '' && alumnoBuscar.value === '') {
     return allStudentsWithMatriculasRef.value;
   }
   else {
@@ -926,7 +933,9 @@ const allStudentsWithMatriculasRefFiltered = computed(() => {
         return matricula.teacher.nombre.toLowerCase().includes(profesorBuscar.value.toLowerCase())
           || matricula.teacher.apellidos.toLowerCase().includes(profesorBuscar.value.toLowerCase())
       })
-      return asignaturaCoincide && profesorCoincide;
+      const alumnoCoincide = student.student.nombre.toLowerCase().includes(alumnoBuscar.value.toLowerCase()) || student.student.apellidos.toLowerCase().includes(alumnoBuscar.value.toLowerCase())
+
+      return asignaturaCoincide && profesorCoincide && alumnoCoincide;
     })
   }
 })
@@ -936,6 +945,7 @@ const clearFilter = () => { // para borrar los filtros
   initFilters()
   asignaturaBuscar.value = ''
   profesorBuscar.value = ''
+  alumnoBuscar.value = ''
 }
 
 // Expandir la tabla
@@ -993,7 +1003,8 @@ const collapseAll = () => {
           <span class="flex md:justify-content-end align-items-center">
             <span class="flex mt-2 p-input-icon-left flex align-items-center">
               <i class="pi pi-search"></i>
-              <InputText class="flex h-3rem mr-2" v-model="filters['global'].value" placeholder="Buscar alumno..." />
+              <!-- <InputText class="flex h-3rem mr-2" v-model="filters['student.nombre'].value" placeholder="Buscar alumno..." /> -->
+              <InputText class="flex h-3rem mr-2" v-model="alumnoBuscar" placeholder="Buscar alumno..." />
             </span>
             <span class=" mt-2 p-input-icon-left flex align-items-center">
               <i class="pi pi-search"></i>
@@ -1021,9 +1032,9 @@ const collapseAll = () => {
             <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
           </template> </Column>
         <Column field="student.direccion" header="Dirección" sortable headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 m-0" :show-filter-match-modes="false">
-          <template #filter="{ filterModel }">
+          <!-- <template #filter="{ filterModel }">
             <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
-          </template>
+          </template> -->
         </Column>
         <!-- <Column field="student.telefono" header="Teléfono" sortable headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 m-0" :show-filter-match-modes="false">
           <template #filter="{ filterModel }">
@@ -1052,7 +1063,7 @@ const collapseAll = () => {
         <template #expansion="slotProps">
 
           <DataTable :value="slotProps.data.matriculas" v-model:filters="filters1" filterDisplay="menu"
-            :globalFilterFields="['subject.nombre', 'teacher.nombre', 'teacher.apellidos', 'teacher.dni', 'teacher.telefono', 'teacher.email']" class="" removableSort selection-mode="single" :pt="{
+            :globalFilterFields="['subject.nombre', 'teacher.nombre', 'teacher.apellidos', 'teacher.dni', 'teacher.telefono', 'teacher.email',]" class="" removableSort selection-mode="single" :pt="{
     table: {
       class: 'mt-0 w-full',
       style: {
