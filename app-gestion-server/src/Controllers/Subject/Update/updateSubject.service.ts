@@ -25,6 +25,12 @@ export class UpdateSubjectService {
     // Actualiza los campos de la asignatura con newData
     Object.assign(subjectToUpdate, newData);
 
+    // Opción con merge
+    // const updatedSubject = this.subjectRepository.merge(
+    //   subjectToUpdate,
+    //   newData,
+    // );
+
     // Guarda los cambios en la base de datos
     await this.subjectRepository.save(subjectToUpdate);
 
