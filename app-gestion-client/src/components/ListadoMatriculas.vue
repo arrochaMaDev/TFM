@@ -1065,7 +1065,7 @@ const collapseAll = () => {
           <DataTable :value="slotProps.data.matriculas" v-model:filters="filters1" filterDisplay="menu"
             :globalFilterFields="['subject.nombre', 'teacher.nombre', 'teacher.apellidos', 'teacher.dni', 'teacher.telefono', 'teacher.email',]" class="" removableSort selection-mode="single" :pt="{
     table: {
-      class: 'mt-0 w-full',
+      class: 'mt-0 w-full h-max',
       style: {
         'border': 'solid 1rem #f8f9fa', 'background-color': 'transparent'
       }
@@ -1154,7 +1154,7 @@ const collapseAll = () => {
             <Column field="nota2"></Column>
             <Column field="nota3"></Column>
 
-            <Column field="" bodyClass="flex p-1 pl-1">
+            <Column field="" bodyClass="flex p-1 pl-1 h-full align-items-center">
               <template #body="slotProps">
                 <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Matrícula'" @click="confirmDelete(slotProps.data)"></Button>
                 <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Matrícula'" @click="mostrarDialogEditarMatricula(slotProps.data)"></Button>

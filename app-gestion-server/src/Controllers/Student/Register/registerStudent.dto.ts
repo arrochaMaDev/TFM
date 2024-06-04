@@ -20,7 +20,9 @@ export class RegisterStudentDto {
   apellidos: string;
 
   @IsString()
-  @IsIdentityCard('ES') // validar para que sea en formato 12345678X de españa
+  @IsIdentityCard('ES', {
+    message: 'El DNI no tiene el formato correcto (12345678X)',
+  }) // validar para que sea en formato 12345678X de españa
   @IsNotEmpty()
   dni: string;
 

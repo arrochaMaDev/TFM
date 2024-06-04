@@ -40,17 +40,15 @@ const visibleDialogUsername = ref(false)
 
 const usernameGenerated = {
   nombre: ref<string>(""),
-  nombre2: ref<string>(""),
   apellido1: ref<string>(""),
   apellido2: ref<string>(""),
   DNI: ref<string>(""),
 }
 
-const generarUsername = (nombre: string, nombre2: string, apellido1: string, apellido2: string, DNI: string) => {
+const generarUsername = (nombre: string, apellido1: string, apellido2: string, DNI: string) => {
 
   // Obtener las primeras letras de cada variable y convertirlas a minúsculas
   const inicialesNombre: string = nombre.slice(0, 1).toLowerCase();
-  const inicialesNombre2: string = nombre2.slice(0, 1).toLowerCase();
   const inicialesApellido1: string = apellido1.slice(0, 3).toLowerCase();
   const inicialesApellido2: string = apellido2.slice(0, 3).toLowerCase();
   const letraDNI: string = DNI.substring(DNI.length - 1).toLowerCase()
@@ -58,9 +56,10 @@ const generarUsername = (nombre: string, nombre2: string, apellido1: string, ape
   visibleDialogUsername.value = false
 
   // Concatenar las iniciales
-  const username: string = inicialesNombre + inicialesNombre2 + inicialesApellido1 + inicialesApellido2 + letraDNI;
+  const username: string = inicialesNombre + inicialesApellido1 + inicialesApellido2 + letraDNI;
 
-  userRef.username.value = username.replace(/\s+/g, '') // expresión regular que reemplaza los espacios que haya en la variable
+  userRef.username.value = username.replace(/\s+/g, '').normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  // expresión regular que elimina los espacios que haya y luego tambiñen elimina las tildes
   /* 
 - Los caracteres de barra inclinada (/) delimitan el inicio y el final de la expresión regular.  
 - El carácter de barra invertida (\) seguido de 's' es una secuencia de escape que representa cualquier carácter de espacio en blanco. Esto incluye:
@@ -240,10 +239,10 @@ const borrarDatosForm = () => {
         <label for="nombre" class="font-semibold w-6rem">Nombre</label>
         <InputText id="nombre" class="w-full" v-model="usernameGenerated.nombre.value" />
       </div>
-      <div class="flex align-items-center gap-3 mb-3">
+      <!-- <div class="flex align-items-center gap-3 mb-3">
         <label for="nombre" class="font-semibold w-6rem">Segundo Nombre</label>
         <InputText id="nombre" class="w-full" v-model="usernameGenerated.nombre2.value" />
-      </div>
+      </div> -->
       <div class="flex align-items-center gap-3 mb-3">
         <label for="nombre" class="font-semibold w-6rem">Primer Apellido</label>
         <InputText id="nombre" class="w-full" v-model="usernameGenerated.apellido1.value" />
@@ -259,7 +258,7 @@ const borrarDatosForm = () => {
       <div class="flex justify-content-center mb-3 pt-2">
         <Button class="mr-2" type="button" rounded label="Cancelar" severity="secondary" @click="visibleDialogUsername = false"></Button>
         <Button type="button" rounded label="Generar"
-          @click="generarUsername(usernameGenerated.nombre.value, usernameGenerated.nombre2.value, usernameGenerated.apellido1.value, usernameGenerated.apellido2.value, usernameGenerated.DNI.value)"></Button>
+          @click="generarUsername(usernameGenerated.nombre.value, usernameGenerated.apellido1.value, usernameGenerated.apellido2.value, usernameGenerated.DNI.value)"></Button>
       </div>
       <Toast></Toast>
     </Dialog>

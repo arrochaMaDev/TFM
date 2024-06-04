@@ -1,7 +1,7 @@
 export class User {
   constructor(
     private readonly id: number,
-    private readonly username: string, // https://www.uuidgenerator.net/dev-corner/typescript
+    private readonly username: string,
     private readonly email: string,
     private readonly pass: string,
     private readonly permiso: number,

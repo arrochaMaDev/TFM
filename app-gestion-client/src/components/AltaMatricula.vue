@@ -507,7 +507,7 @@ const borrarDatosForm = () => {
         </div>
 
         <!-- Tabla del profesor seleccionado -->
-        <div v-if="teacherSelected" class="field col-5">
+        <div v-if="teacherSelected" class="field col-8">
           <label class="text-xl text-800 font-bold pl-1">Datos del profesor</label>
           <DataTable :value="[teacherSelected]" class="pt-1" tableStyle="width: 100%" :pt="{
     table: {
@@ -518,6 +518,8 @@ const borrarDatosForm = () => {
     ">
             <Column field="nombre" header="Nombre" Class="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
             <Column field="apellidos" header=" Apellidos" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+            <Column field="dni" header="Dni" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
+            <Column field="telefono" header="Teléfono" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"></Column>
             <Column field="email" header="Email" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
           </DataTable>
         </div>

@@ -439,7 +439,7 @@ const getSeverity = (permiso: string) => {
   }
     "></Toast>
   <div class="flex justify-content-start pt-2" v-if="isAdmin">
-    <div class="card flex justify-content-center">
+    <div class="card flex justify-content-center ">
       <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['nombre', 'apellidos', 'email', 'userId.username', 'userId.email', 'userId.permiso']" class="" removableSort
         :value="teachersRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" :pt="{
     paginator: {
@@ -451,7 +451,7 @@ const getSeverity = (permiso: string) => {
       lastPageButton: { class: 'w-auto' },
     },
     table: {
-      class: 'mt-0 w-max',
+      class: 'mt-0 w-full h-max',
       style: { 'border': 'none' }
     }
   }
@@ -488,12 +488,12 @@ const getSeverity = (permiso: string) => {
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>
             </Column>
-            <Column field="direccion" header="Dirección" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+            <Column field="direccion" header="Dirección" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 " :show-filter-match-modes="false">
               <template #filter="{ filterModel }">
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>
             </Column>
-            <Column field="telefono" header="Teléfono" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+            <Column field="telefono" header="Teléfono" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 " :show-filter-match-modes="false">
               <template #filter="{ filterModel }">
                 <InputText v-model="filterModel.value" type="number" class="p-column-filter" placeholder="Buscar..." />
               </template>
@@ -528,7 +528,7 @@ const getSeverity = (permiso: string) => {
                 </template>
               </Column>
             </div>
-            <Column field="" header=""></Column>
+            <Column field="" header="" bodyClass="h-full"></Column>
           </Row>
         </ColumnGroup>
 
@@ -549,7 +549,7 @@ const getSeverity = (permiso: string) => {
         </div>
 
 
-        <Column headerStyle="" bodyClass=" flex p-1 pl-1">
+        <Column headerStyle="" bodyClass="flex p-1 pl-1 min-h-full align-items-center">
           <template #body="slotProps">
             <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.id)"></Button>
             <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Profesor'" @click="mostrarDialog(slotProps.data)"></Button>
