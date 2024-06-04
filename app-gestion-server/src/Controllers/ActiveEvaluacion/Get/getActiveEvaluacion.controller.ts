@@ -1,21 +1,21 @@
 import { Controller, Get, Param, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { GetEvaluacionActivaService } from './getEvaluacionActiva.service';
+import { GetActiveEvaluacionService } from './getActiveEvaluacion.service';
 
-@Controller('evaluacionActiva')
-export class GetEvaluacionActivaController {
+@Controller('activeEvaluacion')
+export class GetActiveEvaluacionController {
   constructor(
-    private readonly getEvaluacionActivaService: GetEvaluacionActivaService,
+    private readonly getActiveEvaluacionService: GetActiveEvaluacionService,
   ) {}
 
   @Get(':id')
-  async getEvaluacionActiva(
+  async getActiveEvaluacion(
     @Param('id') id: number,
     @Res() response: Response,
   ) {
     try {
       const evaluacionActiva =
-        await this.getEvaluacionActivaService.getEvaluacionActiva(Number(id));
+        await this.getActiveEvaluacionService.getActiveEvaluacion(Number(id));
 
       if (!evaluacionActiva) {
         return response

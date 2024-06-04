@@ -1,16 +1,16 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity({ name: 'evaluacionActiva' })
-export class EvaluacionActivaDb {
+@Entity({ name: 'activeEvaluacion' })
+export class ActiveEvaluacionDb {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  evaluacion1: number;
+  activeEval1: number;
 
   @Column()
-  evaluacion2: number;
+  activeEval2: number;
 
   @Column()
-  evaluacion3: number;
+  activeEval3: number;
 }

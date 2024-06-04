@@ -27,7 +27,7 @@ const confirm = useConfirm();
 const toast = useToast();
 const router = useRouter()
 
-// VERIFICAR SI SE ES ADMINISTRADOR
+// VERIFICAR SI SE ES USUARIO, ADMINISTRADOR O PROFESOR
 const adminStore = useAdminStore()
 const $cookies = inject<VueCookies>('$cookies')
 const userCookie = $cookies?.get('user') // si no existe, userCookie es null

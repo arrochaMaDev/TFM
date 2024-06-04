@@ -114,15 +114,15 @@ import { ListerMatriculasBySubjectIdService } from './Controllers/Matricula/Get/
 import { ListerMatriculasBySubjectIdController } from './Controllers/Matricula/Get/listerMatriculasBySubjectId.controller';
 import { GetTeacherByUserIdController } from './Controllers/Teacher/Get/getTeacherByUserId.controller.ts';
 import { GetTeacherByUserIdService } from './Controllers/Teacher/Get/getTeacherByUserId.service.ts';
-import { EvaluacionActivaDb } from './Modelos/EvaluacionActiva/evaluacionActivaDb';
-import { RegisterEvaluacionActivaService } from './Controllers/EvaluacionActiva/Register/registerEvaluacionActiva.service';
-import { RegisterEvaluacionActivaController } from './Controllers/EvaluacionActiva/Register/registerEvaluacionActiva.controller';
-import { GetEvaluacionActivaController } from './Controllers/EvaluacionActiva/Get/getEvaluacionActiva.controller';
-import { GetEvaluacionActivaService } from './Controllers/EvaluacionActiva/Get/getEvaluacionActiva.service';
-import { UpdateEvaluacionActivaController } from './Controllers/EvaluacionActiva/Update/updateEvaluacionActiva.controller';
-import { UpdateEvaluacionActivaService } from './Controllers/EvaluacionActiva/Update/updateEvaluacionActiva.service';
-import { DeleteEvaluacionActivaController } from './Controllers/EvaluacionActiva/Delete/deleteEvaluacionActiva.controller';
-import { DeleteEvaluacionActivaService } from './Controllers/EvaluacionActiva/Delete/deleteEvaluacionActiva.service';
+import { ActiveEvaluacionDb } from './Modelos/ActiveEvaluacion/activeEvaluacionDb';
+import { RegisterActiveEvaluacionService } from './Controllers/ActiveEvaluacion/Register/registerActiveEvaluacion.service';
+import { RegisterActiveEvaluacionController } from './Controllers/ActiveEvaluacion/Register/registerActiveEvaluacion.controller';
+import { GetActiveEvaluacionController } from './Controllers/ActiveEvaluacion/Get/getActiveEvaluacion.controller';
+import { GetActiveEvaluacionService } from './Controllers/ActiveEvaluacion/Get/getActiveEvaluacion.service';
+import { UpdateActiveEvaluacionController } from './Controllers/ActiveEvaluacion/Update/updateActiveEvaluacion.controller';
+import { UpdateActiveEvaluacionService } from './Controllers/ActiveEvaluacion/Update/updateActiveEvaluacion.service';
+import { DeleteActiveEvaluacionController } from './Controllers/ActiveEvaluacion/Delete/deleteActiveEvaluacion.controller';
+import { DeleteActiveEvaluacionService } from './Controllers/ActiveEvaluacion/Delete/deleteActiveEvaluacion.service';
 
 @Module({
   imports: [
@@ -141,7 +141,7 @@ import { DeleteEvaluacionActivaService } from './Controllers/EvaluacionActiva/De
         MatriculaDb,
         SubjectTeacherDb,
         EvaluacionDb,
-        EvaluacionActivaDb,
+        ActiveEvaluacionDb,
       ],
     }),
     TypeOrmModule.forFeature([
@@ -152,7 +152,7 @@ import { DeleteEvaluacionActivaService } from './Controllers/EvaluacionActiva/De
       MatriculaDb,
       SubjectTeacherDb,
       EvaluacionDb,
-      EvaluacionActivaDb,
+      ActiveEvaluacionDb,
     ]),
     ServeStaticModule.forRoot({
       // configuración para servir archivos estáticos y ver las imagenes almacenadas en el servidor
@@ -212,10 +212,10 @@ import { DeleteEvaluacionActivaService } from './Controllers/EvaluacionActiva/De
     DeleteEvaluacionesBySubjectIdController,
     UpdateEvaluacionController,
     GetTeacherByUserIdController,
-    RegisterEvaluacionActivaController,
-    GetEvaluacionActivaController,
-    UpdateEvaluacionActivaController,
-    DeleteEvaluacionActivaController,
+    RegisterActiveEvaluacionController,
+    GetActiveEvaluacionController,
+    UpdateActiveEvaluacionController,
+    DeleteActiveEvaluacionController,
   ], //AppController
   providers: [
     RegisterStudentService,
@@ -269,10 +269,10 @@ import { DeleteEvaluacionActivaService } from './Controllers/EvaluacionActiva/De
     DeleteEvaluacionesBysubjectIdService,
     UpdateEvaluacionService,
     GetTeacherByUserIdService,
-    RegisterEvaluacionActivaService,
-    GetEvaluacionActivaService,
-    UpdateEvaluacionActivaService,
-    DeleteEvaluacionActivaService,
+    RegisterActiveEvaluacionService,
+    GetActiveEvaluacionService,
+    UpdateActiveEvaluacionService,
+    DeleteActiveEvaluacionService,
   ],
 })
 export class AppModule {}

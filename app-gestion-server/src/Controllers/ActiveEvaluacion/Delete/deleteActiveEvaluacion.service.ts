@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EvaluacionActivaDb } from 'src/Modelos/EvaluacionActiva/evaluacionActivaDb';
+import { ActiveEvaluacionDb } from 'src/Modelos/ActiveEvaluacion/activeEvaluacionDb';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class DeleteEvaluacionActivaService {
+export class DeleteActiveEvaluacionService {
   constructor(
-    @InjectRepository(EvaluacionActivaDb)
-    private readonly evaluacionActivaRepository: Repository<EvaluacionActivaDb>,
+    @InjectRepository(ActiveEvaluacionDb)
+    private readonly evaluacionActivaRepository: Repository<ActiveEvaluacionDb>,
   ) {}
 
-  async deleteEvaluacionActiva(id: number): Promise<EvaluacionActivaDb> {
+  async deleteActiveEvaluacion(id: number): Promise<ActiveEvaluacionDb> {
     const evaluacionActiva = await this.evaluacionActivaRepository.findOne({
       where: {
         id,

@@ -23,13 +23,11 @@ import type { VueCookies } from 'vue-cookies';
 import Image from 'primevue/image';
 import FileUpload from 'primevue/fileupload';
 
-
-
 const confirm = useConfirm();
 const toast = useToast();
 const router = useRouter()
 
-// VERIFICAR SI SE ES ADMINISTRADOR
+// VERIFICAR SI SE ES USUARIO, ADMINISTRADOR O PROFESOR
 const adminStore = useAdminStore()
 const teacherStore = useTeacherStore()
 const $cookies = inject<VueCookies>('$cookies')
@@ -65,8 +63,51 @@ onMounted(async () => {
       router.push('/')
     }, 3000)
   }
+  // verificar si está activa la evaluación. Solo si no se es administrador
+  if (!isAdmin.value) {
+    await getEvaluacionActiva()
+  }
 })
 
+// LÓGICA PARA VERIFICAR SI LA EVALUACIÓN ESTÁ ACTIVA
+const evaluacionActiva: Ref<{
+  id: number,
+  evaluacion1: number
+  evaluacion2: number
+  evaluacion3: number
+}> = ref({
+  id: 0, // Sólo existe la línea 0, se inicia con ese valor
+  evaluacion1: 1,
+  evaluacion2: 1,
+  evaluacion3: 1,
+  // se inicia siempre con 1 para que el admin pueda evaluar siempre
+})
+
+const getEvaluacionActiva = async () => {
+  try {
+    const response = await fetch(`http://localhost:3000/evaluacionActiva/${evaluacionActiva.value.id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`)
+    } else {
+      const data = await response.json()
+
+      evaluacionActiva.value = data
+      console.log(evaluacionActiva.value)
+
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error)
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Ha ocurrido un error verificando si está activa la evaluación', life: 3000 });
+  }
+}
+
+// OBTENER DATOS DEL PROFESOR
 const teacherDataFromServer: Ref<{
   id: number
   nombre: string
@@ -91,7 +132,6 @@ console.log(teacherId)
 
 const imageSrc: Ref<string | null> = ref(null) // Directorio donde se almacena la imagen de perfil
 
-// OBTENER DATOS DEL PROFESOR
 const getTeacherData = async (teacherId: number) => {
   try {
     const response = await fetch(`http://localhost:3000/teacher/${teacherId}`, {
@@ -1399,6 +1439,11 @@ const editarEvaluacion = async (matricula: typeof matriculaEditar.value) => {
     }
   }
 
+  if (evaluacionActiva.value.evaluacion1 == 0 && evaluacionActiva.value.evaluacion2 == 0 && evaluacionActiva.value.evaluacion3 == 0) {
+    isValid = false
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'No está habilitada la evaluación', life: 3000 });
+  }
+
   if (isValid) {
     try {
       const response = await fetch(`http://localhost:3000/matricula/${matricula?.id}`, {
@@ -2432,27 +2477,27 @@ const clearFilter = () => { // para borrar los filtros
     <div v-if="matriculaEditar" class="pl-3">
       <div class="flex align-items-center gap-3 mb-3">
         <label for="nombre" class="font-semibold w-8rem">Nota trimestre 1</label>
-        <InputNumber id="nota1" class="" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota1" :min="0" :max="10" :useGrouping="false" />
+        <InputNumber :disabled="evaluacionActiva.evaluacion1 == 0" id="nota1" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota1" :min="0" :max="10" :useGrouping="false" />
       </div>
       <div class="flex align-items-center gap-3 mb-3">
         <label for="apellidos" class="font-semibold w-8rem">Comentario trimestre 1</label>
-        <Textarea id="comentario1" class="w-7" rows="5" cols="30" v-model="matriculaEditar.comentario1"></Textarea>
+        <Textarea :disabled="evaluacionActiva.evaluacion1 == 0" id="comentario1" class="w-7" rows="5" cols="30" v-model="matriculaEditar.comentario1"></Textarea>
       </div>
       <div class="flex align-items-center gap-3 mb-3">
         <label for="nombre" class="font-semibold w-8rem">Nota trimestre 2</label>
-        <InputNumber id="nota2" class="" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota2" :min="0" :max="10" :useGrouping="false" />
+        <InputNumber :disabled="evaluacionActiva.evaluacion2 == 0" id="nota2" class="" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota2" :min="0" :max="10" :useGrouping="false" />
       </div>
       <div class="flex align-items-center gap-3 mb-3">
         <label for="apellidos" class="font-semibold w-8rem">Comentario trimestre 2</label>
-        <Textarea id="comentario2" class="w-7" v-model="matriculaEditar.comentario2"></Textarea>
+        <Textarea :disabled="evaluacionActiva.evaluacion2 == 0" id="comentario2" class="w-7" v-model="matriculaEditar.comentario2"></Textarea>
       </div>
       <div class="flex align-items-center gap-3 mb-3">
         <label for="nombre" class="font-semibold w-8rem">Nota trimestre 3</label>
-        <InputNumber id="nota3" class="" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota3" :min="0" :max="10" :useGrouping="false" />
+        <InputNumber :disabled="evaluacionActiva.evaluacion3 == 0" id="nota3" class="" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota3" :min="0" :max="10" :useGrouping="false" />
       </div>
       <div class="flex align-items-center gap-3 mb-3">
         <label for="apellidos" class="font-semibold w-8rem">Comentario trimestre 3</label>
-        <Textarea id="comentario3" class="w-7" v-model="matriculaEditar.comentario3"></Textarea>
+        <Textarea :disabled="evaluacionActiva.evaluacion3 == 0" id="comentario3" class="w-7" v-model="matriculaEditar.comentario3"></Textarea>
       </div>
     </div>
     <div class="flex justify-content-center mb-3 pt-2">

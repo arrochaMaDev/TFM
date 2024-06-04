@@ -1,21 +1,21 @@
 import { Controller, Delete, Param, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { DeleteEvaluacionActivaService } from './deleteEvaluacionActiva.service';
+import { DeleteActiveEvaluacionService } from './deleteActiveEvaluacion.service';
 
-@Controller('evaluacionActiva')
-export class DeleteEvaluacionActivaController {
+@Controller('activeEvaluacion')
+export class DeleteActiveEvaluacionController {
   constructor(
-    private readonly getEvaluacionActivaService: DeleteEvaluacionActivaService,
+    private readonly getActiveEvaluacionService: DeleteActiveEvaluacionService,
   ) {}
 
   @Delete(':id')
-  async deleteEvaluacionActiva(
+  async deleteActiveEvaluacion(
     @Param('id') id: number,
     @Res() response: Response,
   ) {
     try {
       const evaluacionActiva =
-        await this.getEvaluacionActivaService.deleteEvaluacionActiva(
+        await this.getActiveEvaluacionService.deleteActiveEvaluacion(
           Number(id),
         );
 
