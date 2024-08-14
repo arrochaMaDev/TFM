@@ -1031,7 +1031,7 @@ const collapseAll = () => {
         <Column field="student.dni" header="DNI" sortable headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 m-0" :show-filter-match-modes="false"> <template #filter="{ filterModel }">
             <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
           </template> </Column>
-        <Column field="student.direccion" header="Dirección" sortable headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 m-0" :show-filter-match-modes="false">
+        <Column field="student.direccion" header="Dirección" sortable headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 m-0 w-5" :show-filter-match-modes="false">
           <!-- <template #filter="{ filterModel }">
             <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
           </template> -->
@@ -1041,7 +1041,7 @@ const collapseAll = () => {
             <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
           </template>
         </Column> -->
-        <Column field="student.telefono" bodyClass="p-0 pl-1">
+        <Column field="student.telefono" header="Teléfono" bodyClass="p-0 pl-1">
           <template #body="slotProps">
             <a :href="'tel:' + slotProps.data.student.telefono" class="flex justify-content-start"> {{ slotProps.data.student.telefono }}</a>
           </template>
@@ -1049,14 +1049,14 @@ const collapseAll = () => {
         <!-- <Column field="student.email" header="Email" sortable headerClass="h-2rem pl-1 pr-2" bodyClass="p-0 pl-1 m-0" :show-filter-match-modes="false"> <template #filter="{ filterModel }">
             <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
           </template> </Column> -->
-        <Column field="student.email" bodyClass="p-0 pl-1">
+        <Column field="student.email" header="Email" bodyClass="p-0 pl-1">
           <template #body="slotProps">
             <a :href="'mailto:' + slotProps.data.student.email" class="flex justify-content-start"> {{ slotProps.data.student.email }}</a>
           </template>
         </Column>
         <Column>
           <template #body="slotProps">
-            <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Alumno'" @click="goToStudent(slotProps.data.student.id)"></Button>
+            <Button class="m-0" icon="pi pi-eye" text rounded severity="secondary" v-tooltip.top="'Ver Alumno'" @click="goToStudent(slotProps.data.student.id)"></Button>
           </template>
         </Column>
 
@@ -1128,7 +1128,7 @@ const collapseAll = () => {
                     <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
                   </template>
                 </Column>
-                <Column field="" header="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1"></Column>
+                <Column field="" header="" headerClass="" bodyClass=""></Column>
               </Row>
             </ColumnGroup>
             <Column field="year" bodyClass="p-0 pl-1">

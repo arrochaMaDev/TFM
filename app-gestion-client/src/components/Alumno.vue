@@ -1719,16 +1719,16 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
         <Column field="subject.nombre" header="Asignatura" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
       </DataTable>
 
-      <DataTable :value="evaluacionFormateada" class="pt-1" stripedRows tableStyle="width: auto" :pt="{
+      <DataTable :value="evaluacionFormateada" class="pt-1" stripedRows :pt="{
     table: {
-      class: 'mt-0 mb-5',
+      class: 'mt-0 mb-5 w-auto',
       style: { 'border': 'none' }
     }
   }
     ">
         <label class="text-xl text-800 font-bold">Calificaciones y comentarios</label>
-        <Column field="clave" header="" class="pl-3 pr-3" headerClass="h-0rem pl-1 bg-transparent" bodyClass="p-0 pl-1 h-3rem font-semibold"></Column>
-        <Column field="valor" header="" class="pl-3 pr-3" headerClass="h-0rem pl-1 bg-transparent" bodyClass="p-0 pl-1 h-3rem"></Column>
+        <Column field="clave" header="" class="pl-3 pr-3" headerClass="h-0rem pl-1 bg-transparent" bodyClass="p-0 pl-1 h-3rem font-semibold w-max"></Column>
+        <Column field="valor" header="" class="pl-3 pr-3" headerClass="h-0rem pl-1 bg-transparent" bodyClass="p-0 pl-1 h-3rem text-left w-full"></Column>
       </DataTable>
 
 

@@ -47,6 +47,7 @@ onMounted(async () => {
   if (userCookie?.permiso == 1) {
     teacherStore.isTeacherTrue()
     isTeacher.value = true
+
   }
   else if (!isAdmin.value || userCookie?.permiso == null || userCookie?.permiso != '9') {
     adminStore.isAdminFalse()
@@ -72,20 +73,20 @@ onMounted(async () => {
 // LÓGICA PARA VERIFICAR SI LA EVALUACIÓN ESTÁ ACTIVA
 const evaluacionActiva: Ref<{
   id: number,
-  evaluacion1: number
-  evaluacion2: number
-  evaluacion3: number
+  activeEval1: number
+  activeEval2: number
+  activeEval3: number
 }> = ref({
   id: 0, // Sólo existe la línea 0, se inicia con ese valor
-  evaluacion1: 1,
-  evaluacion2: 1,
-  evaluacion3: 1,
+  activeEval1: 1,
+  activeEval2: 1,
+  activeEval3: 1,
   // se inicia siempre con 1 para que el admin pueda evaluar siempre
 })
 
 const getEvaluacionActiva = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/evaluacionActiva/${evaluacionActiva.value.id}`, {
+    const response = await fetch(`http://localhost:3000/activeEvaluacion/${evaluacionActiva.value.id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -1439,7 +1440,7 @@ const editarEvaluacion = async (matricula: typeof matriculaEditar.value) => {
     }
   }
 
-  if (evaluacionActiva.value.evaluacion1 == 0 && evaluacionActiva.value.evaluacion2 == 0 && evaluacionActiva.value.evaluacion3 == 0) {
+  if (evaluacionActiva.value.activeEval1 == 0 && evaluacionActiva.value.activeEval2 == 0 && evaluacionActiva.value.activeEval3 == 0) {
     isValid = false
     toast.add({ severity: 'warn', summary: 'Error', detail: 'No está habilitada la evaluación', life: 3000 });
   }
@@ -2477,27 +2478,27 @@ const clearFilter = () => { // para borrar los filtros
     <div v-if="matriculaEditar" class="pl-3">
       <div class="flex align-items-center gap-3 mb-3">
         <label for="nombre" class="font-semibold w-8rem">Nota trimestre 1</label>
-        <InputNumber :disabled="evaluacionActiva.evaluacion1 == 0" id="nota1" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota1" :min="0" :max="10" :useGrouping="false" />
+        <InputNumber :disabled="evaluacionActiva.activeEval1 == 0" id="nota1" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota1" :min="0" :max="10" :useGrouping="false" />
       </div>
       <div class="flex align-items-center gap-3 mb-3">
         <label for="apellidos" class="font-semibold w-8rem">Comentario trimestre 1</label>
-        <Textarea :disabled="evaluacionActiva.evaluacion1 == 0" id="comentario1" class="w-7" rows="5" cols="30" v-model="matriculaEditar.comentario1"></Textarea>
+        <Textarea :disabled="evaluacionActiva.activeEval1 == 0" id="comentario1" class="w-7" rows="5" cols="30" v-model="matriculaEditar.comentario1"></Textarea>
       </div>
       <div class="flex align-items-center gap-3 mb-3">
         <label for="nombre" class="font-semibold w-8rem">Nota trimestre 2</label>
-        <InputNumber :disabled="evaluacionActiva.evaluacion2 == 0" id="nota2" class="" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota2" :min="0" :max="10" :useGrouping="false" />
+        <InputNumber :disabled="evaluacionActiva.activeEval2 == 0" id="nota2" class="" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota2" :min="0" :max="10" :useGrouping="false" />
       </div>
       <div class="flex align-items-center gap-3 mb-3">
         <label for="apellidos" class="font-semibold w-8rem">Comentario trimestre 2</label>
-        <Textarea :disabled="evaluacionActiva.evaluacion2 == 0" id="comentario2" class="w-7" v-model="matriculaEditar.comentario2"></Textarea>
+        <Textarea :disabled="evaluacionActiva.activeEval2 == 0" id="comentario2" class="w-7" v-model="matriculaEditar.comentario2"></Textarea>
       </div>
       <div class="flex align-items-center gap-3 mb-3">
         <label for="nombre" class="font-semibold w-8rem">Nota trimestre 3</label>
-        <InputNumber :disabled="evaluacionActiva.evaluacion3 == 0" id="nota3" class="" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota3" :min="0" :max="10" :useGrouping="false" />
+        <InputNumber :disabled="evaluacionActiva.activeEval3 == 0" id="nota3" class="" :inputStyle="{ width: '3rem' }" v-model="matriculaEditar.nota3" :min="0" :max="10" :useGrouping="false" />
       </div>
       <div class="flex align-items-center gap-3 mb-3">
         <label for="apellidos" class="font-semibold w-8rem">Comentario trimestre 3</label>
-        <Textarea :disabled="evaluacionActiva.evaluacion3 == 0" id="comentario3" class="w-7" v-model="matriculaEditar.comentario3"></Textarea>
+        <Textarea :disabled="evaluacionActiva.activeEval3 == 0" id="comentario3" class="w-7" v-model="matriculaEditar.comentario3"></Textarea>
       </div>
     </div>
     <div class="flex justify-content-center mb-3 pt-2">
@@ -2589,7 +2590,7 @@ const clearFilter = () => { // para borrar los filtros
 
     <DataTable :value="[matriculaEditar]" class="pt-1" tableStyle="width: auto" :pt="{
     table: {
-      class: 'mt-0 mb-5',
+      class: 'mt-0 mb-5 w-max',
       style: { 'border': 'none' }
     }
   }
@@ -2609,16 +2610,16 @@ const clearFilter = () => { // para borrar los filtros
       <Column field="subject.nombre" header="Asignatura" class="pl-3 pr-3" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 h-3rem"> </Column>
     </DataTable>
 
-    <DataTable :value="evaluacionFormateada" class="pt-1" stripedRows tableStyle="width: auto" :pt="{
+    <DataTable :value="evaluacionFormateada" class="pt-1" stripedRows :pt="{
     table: {
-      class: 'mt-0 mb-5',
+      class: 'mt-0 mb-5 w-auto',
       style: { 'border': 'none' }
     }
   }
     ">
       <label class="text-xl text-800 font-bold">Calificaciones y comentarios</label>
-      <Column field="clave" header="" class="pl-3 pr-3" headerClass="h-0rem pl-1 bg-transparent" bodyClass="p-0 pl-1 h-3rem font-semibold"></Column>
-      <Column field="valor" header="" class="pl-3 pr-3" headerClass="h-0rem pl-1 bg-transparent" bodyClass="p-0 pl-1 h-3rem"></Column>
+      <Column field="clave" header="" class="pl-3 pr-3" headerClass="h-0rem pl-1 bg-transparent" bodyClass="p-0 pl-1 h-3rem font-semibold w-max"></Column>
+      <Column field="valor" header="" class="pl-3 pr-3" headerClass="h-0rem pl-1 bg-transparent" bodyClass="p-0 pl-1 h-3rem text-left w-full"></Column>
     </DataTable>
 
 

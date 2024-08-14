@@ -19,6 +19,7 @@ import AltaAsignaturaProfesorVue from '@/components/AltaAsignaturaProfesor.vue'
 import ListadoAsignaturasProfesores from '@/components/ListadoAsignaturasProfesores.vue'
 import NotFound from '@/components/NotFound.vue'
 import ListadoEvaluaciones from '@/components/ListadoEvaluaciones.vue'
+import ActivarEvaluacion from '@/components/ActivarEvaluacion.vue'
 // import App from '@/App/App.vue'
 // import AppLayoutVue from '@/App/AppLayout.vue'
 
@@ -167,6 +168,12 @@ const router = createRouter({
       name: 'listado-evaluaciones',
 
       component: ListadoEvaluaciones
+    },
+    {
+      path: '/activar-evaluacion',
+      name: 'activar-evaluacion',
+
+      component: ActivarEvaluacion
     },
     {
       path: '/:pathMatch(.*)*',

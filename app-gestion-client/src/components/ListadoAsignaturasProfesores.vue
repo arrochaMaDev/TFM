@@ -566,7 +566,7 @@ const collapseAll = () => {
   }
     "></Toast>
   <div class="flex justify-content-start pt-2" v-if="isAdmin">
-    <div class="card flex justify-content-center">
+    <div class="card flex col-10">
       <DataTable v-model:expandedRows="expandedRows" v-model:filters="filters"
         :globalFilterFields="['teacher.nombre', 'teacher.apellidos', 'teacher.dni', 'teacher.direccion', 'teacher.telefono', 'teacher.email']" filterDisplay="menu" class="" removableSort
         removableSortstripedRows :value="teachersWithSubjectsRefFiltered" dataKey="teacher.id" sortField="teacher.id" :sortOrder="1" :paginator="true" :rows="10" :pt="{
@@ -579,7 +579,7 @@ const collapseAll = () => {
       lastPageButton: { class: 'w-auto' },
     },
     table: {
-      class: 'mt-0 w-auto',
+      class: 'mt-0 w-full',
       style: { 'border': 'none' }
     }
   }">
@@ -631,12 +631,12 @@ const collapseAll = () => {
             <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
           </template>
         </Column>
-        <Column field="teacher.email" header="Email" headerStyle="width:40%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+        <Column field="teacher.email" header="Email" headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
           <template #filter="{ filterModel }">
             <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
           </template>
         </Column>
-        <Column headerStyle="width:5%; min-width:8rem">
+        <Column headerStyle="">
           <template #body="slotProps">
             <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.teacher.id)"></Button>
           </template>

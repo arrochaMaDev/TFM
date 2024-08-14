@@ -79,6 +79,7 @@ const menuItems1 = ref([
   {
     label: 'SETTINGS',
     items: [
+      { label: 'Activar Evaluaciones', icon: 'pi pi-list', to: '/activar-evaluacion' },
 
       {
         label: 'Cerrar Sesión', icon: 'pi pi-fw pi-id-card', to: '/login', command: () => {

@@ -891,7 +891,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
 
     <!-- Tabla alumnos asignados -->
     <!-- v-if="studentsRefFromServer.length > 0" -->
-    <div class="card w-max ">
+    <div v-if="studentsRefFromServer.length > 0" class="card w-max ">
       <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['nombre', 'apellidos', 'email', 'userId.username', 'userId.email', 'userId.permiso']" class="" removableSort
         :value="studentsRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="5" :pt="{
     paginator: {
@@ -910,7 +910,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
     ">
 
         <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
-          <h5 class="m-0 text-3xl text-800 font-bold pl-1">Alumnos asignados</h5>
+          <h5 class="m-0 text-3xl text-800 font-bold pl-1">Alumnos asignados al usuario</h5>
           <span class="mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
             <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Búsqueda global..." />
@@ -1013,7 +1013,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
 
     <!-- Tabla profesores asignados -->
     <!-- v-if="teachersRefFromServer.length > 0" -->
-    <div class="card w-max">
+    <div v-if="teachersRefFromServer.length > 0" class="card w-max">
       <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['nombre', 'apellidos', 'email', 'userId.username', 'userId.email', 'userId.permiso']" class="" removableSort
         :value="teachersRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="5" :pt="{
     paginator: {
@@ -1025,14 +1025,14 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
       lastPageButton: { class: 'w-auto' },
     },
     table: {
-      class: 'mt-0 w-auto',
+      class: 'mt-0 w-full h-full',
       style: { 'border': 'none' }
     }
   }
     ">
 
         <div id="header" class="flex flex-column md:flex-row md:justify-content-between md:align-items-center h-6rem border-round-top" style="background-color:  #f8f9fa">
-          <h5 class="m-0 text-3xl text-800 font-bold pl-1 mr-5">Profesores asignados</h5>
+          <h5 class="m-0 text-3xl text-800 font-bold pl-1 mr-5">Profesores asignados al usuario</h5>
           <span class=" mt-2 md:mt-0 p-input-icon-left flex align-items-center">
             <i class="pi pi-search"></i>
             <InputText class="h-3rem mr-2" v-model="filters['global'].value" placeholder="Búsqueda global..." />
@@ -1042,17 +1042,17 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
 
         <ColumnGroup type="header" class="">
           <Row>
-            <Column field="nombre" header="Nombre" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+            <Column field="nombre" header="Nombre" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
               <template #filter="{ filterModel }">
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>
             </Column>
-            <Column field="apellidos" header="Apellidos" sortable headerStyle="width:20%; min-width:8rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+            <Column field="apellidos" header="Apellidos" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
               <template #filter="{ filterModel }">
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>
             </Column>
-            <Column field="email" header="Email" sortable headerStyle="width:40%; min-width:6rem" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
+            <Column field="email" header="Email" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 pr-5" :show-filter-match-modes="false">
               <template #filter="{ filterModel }">
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>
@@ -1068,7 +1068,7 @@ const clearFilter = () => { // para borrar los filtros, reinicio la función y e
 
 
 
-        <Column headerStyle="width:20%; min-width:8rem" bodyClass="flex p-1 pl-1">
+        <Column headerStyle="" bodyClass="flex p-1 pl-1 h-full align-items-center">
           <template #body="slotProps">
             <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Profesor'" @click="goToTeacher(slotProps.data.id)"></Button>
 

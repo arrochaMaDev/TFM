@@ -441,7 +441,7 @@ const getSeverity = (permiso: string) => {
   }
     "></Toast>
   <div class="flex justify-content-start pt-2 " v-if="isAdmin == true">
-    <div class="card flex justify-content-center">
+    <div class="card flex col-max">
       <DataTable v-model:filters="filters" filterDisplay="menu" :globalFilterFields="['nombre', 'apellidos', 'email', 'userId.username', 'userId.email', 'userId.permiso']" class="" removableSort
         :value="studentsRefFromServer" dataKey="id" stripedRows selectionMode="single" sortField="nombre" :sortOrder="1" :paginator="true" :rows="10" :pt="{
     paginator: {
@@ -453,7 +453,7 @@ const getSeverity = (permiso: string) => {
       lastPageButton: { class: 'w-auto' },
     },
     table: {
-      class: 'mt-0 w-max',
+      class: 'mt-0 w-full h-full',
       style: { 'border': 'none' }
     }
   }">
@@ -489,7 +489,7 @@ const getSeverity = (permiso: string) => {
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>
             </Column>
-            <Column field="direccion" header="Dirección" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1" :show-filter-match-modes="false">
+            <Column field="direccion" header="Dirección" sortable headerStyle="" headerClass="h-2rem pl-1" bodyClass="p-0 pl-1 w-5" :show-filter-match-modes="false">
               <template #filter="{ filterModel }">
                 <InputText v-model="filterModel.value" type="text" class="p-column-filter" placeholder="Buscar..." />
               </template>
@@ -546,11 +546,11 @@ const getSeverity = (permiso: string) => {
           </Column>
         </div>
 
-        <Column headerStyle="min-width:rem" bodyClass="flex p-1 pl-0">
+        <Column bodyClass="flex p-1 pl-0 h-full align-items-center">
           <template #body="slotProps">
-            <Button class="m-0 p-0 h-4rem w-4rem" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Alumno'" @click="goToStudent(slotProps.data.id)"></Button>
-            <Button class="m-0 p-0 h-4rem w-4rem" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Alumno'" @click="mostrarDialog(slotProps.data)"></Button>
-            <Button class="m-0 p-0 h-4rem w-4rem" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Alumno'" @click="confirmDelete(slotProps.data)"></Button>
+            <Button class="m-0" icon="pi pi-eye" text rounded severity="primary" v-tooltip.top="'Ver Alumno'" @click="goToStudent(slotProps.data.id)"></Button>
+            <Button class="m-0" icon="pi pi-pencil" text rounded severity="secondary" v-tooltip.top="'Editar Alumno'" @click="mostrarDialog(slotProps.data)"></Button>
+            <Button class="m-0" icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Borrar Alumno'" @click="confirmDelete(slotProps.data)"></Button>
           </template>
         </Column>
       </DataTable>

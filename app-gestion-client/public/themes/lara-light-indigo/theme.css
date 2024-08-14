@@ -1151,7 +1151,7 @@
   height: 1.75rem;
 }
 .p-inputswitch .p-inputswitch-slider {
-  background: #ced4da;
+  /* background: #ced4da; */
   transition:
     background-color 0.2s,
     color 0.2s,
@@ -1177,7 +1177,7 @@
   box-shadow: 0 0 0 0.2rem #c7d2fe;
 }
 .p-inputswitch:not(.p-disabled):hover .p-inputswitch-slider {
-  background: #b6bfc8;
+  /* background: #b6bfc8; */
 }
 .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
   background: #6366f1;
